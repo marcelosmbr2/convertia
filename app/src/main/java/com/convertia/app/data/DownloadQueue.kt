@@ -145,10 +145,12 @@ class DownloadQueue(
 
     private fun complete(id: Long) {
         val now = clock.millis()
-        update(id) { it.copy(status = DownloadStatus.DONE, progress = 100.0, speedMbps = 0.0, finishedAt = now) }
-        val job = find(id) ?: return
-        library.add(job.toLibraryItem(now))
-        _finished.tryEmit(job)
+        val item = find(id)?.toLibraryItem(now) ?: return
+        library.add(item)
+        update(id) {
+            it.copy(status = DownloadStatus.DONE, progress = 100.0, speedMbps = 0.0, finishedAt = now, libraryItemId = item.id)
+        }
+        find(id)?.let { _finished.tryEmit(it) }
     }
 
     private fun stopWorker(id: Long) {

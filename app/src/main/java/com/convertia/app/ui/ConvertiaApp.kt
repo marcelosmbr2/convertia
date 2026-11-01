@@ -1,114 +1,107 @@
 package com.convertia.app.ui
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.semantics.hideFromAccessibility
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.convertia.app.R
+import com.convertia.app.ui.components.ScreenHeader
+import com.convertia.app.ui.components.SheetHost
+import com.convertia.app.ui.components.ToastHost
 import com.convertia.app.ui.theme.Palette
-import com.convertia.app.ui.theme.ConvertiaTheme
+import com.convertia.app.ui.theme.TextStyles
 
+/** App principal: aba atual, barra inferior, bottom sheet e toast. */
 @Composable
-fun ConvertiaApp() {
-    var current by rememberSaveable { mutableStateOf(Destination.Download) }
+fun ConvertiaApp(appViewModel: AppViewModel) {
+    val nav by appViewModel.nav.collectAsStateWithLifecycle()
+    val queueBadge by appViewModel.queueBadge.collectAsStateWithLifecycle()
+    val toast by appViewModel.toast.collectAsStateWithLifecycle()
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = {
-            ConvertiaNavigationBar(current = current, onSelect = { current = it })
-        },
-    ) { innerPadding ->
-        PlaceholderScreen(
-            destination = current,
-            modifier = Modifier.padding(innerPadding),
-        )
-    }
-}
+    BackHandler(enabled = nav.canGoBack) { appViewModel.goBack() }
 
-@Composable
-private fun ConvertiaNavigationBar(
-    current: Destination,
-    onSelect: (Destination) -> Unit,
-) {
-    Column {
-        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
-        NavigationBar(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-            tonalElevation = 0.dp,
-        ) {
-            Destination.entries.forEach { destination ->
-                val selected = destination == current
-                NavigationBarItem(
-                    selected = selected,
-                    onClick = { onSelect(destination) },
-                    // O rótulo já descreve o item para o TalkBack.
-                    icon = { Icon(painterResource(destination.icon), contentDescription = null) },
-                    label = {
-                        Text(
-                            text = stringResource(destination.label),
-                            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-                        )
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Palette.AccentText,
-                        selectedTextColor = Palette.AccentText,
-                        indicatorColor = Color.Transparent,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    ),
-                )
-            }
-        }
-    }
-}
-
-/** Tela provisória de cada aba, até as telas de verdade serem implementadas. */
-@Composable
-private fun PlaceholderScreen(
-    destination: Destination,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier
+    Box(
+        Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+            .background(Palette.Background),
     ) {
-        Text(
-            text = stringResource(destination.label),
-            style = MaterialTheme.typography.headlineLarge,
-        )
-        Text(
-            text = stringResource(destination.subtitle),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        Column(
+            Modifier
+                .fillMaxSize()
+                .semantics { if (nav.sheet != null) hideFromAccessibility() },
+        ) {
+            Box(
+                Modifier
+                    .weight(1f)
+                    .statusBarsPadding(),
+            ) {
+                TabContent(nav, appViewModel)
+            }
+            BottomNavBar(current = nav.tab, queueBadge = queueBadge, onSelect = appViewModel::selectTab)
+        }
+
+        SheetHost(
+            value = nav.sheet,
+            onDismiss = appViewModel::closeSheet,
+            paneTitle = stringResource(R.string.app_name),
+        ) { sheet ->
+            SheetContent(sheet, appViewModel)
+        }
+
+        val toastInsets = if (nav.sheet != null) WindowInsets.navigationBars.union(WindowInsets.ime) else WindowInsets.navigationBars
+        ToastHost(
+            toast = toast?.toContent(),
+            onAction = { id -> toast?.takeIf { it.id == id }?.let(appViewModel::onToastAction) },
+            onDismiss = appViewModel::dismissToast,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .windowInsetsPadding(toastInsets)
+                .padding(bottom = if (nav.sheet != null) 16.dp else 92.dp),
         )
     }
 }
 
-@Preview(widthDp = 412, heightDp = 892)
 @Composable
-private fun ConvertiaAppPreview() {
-    ConvertiaTheme {
-        ConvertiaApp()
+private fun TabContent(nav: NavState, appViewModel: AppViewModel) {
+    when (nav.tab) {
+        Tab.DOWNLOAD -> PlaceholderScreen(R.string.tab_download, R.string.download_subtitle)
+        Tab.CONVERT -> PlaceholderScreen(R.string.tab_convert, R.string.convert_subtitle)
+        Tab.QUEUE -> PlaceholderScreen(R.string.tab_queue, R.string.queue_subtitle)
+        Tab.LIBRARY -> PlaceholderScreen(R.string.tab_library, R.string.library_subtitle)
+        Tab.SETTINGS -> PlaceholderScreen(R.string.tab_settings, R.string.settings_subtitle)
+    }
+}
+
+@Composable
+private fun ColumnScope.SheetContent(sheet: AppSheet, appViewModel: AppViewModel) {
+    Text(sheet.toString(), style = TextStyles.RowTitle, modifier = Modifier.padding(20.dp))
+}
+
+/** Tela provisória, substituída tela a tela. */
+@Composable
+private fun PlaceholderScreen(title: Int, subtitle: Int) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        ScreenHeader(stringResource(title), stringResource(subtitle))
     }
 }

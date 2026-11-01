@@ -104,6 +104,10 @@ object Palette {
     val GalleryTint = Color(0xFF8FB0F5)
     val FilesTint = Color(0xFFC9CCD3)
 
+    // Miniaturas listradas (no lugar das capas de vídeo)
+    val StripeA = Color(0xFF151518)
+    val StripeB = Color(0xFF19191D)
+
     /** Véu atrás dos sheets. */
     val Scrim = Color(0x99000000)
 }

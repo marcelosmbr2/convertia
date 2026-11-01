@@ -84,6 +84,8 @@ data class DownloadJob(
     val error: String? = null,
     /** Momento da conclusão, em epoch millis. */
     val finishedAt: Long? = null,
+    /** Item criado na Biblioteca ao concluir. */
+    val libraryItemId: String? = null,
 ) {
     val isActive: Boolean get() = status == DownloadStatus.DOWNLOADING || status == DownloadStatus.QUEUED
 }

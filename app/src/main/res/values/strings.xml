@@ -1,15 +1,65 @@
-<resources>
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pt-BR">
     <string name="app_name">Convertia</string>
 
+    <!-- Abas -->
     <string name="tab_download">Baixar</string>
     <string name="tab_convert">Converter</string>
     <string name="tab_queue">Fila</string>
     <string name="tab_library">Biblioteca</string>
     <string name="tab_settings">Ajustes</string>
+    <plurals name="nav_queue_badge">
+        <item quantity="one">%d ativo</item>
+        <item quantity="many">%d ativos</item>
+        <item quantity="other">%d ativos</item>
+    </plurals>
 
     <string name="download_subtitle">Cole um link, escolha o formato e baixe.</string>
-    <string name="convert_subtitle">Escolha arquivos e o formato de saída.</string>
+    <string name="convert_subtitle">Processado neste aparelho · 0 bytes enviados</string>
     <string name="queue_subtitle">Downloads e conversões aparecem aqui enquanto rodam.</string>
     <string name="library_subtitle">Seus arquivos baixados e convertidos.</string>
     <string name="settings_subtitle">As alterações são salvas automaticamente.</string>
+
+    <!-- Ações comuns -->
+    <string name="action_convert">Converter</string>
+    <string name="action_history">Histórico</string>
+    <string name="action_view_queue">Ver fila</string>
+    <string name="action_open">Abrir</string>
+    <string name="action_undo">Desfazer</string>
+
+    <!-- Toasts -->
+    <string name="toast_download_finished">Download concluído</string>
+    <string name="toast_conversions_finished">Conversões concluídas</string>
+    <string name="toast_download_queued">Na fila · %1$s</string>
+    <string name="toast_shared_download_queued">Baixando no Convertia · %1$s</string>
+    <string name="toast_file_deleted">Arquivo excluído</string>
+    <plurals name="toast_files_added">
+        <item quantity="one">%d arquivo adicionado</item>
+        <item quantity="many">%d arquivos adicionados</item>
+        <item quantity="other">%d arquivos adicionados</item>
+    </plurals>
+    <plurals name="toast_target_set">
+        <item quantity="one">%1$d arquivo definido como %2$s</item>
+        <item quantity="many">%1$d arquivos definidos como %2$s</item>
+        <item quantity="other">%1$d arquivos definidos como %2$s</item>
+    </plurals>
+    <string name="toast_no_compatible_files">Nenhum arquivo compatível</string>
+    <plurals name="toast_preset_applied">
+        <item quantity="one">“%1$s” aplicada a %2$d arquivo</item>
+        <item quantity="many">“%1$s” aplicada a %2$d arquivos</item>
+        <item quantity="other">“%1$s” aplicada a %2$d arquivos</item>
+    </plurals>
+    <string name="toast_preset_no_match">Nenhum arquivo %1$s na lista</string>
+    <plurals name="toast_options_applied">
+        <item quantity="one">Ajustes aplicados a %d arquivo</item>
+        <item quantity="many">Ajustes aplicados a %d arquivos</item>
+        <item quantity="other">Ajustes aplicados a %d arquivos</item>
+    </plurals>
+    <string name="toast_opening_player">Abrindo no player…</string>
+    <string name="toast_share_menu_opened">Menu Compartilhar aberto</string>
+    <string name="toast_engine_up_to_date">%1$s %2$s está atualizado</string>
+    <string name="toast_no_link_shared">Nenhum link encontrado no que foi compartilhado</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_start">Começar</string>
 </resources>
