@@ -1,0 +1,24 @@
+[versions]
+agp = "9.5.0"
+kotlin = "2.4.21"
+androidxCore = "1.19.1"
+androidxActivity = "1.13.0"
+composeBom = "2026.09.00"
+
+[libraries]
+# Com o Kotlin embutido do AGP 9, o KGP vem como dependência do próprio AGP.
+# Fixamos a versão aqui para que ela bata com a do plugin do Compose Compiler.
+kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+
+androidx-core = { group = "androidx.core", name = "core", version.ref = "androidxCore" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
+
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

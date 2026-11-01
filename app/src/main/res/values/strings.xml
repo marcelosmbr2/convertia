@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Convertia</string>
+
+    <string name="tab_download">Baixar</string>
+    <string name="tab_convert">Converter</string>
+    <string name="tab_queue">Fila</string>
+    <string name="tab_library">Biblioteca</string>
+    <string name="tab_settings">Ajustes</string>
+
+    <string name="download_subtitle">Cole um link, escolha o formato e baixe.</string>
+    <string name="convert_subtitle">Escolha arquivos e o formato de saída.</string>
+    <string name="queue_subtitle">Downloads e conversões aparecem aqui enquanto rodam.</string>
+    <string name="library_subtitle">Seus arquivos baixados e convertidos.</string>
+    <string name="settings_subtitle">As alterações são salvas automaticamente.</string>
+</resources>
