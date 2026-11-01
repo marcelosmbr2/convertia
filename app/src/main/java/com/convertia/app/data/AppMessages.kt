@@ -45,6 +45,9 @@ sealed interface ToastEvent {
 
     /** O texto compartilhado não tinha link. */
     data object NoLinkShared : ToastEvent
+
+    /** "Colar" sem link na área de transferência. */
+    data object NoLinkInClipboard : ToastEvent
 }
 
 data class ToastMessage(val id: Long, val event: ToastEvent)

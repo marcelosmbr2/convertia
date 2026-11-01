@@ -59,6 +59,58 @@
     <string name="toast_share_menu_opened">Menu Compartilhar aberto</string>
     <string name="toast_engine_up_to_date">%1$s %2$s está atualizado</string>
     <string name="toast_no_link_shared">Nenhum link encontrado no que foi compartilhado</string>
+    <string name="toast_no_link_clipboard">Nenhum link na área de transferência</string>
+
+    <!-- Baixar -->
+    <string name="download_title">Baixar</string>
+    <string name="download_url_placeholder">Cole um link de vídeo</string>
+    <string name="download_paste">Colar</string>
+    <string name="download_clear">Limpar</string>
+    <string name="download_see_formats">Ver formatos</string>
+    <string name="download_inspect_failed">Não foi possível ler este link.</string>
+    <string name="download_clipboard_title">Link copiado</string>
+    <string name="download_inspect">Inspecionar</string>
+    <string name="download_recent">Recentes</string>
+    <string name="download_tip_title">Baixe direto de outros apps</string>
+    <string name="download_tip_body">No app de vídeo, toque em Compartilhar e escolha Convertia.</string>
+    <string name="download_loading">Lendo formatos disponíveis…</string>
+    <string name="download_tab_video">Vídeo</string>
+    <string name="download_tab_audio">Somente áudio</string>
+    <plurals name="download_chapters">
+        <item quantity="one">%d capítulo</item>
+        <item quantity="many">%d capítulos</item>
+        <item quantity="other">%d capítulos</item>
+    </plurals>
+    <string name="download_subtitles_chip">Legendas · %1$s</string>
+    <string name="download_format_video">%1$s · %2$s fps · %3$s</string>
+    <plurals name="download_show_all">
+        <item quantity="one">Mostrar %1$d formato</item>
+        <item quantity="many">Mostrar todos os %1$d formatos</item>
+        <item quantity="other">Mostrar todos os %1$d formatos</item>
+    </plurals>
+    <string name="download_show_less">Mostrar menos</string>
+    <string name="download_save_as">Salvar como</string>
+    <string name="download_more_options">Mais opções</string>
+    <string name="download_embed_thumbnail">Incorporar miniatura</string>
+    <string name="download_embed_metadata">Incorporar metadados</string>
+    <string name="download_subtitles_en">Legendas (EN)</string>
+    <string name="download_split_chapters">Dividir por capítulos</string>
+    <string name="download_file_name">Nome do arquivo</string>
+    <string name="download_disclaimer">Salve apenas conteúdo que seja seu ou que você tenha permissão para baixar.</string>
+    <string name="download_summary_video">%1$s · %2$s · ≈ %3$s</string>
+    <string name="download_summary_audio">Áudio · %1$s · %2$s · ≈ %3$s</string>
+    <string name="download_folder">Download/Convertia</string>
+    <string name="download_action">Baixar</string>
+    <string name="badge_recommended">Recomendado</string>
+    <string name="badge_best">Melhor</string>
+
+    <!-- Datas -->
+    <string name="time_now">Agora</string>
+    <string name="time_minutes_ago">há %1$d min</string>
+    <string name="time_hours_ago">há %1$d h</string>
+    <string name="time_today">Hoje</string>
+    <string name="time_today_at">Hoje, %1$s</string>
+    <string name="time_yesterday">Ontem</string>
 
     <!-- Onboarding -->
     <string name="onboarding_start">Começar</string>

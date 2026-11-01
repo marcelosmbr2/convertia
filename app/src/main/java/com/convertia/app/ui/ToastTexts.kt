@@ -36,6 +36,7 @@ fun ToastMessage.toContent(): ToastContent {
         ToastEvent.ShareMenuOpened -> stringResource(R.string.toast_share_menu_opened) to null
         is ToastEvent.EngineUpToDate -> stringResource(R.string.toast_engine_up_to_date, e.engine, e.version) to null
         ToastEvent.NoLinkShared -> stringResource(R.string.toast_no_link_shared) to null
+        ToastEvent.NoLinkInClipboard -> stringResource(R.string.toast_no_link_clipboard) to null
     }
     return ToastContent(id, text, action)
 }

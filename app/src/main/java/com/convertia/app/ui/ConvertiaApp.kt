@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.convertia.app.R
 import com.convertia.app.ui.components.ScreenHeader
+import com.convertia.app.ui.download.DownloadScreen
 import com.convertia.app.ui.components.SheetHost
 import com.convertia.app.ui.components.ToastHost
 import com.convertia.app.ui.theme.Palette
@@ -85,7 +86,7 @@ fun ConvertiaApp(appViewModel: AppViewModel) {
 @Composable
 private fun TabContent(nav: NavState, appViewModel: AppViewModel) {
     when (nav.tab) {
-        Tab.DOWNLOAD -> PlaceholderScreen(R.string.tab_download, R.string.download_subtitle)
+        Tab.DOWNLOAD -> DownloadScreen()
         Tab.CONVERT -> PlaceholderScreen(R.string.tab_convert, R.string.convert_subtitle)
         Tab.QUEUE -> PlaceholderScreen(R.string.tab_queue, R.string.queue_subtitle)
         Tab.LIBRARY -> PlaceholderScreen(R.string.tab_library, R.string.library_subtitle)
