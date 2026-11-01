@@ -7,7 +7,7 @@ import org.junit.Test
 class FormattersTest {
 
     @Test
-    fun `size segue as faixas e a vírgula do mockup`() {
+    fun `size segue as faixas e a virgula do mockup`() {
         val cases = listOf(
             0.0 to "0 B",
             512.0 to "512 B",
@@ -38,13 +38,13 @@ class FormattersTest {
     }
 
     @Test
-    fun `decimal usa vírgula`() {
+    fun `decimal usa virgula`() {
         assertEquals("5,1", Formatters.decimal(5.1, 1))
         assertEquals("13,7", Formatters.decimal(13.66, 1))
     }
 
     @Test
-    fun `sizeDelta usa sinal de menos tipográfico`() {
+    fun `sizeDelta usa sinal de menos tipografico`() {
         assertEquals("+28%", Formatters.sizeDelta(3_200_000, 4_100_000))
         assertEquals("−42%", Formatters.sizeDelta(1_000_000, 580_000))
         assertEquals("−0%", Formatters.sizeDelta(1_000_000, 1_000_000))

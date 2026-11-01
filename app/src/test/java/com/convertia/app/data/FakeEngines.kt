@@ -1,0 +1,65 @@
+package com.convertia.app.data
+
+import com.convertia.app.data.engine.ConversionEngine
+import com.convertia.app.data.engine.ConversionProgress
+import com.convertia.app.data.engine.DownloadEngine
+import com.convertia.app.data.engine.DownloadProgress
+import com.convertia.app.domain.ConversionItem
+import com.convertia.app.domain.DownloadJob
+import com.convertia.app.domain.DownloadRequest
+import com.convertia.app.domain.MediaKind
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneOffset
+import kotlin.math.min
+
+/** Avança [step]% a cada [tickMs] ms a partir do progresso atual do job. */
+class FakeDownloadEngine(
+    private val step: Double = 25.0,
+    private val tickMs: Long = 100,
+    private val failAt: Double? = null,
+) : DownloadEngine {
+    override fun download(job: DownloadJob): Flow<DownloadProgress> = flow {
+        var percent = job.progress
+        while (percent < 100) {
+            delay(tickMs)
+            percent = min(100.0, percent + step)
+            if (failAt != null && percent >= failAt) error("HTTP 403")
+            emit(DownloadProgress(percent, 5.0))
+        }
+    }
+}
+
+/** Avança [step]% a cada [tickMs] ms; o arquivo de saída tem metade do tamanho. */
+class FakeConversionEngine(private val step: Double = 25.0, private val tickMs: Long = 100) : ConversionEngine {
+    override fun convert(item: ConversionItem, hardwareAcceleration: Boolean): Flow<ConversionProgress> = flow {
+        var percent = item.progress
+        while (true) {
+            delay(tickMs)
+            percent = min(100.0, percent + step)
+            if (percent >= 100) {
+                emit(ConversionProgress.Finished(item.sizeBytes / 2))
+                return@flow
+            }
+            emit(ConversionProgress.Running(percent, null))
+        }
+    }
+}
+
+val fixedClock: Clock = Clock.fixed(Instant.parse("2026-11-01T13:00:00Z"), ZoneOffset.UTC)
+
+fun request(title: String, mb: Double = 100.0) = DownloadRequest(
+    url = "https://youtube.com/watch?v=$title",
+    title = title,
+    kind = MediaKind.VIDEO,
+    formatId = "v1080",
+    container = "mp4",
+    quality = "1080p",
+    resolution = "1920×1080",
+    site = "youtube.com",
+    sizeMb = mb,
+    duration = "1:00",
+)

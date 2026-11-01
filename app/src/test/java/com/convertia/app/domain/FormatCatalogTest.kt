@@ -39,7 +39,7 @@ class FormatCatalogTest {
     }
 
     @Test
-    fun `GIF de um vídeo é vídeo, GIF de uma imagem é imagem`() {
+    fun `GIF de um video e video, GIF de uma imagem e imagem`() {
         assertEquals(MediaCategory.VIDEO, FormatCatalog.targetCategory(MediaCategory.VIDEO, "GIF"))
         assertEquals(MediaCategory.IMAGE, FormatCatalog.targetCategory(MediaCategory.IMAGE, "GIF"))
         assertEquals(MediaCategory.AUDIO, FormatCatalog.targetCategory(MediaCategory.VIDEO, "MP3"))
@@ -83,14 +83,14 @@ class FormatCatalogTest {
     }
 
     @Test
-    fun `qualidade fora das predefinições vira personalizada`() {
+    fun `qualidade fora das predefinicoes vira personalizada`() {
         assertEquals(QualityPreset.BEST, ConversionOptions().withQuality(95).preset)
         assertEquals(QualityPreset.CUSTOM, ConversionOptions().withQuality(70).preset)
         assertEquals(55, ConversionOptions().withPreset(QualityPreset.SMALLER).quality)
     }
 
     @Test
-    fun `nome de saída troca só a última extensão`() {
+    fun `nome de saida troca so a ultima extensao`() {
         val item = ConversionItem.create("id", "IMG_4021.HEIC", 1, "p", ConversionSource.Sample)
         assertEquals("IMG_4021.jpg", item.outputName)
         val archive = ConversionItem.create("id", "backup.zip", 1, "p", ConversionSource.Sample, "TAR.GZ")
