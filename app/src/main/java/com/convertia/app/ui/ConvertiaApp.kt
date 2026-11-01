@@ -24,7 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.convertia.app.ui.theme.AccentBright
+import com.convertia.app.ui.theme.Palette
 import com.convertia.app.ui.theme.ConvertiaTheme
 
 @Composable
@@ -69,8 +69,8 @@ private fun ConvertiaNavigationBar(
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = AccentBright,
-                        selectedTextColor = AccentBright,
+                        selectedIconColor = Palette.AccentText,
+                        selectedTextColor = Palette.AccentText,
                         indicatorColor = Color.Transparent,
                         unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
