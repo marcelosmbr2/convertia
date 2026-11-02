@@ -56,6 +56,7 @@ fun PillButton(
     contentColor: Color = Palette.TextPrimary,
     contentPadding: PaddingValues = PaddingValues(horizontal = 14.dp),
     enabled: Boolean = true,
+    spacing: Dp = 8.dp,
     content: @Composable RowScope.() -> Unit,
 ) {
     val interaction = remember { MutableInteractionSource() }
@@ -69,7 +70,7 @@ fun PillButton(
             .then(if (border != null) Modifier.border(border, shape) else Modifier)
             .clickable(interaction, indication = null, enabled = enabled, role = Role.Button, onClick = onClick)
             .padding(contentPadding),
-        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+        horizontalArrangement = Arrangement.spacedBy(spacing, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         CompositionLocalProvider(LocalContentColor provides contentColor, content = { content() })

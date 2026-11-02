@@ -25,8 +25,17 @@ import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.convertia.app.R
 import com.convertia.app.ui.components.ScreenHeader
+import com.convertia.app.ui.convert.AddFilesSheet
+import com.convertia.app.ui.convert.ConvertNavigation
+import com.convertia.app.ui.convert.ConvertScreen
+import com.convertia.app.ui.convert.ConvertViewModel
+import com.convertia.app.ui.convert.FormatPickerSheet
+import com.convertia.app.ui.convert.InspectorActions
+import com.convertia.app.ui.convert.InspectorSheet
+import com.convertia.app.ui.convert.PickerActions
 import com.convertia.app.ui.download.DownloadScreen
 import com.convertia.app.ui.components.SheetHost
 import com.convertia.app.ui.components.ToastHost
@@ -87,7 +96,13 @@ fun ConvertiaApp(appViewModel: AppViewModel) {
 private fun TabContent(nav: NavState, appViewModel: AppViewModel) {
     when (nav.tab) {
         Tab.DOWNLOAD -> DownloadScreen()
-        Tab.CONVERT -> PlaceholderScreen(R.string.tab_convert, R.string.convert_subtitle)
+        Tab.CONVERT -> ConvertScreen(
+            navigation = ConvertNavigation(
+                openItem = { appViewModel.openSheet(AppSheet.Inspector(it)) },
+                openPicker = { appViewModel.openFormatPicker(it) },
+                openAddFiles = { appViewModel.openSheet(AppSheet.AddFiles) },
+            ),
+        )
         Tab.QUEUE -> PlaceholderScreen(R.string.tab_queue, R.string.queue_subtitle)
         Tab.LIBRARY -> PlaceholderScreen(R.string.tab_library, R.string.library_subtitle)
         Tab.SETTINGS -> PlaceholderScreen(R.string.tab_settings, R.string.settings_subtitle)
@@ -96,7 +111,50 @@ private fun TabContent(nav: NavState, appViewModel: AppViewModel) {
 
 @Composable
 private fun ColumnScope.SheetContent(sheet: AppSheet, appViewModel: AppViewModel) {
-    Text(sheet.toString(), style = TextStyles.RowTitle, modifier = Modifier.padding(20.dp))
+    val convert: ConvertViewModel = viewModel(factory = ConvertViewModel.Factory)
+    val convertUi by convert.uiState.collectAsStateWithLifecycle()
+    when (sheet) {
+        AppSheet.AddFiles -> AddFilesSheet(
+            recentDownloads = convertUi.recentDownloads,
+            onPicked = { files, location ->
+                if (files.isNotEmpty()) {
+                    convert.addPicked(files, location)
+                    appViewModel.selectTab(Tab.CONVERT)
+                }
+            },
+            onAddDownload = appViewModel::convertLibraryItem,
+        )
+        is AppSheet.Inspector -> {
+            val item = convertUi.items.firstOrNull { it.id == sheet.itemId } ?: return
+            InspectorSheet(
+                item = item,
+                actions = InspectorActions(
+                    onPickFormat = { appViewModel.openFormatPicker(item.id, fromInspector = true) },
+                    onOptions = { transform -> convert.updateOptions(item.id, transform) },
+                    onApplyToAll = {
+                        convert.applyToSameCategory(item.id)
+                        appViewModel.closeSheet()
+                    },
+                    onRemove = { convert.remove(item.id) },
+                    onDone = appViewModel::closeSheet,
+                ),
+            )
+        }
+        is AppSheet.FormatPicker -> FormatPickerSheet(
+            sheet = sheet,
+            items = convertUi.items,
+            actions = PickerActions(
+                onBack = { appViewModel.goBack() },
+                onQuery = appViewModel::updatePickerQuery,
+                onCategory = appViewModel::selectPickerCategory,
+                onChoose = { format ->
+                    if (sheet.itemId != null) convert.setTarget(sheet.itemId, format) else convert.setTargetForAll(format)
+                    appViewModel.finishPicker()
+                },
+            ),
+        )
+        is AppSheet.LibraryActions -> Text(sheet.toString(), style = TextStyles.RowTitle, modifier = Modifier.padding(20.dp))
+    }
 }
 
 /** Tela provisória, substituída tela a tela. */

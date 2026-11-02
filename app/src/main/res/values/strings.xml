@@ -15,7 +15,6 @@
     </plurals>
 
     <string name="download_subtitle">Cole um link, escolha o formato e baixe.</string>
-    <string name="convert_subtitle">Processado neste aparelho · 0 bytes enviados</string>
     <string name="queue_subtitle">Downloads e conversões aparecem aqui enquanto rodam.</string>
     <string name="library_subtitle">Seus arquivos baixados e convertidos.</string>
     <string name="settings_subtitle">As alterações são salvas automaticamente.</string>
@@ -26,6 +25,7 @@
     <string name="action_view_queue">Ver fila</string>
     <string name="action_open">Abrir</string>
     <string name="action_undo">Desfazer</string>
+    <string name="action_back">Voltar</string>
 
     <!-- Toasts -->
     <string name="toast_download_finished">Download concluído</string>
@@ -103,6 +103,143 @@
     <string name="download_action">Baixar</string>
     <string name="badge_recommended">Recomendado</string>
     <string name="badge_best">Melhor</string>
+
+    <!-- Converter -->
+    <string name="convert_title">Converter</string>
+    <plurals name="convert_summary">
+        <item quantity="one">%1$d arquivo · %2$s · processado neste aparelho</item>
+        <item quantity="many">%1$d arquivos · %2$s · processado neste aparelho</item>
+        <item quantity="other">%1$d arquivos · %2$s · processado neste aparelho</item>
+    </plurals>
+    <string name="convert_summary_empty">Processado neste aparelho · 0 bytes enviados</string>
+    <string name="convert_quick_presets">Predefinições rápidas</string>
+    <string name="convert_files_label">Arquivos · %1$d</string>
+    <string name="convert_clear">Limpar</string>
+    <string name="convert_all_to">Tudo para</string>
+    <string name="convert_various">Vários</string>
+    <string name="convert_converting_eta">Convertendo · %1$ds restantes</string>
+    <string name="convert_paused">Pausado</string>
+    <string name="convert_queued">Na fila</string>
+    <string name="convert_empty_title">Adicione arquivos</string>
+    <string name="convert_empty_body">Imagens, documentos, áudio, vídeo, compactados e e-books. Tudo processado neste aparelho.</string>
+    <string name="convert_choose_files">Escolher arquivos</string>
+    <string name="convert_add_files">Adicionar arquivos</string>
+    <string name="convert_pause">Pausar</string>
+    <string name="convert_resume">Retomar</string>
+    <string name="convert_action">Converter</string>
+    <plurals name="convert_n_files">
+        <item quantity="one">Converter %d arquivo</item>
+        <item quantity="many">Converter %d arquivos</item>
+        <item quantity="other">Converter %d arquivos</item>
+    </plurals>
+
+    <!-- Sheet: adicionar arquivos -->
+    <string name="add_title">Adicionar arquivos</string>
+    <string name="add_gallery">Galeria</string>
+    <string name="add_gallery_desc">Fotos e vídeos do aparelho</string>
+    <string name="add_files">Arquivos</string>
+    <string name="add_files_desc">Documentos, áudio, compactados, e-books</string>
+    <string name="add_from_downloads">Dos seus downloads</string>
+    <string name="add_location_gallery">Galeria</string>
+    <string name="add_location_files">Arquivos</string>
+
+    <!-- Sheet: inspetor -->
+    <string name="inspector_output">Formato de saída</string>
+    <string name="inspector_quality">Qualidade</string>
+    <string name="quality_smaller">Menor</string>
+    <string name="quality_balanced">Equilibrado</string>
+    <string name="quality_best">Melhor</string>
+    <string name="quality_custom">Personalizado</string>
+    <string name="inspector_codec">Codec</string>
+    <string name="inspector_resolution">Resolução</string>
+    <string name="inspector_bitrate">Taxa de bits</string>
+    <string name="inspector_channels">Canais</string>
+    <string name="inspector_resize">Redimensionar</string>
+    <string name="inspector_strip">Remover metadados</string>
+    <string name="inspector_strip_desc">Remove localização e dados da câmera</string>
+    <string name="inspector_compress">Comprimir imagens</string>
+    <string name="inspector_compress_desc">Reduz imagens incorporadas para 150 dpi</string>
+    <string name="inspector_ocr">Reconhecer texto</string>
+    <string name="inspector_ocr_desc">Torna páginas digitalizadas pesquisáveis</string>
+    <string name="inspector_compression">Compressão</string>
+    <string name="inspector_estimated_size">Tamanho estimado</string>
+    <string name="inspector_final_size">Tamanho final</string>
+    <string name="inspector_apply_all">Aplicar a %1$s</string>
+    <string name="inspector_remove">Remover</string>
+    <string name="inspector_done">Concluir</string>
+    <string name="option_original">Original</string>
+    <string name="option_stereo">Estéreo</string>
+    <string name="option_mono">Mono</string>
+    <string name="option_level_fast">Rápida</string>
+    <string name="option_level_normal">Normal</string>
+    <string name="option_level_max">Máxima</string>
+
+    <!-- Sheet: seletor de formato -->
+    <string name="picker_title">Converter para</string>
+    <string name="picker_all_files">Todos os arquivos compatíveis</string>
+    <string name="picker_search">Buscar formatos</string>
+    <string name="picker_results">Resultados</string>
+    <string name="picker_current">Formato atual</string>
+    <string name="picker_empty">Nenhum formato compatível.</string>
+
+    <!-- Formatos de saída (descrições do seletor) -->
+    <string name="format_image_jpg">Com perdas · universal</string>
+    <string name="format_image_png">Sem perdas</string>
+    <string name="format_image_webp">Leve · web</string>
+    <string name="format_image_avif">Mínimo · moderno</string>
+    <string name="format_image_heic">Fotos Apple</string>
+    <string name="format_image_gif">Animado</string>
+    <string name="format_image_tiff">Impressão</string>
+    <string name="format_image_bmp">Sem compressão</string>
+    <string name="format_image_ico">Ícone</string>
+    <string name="format_document_pdf">Documento portátil</string>
+    <string name="format_document_docx">Microsoft Word</string>
+    <string name="format_document_odt">OpenDocument</string>
+    <string name="format_document_rtf">Texto formatado</string>
+    <string name="format_document_txt">Texto simples</string>
+    <string name="format_document_html">Página web</string>
+    <string name="format_document_md">Markdown</string>
+    <string name="format_audio_mp3">Universal</string>
+    <string name="format_audio_aac">Eficiente</string>
+    <string name="format_audio_m4a">AAC em MP4</string>
+    <string name="format_audio_opus">Voz · mínimo</string>
+    <string name="format_audio_ogg">Vorbis</string>
+    <string name="format_audio_flac">Sem perdas</string>
+    <string name="format_audio_wav">Sem compressão</string>
+    <string name="format_audio_aiff">Sem compressão</string>
+    <string name="format_video_mp4">H.264 · HEVC</string>
+    <string name="format_video_mov">QuickTime</string>
+    <string name="format_video_webm" tools:ignore="Typos">VP9 · AV1</string>
+    <string name="format_video_mkv">Matroska</string>
+    <string name="format_video_avi">Legado</string>
+    <string name="format_video_gif">Loop animado</string>
+    <string name="format_archive_zip">Universal</string>
+    <string name="format_archive_7z">Melhor compressão</string>
+    <string name="format_archive_tar_gz">Unix · compactado</string>
+    <string name="format_archive_tar">Unix</string>
+    <string name="format_ebook_epub">Padrão aberto</string>
+    <string name="format_ebook_mobi">Kindle legado</string>
+    <string name="format_ebook_azw3">Kindle</string>
+    <string name="format_ebook_fb2">FictionBook</string>
+    <!-- Categorias -->
+    <string name="category_image">Imagens</string>
+    <string name="category_image_one">Imagem</string>
+    <string name="category_image_all">todas as imagens</string>
+    <string name="category_document">Documentos</string>
+    <string name="category_document_one">Documento</string>
+    <string name="category_document_all">todos os documentos</string>
+    <string name="category_audio">Áudio</string>
+    <string name="category_audio_one">Áudio</string>
+    <string name="category_audio_all">todos os áudios</string>
+    <string name="category_video">Vídeo</string>
+    <string name="category_video_one">Vídeo</string>
+    <string name="category_video_all">todos os vídeos</string>
+    <string name="category_archive">Compactados</string>
+    <string name="category_archive_one">Compactado</string>
+    <string name="category_archive_all">todos os compactados</string>
+    <string name="category_ebook">E-books</string>
+    <string name="category_ebook_one">E-book</string>
+    <string name="category_ebook_all">todos os e-books</string>
 
     <!-- Datas -->
     <string name="time_now">Agora</string>

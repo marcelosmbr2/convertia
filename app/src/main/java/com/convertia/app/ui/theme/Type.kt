@@ -22,8 +22,14 @@ val JetBrainsMono = FontFamily(
     Font(R.font.jetbrains_mono_medium, FontWeight.Medium),
 )
 
-/** Recursos do Inter usados no mockup: "1" e "l" desambiguados e números tabulares. */
-private const val InterFeatures = "'cv11', 'ss01', 'tnum'"
+/** Recursos do Inter usados no mockup: "a" de um andar e dígitos abertos. */
+private const val InterFeatures = "'cv11', 'ss01'"
+
+/**
+ * Números tabulares, para textos com números que mudam (progresso, velocidade). Não vai no
+ * estilo base porque, no Inter, o `tnum` também alarga o hífen ("e - books").
+ */
+const val TabularFeatures = "'cv11', 'ss01', 'tnum'"
 
 private val CenteredLineHeight = LineHeightStyle(
     alignment = LineHeightStyle.Alignment.Center,

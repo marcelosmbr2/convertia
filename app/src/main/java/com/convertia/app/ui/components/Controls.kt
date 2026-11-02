@@ -172,13 +172,15 @@ fun ToggleRow(
     description: String? = null,
     titleSize: TextUnit = 14.5.sp,
     minHeight: Dp = 64.dp,
+    horizontalPadding: Dp = 16.dp,
+    verticalPadding: Dp = 10.dp,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = minHeight)
             .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+            .padding(horizontal = horizontalPadding, vertical = verticalPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {

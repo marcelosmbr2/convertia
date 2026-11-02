@@ -147,6 +147,23 @@ class AppViewModel(
         openSheet(AppSheet.FormatPicker(itemId, category, backToInspector = fromInspector))
     }
 
+    fun updatePickerQuery(query: String) = setNav { nav ->
+        val sheet = nav.sheet as? AppSheet.FormatPicker ?: return@setNav nav
+        nav.copy(sheet = sheet.copy(query = query))
+    }
+
+    fun selectPickerCategory(category: MediaCategory) = setNav { nav ->
+        val sheet = nav.sheet as? AppSheet.FormatPicker ?: return@setNav nav
+        nav.copy(sheet = sheet.copy(category = category, query = ""))
+    }
+
+    /** Depois de escolher um formato: volta ao inspetor se veio de lá; senão fecha. */
+    fun finishPicker() = setNav { nav ->
+        val sheet = nav.sheet as? AppSheet.FormatPicker
+        val back = sheet?.takeIf { it.backToInspector }?.itemId
+        nav.copy(sheet = back?.let { AppSheet.Inspector(it) })
+    }
+
     /** Volta um nível: seletor → inspetor → fecha sheet → sai de Predefinições → aba Baixar. */
     fun goBack(): Boolean {
         val nav = _nav.value
