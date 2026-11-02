@@ -87,7 +87,10 @@ class OfficeService : Service() {
     private fun convert(input: String, output: String, format: String, options: String) {
         val office = ensureOffice()
         val document = office.documentLoad(File(input).toURI().toString())
-            ?: throw IOException(office.getError()?.takeIf { it.isNotBlank() }?.let(::friendly) ?: "O LibreOffice não conseguiu abrir o arquivo")
+            ?: throw IOException(
+                (office.getError()?.takeIf { it.isNotBlank() }?.let(::friendly) ?: "O LibreOffice não conseguiu abrir o arquivo") +
+                    " (.${File(input).extension.lowercase()})",
+            )
         try {
             document.saveAs(File(output).toURI().toString(), format, options)
         } finally {
@@ -137,6 +140,7 @@ class OfficeService : Service() {
     private fun friendly(error: String): String = when {
         "password" in error.lowercase() -> "Documento protegido por senha"
         "filter" in error.lowercase() && "not" in error.lowercase() -> "O LibreOffice não tem filtro para este formato"
+        "empty reference" in error.lowercase() -> "O LibreOffice não reconheceu o formato do arquivo"
         else -> error.lineSequence().firstOrNull { it.isNotBlank() }?.take(200) ?: error
     }
 

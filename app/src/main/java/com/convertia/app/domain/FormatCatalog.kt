@@ -43,7 +43,7 @@ object FormatCatalog {
     private val sourceCategories: Map<String, MediaCategory> = buildMap {
         fun add(category: MediaCategory, exts: String) = exts.split(' ').forEach { put(it, category) }
         add(MediaCategory.IMAGE, "jpg jpeg png webp avif heic heif gif tiff tif bmp ico svg dng")
-        add(MediaCategory.DOCUMENT, "pdf doc docx odt rtf txt html htm md pptx ppt xlsx xls csv")
+        add(MediaCategory.DOCUMENT, "pdf doc docx odt fodt rtf txt html htm md pptx ppt xlsx xls csv")
         add(MediaCategory.AUDIO, "mp3 wav flac aac ogg m4a opus aiff aif wma")
         add(MediaCategory.VIDEO, "mp4 mov mkv webm avi wmv m4v 3gp")
         add(MediaCategory.ARCHIVE, "zip 7z rar tar gz tgz bz2")

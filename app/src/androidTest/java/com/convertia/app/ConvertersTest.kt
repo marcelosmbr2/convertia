@@ -184,18 +184,50 @@ class ConvertersTest {
         assertTrue(text, text.contains("Relatório Trimestral") && text.contains("Sudeste"))
     }
 
-    @Test
-    fun documentosPeloLibreOffice() {
+    private fun officeEngine(): OfficeEngine {
         assumeTrue("APK sem LibreOffice", OfficeAvailability.isAvailable(context))
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-        val engine = OfficeEngine(OfficeClient(context, scope))
+        return OfficeEngine(OfficeClient(context, CoroutineScope(SupervisorJob() + Dispatchers.Main)))
+    }
+
+    @Test
+    fun docxPeloLibreOffice() {
+        val engine = officeEngine()
         val docx = asset("sample.docx")
         assertEquals("sample.pdf", run(engine, job(docx, "PDF")).first().name)
         run(engine, job(docx, "ODT"))
         run(engine, job(docx, "FB2"))
         run(engine, job(docx, "PNG"))
-        assertEquals("sample.pdf", run(engine, job(asset("sample.epub"), "PDF")).first().name)
-        // PDF → DOCX: reconstrução + LibreOffice.
+    }
+
+    @Test
+    fun htmlPeloLibreOffice() {
+        val engine = officeEngine()
+        val html = File(root, "pagina.html").apply { writeText("<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>T</title></head><body><h1>Título</h1><p>Um <b>parágrafo</b>.</p></body></html>") }
+        assertEquals("pagina.pdf", run(engine, job(html, "PDF")).first().name)
+        run(engine, job(html, "DOCX"))
+    }
+
+    @Test
+    fun epubPeloLibreOffice() {
+        assertEquals("sample.pdf", run(officeEngine(), job(asset("sample.epub"), "PDF")).first().name)
+    }
+
+    @Test
+    fun odtPlanoPeloLibreOffice() {
+        val engine = officeEngine()
+        val fodt = File(root, "plano.fodt").apply {
+            writeText(
+                """<?xml version="1.0" encoding="UTF-8"?>
+<office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" office:version="1.3" office:mimetype="application/vnd.oasis.opendocument.text"><office:body><office:text><text:h text:outline-level="1">Título</text:h><text:p>Parágrafo.</text:p></office:text></office:body></office:document>""",
+            )
+        }
+        assertEquals("plano.docx", run(engine, job(fodt, "DOCX")).first().name)
+    }
+
+    @Test
+    fun pdfParaDocxPeloLibreOffice() {
+        assumeTrue("APK sem LibreOffice", OfficeAvailability.isAvailable(context))
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
         val rebuilt = run(PdfDocumentConverter(PdfBoxExtractor(context), OfficeClient(context, scope)), job(asset("sample.pdf"), "DOCX")).first()
         assertEquals("sample.docx", rebuilt.name)
     }
