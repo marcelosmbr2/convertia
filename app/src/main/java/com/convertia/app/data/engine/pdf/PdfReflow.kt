@@ -2,6 +2,7 @@ package com.convertia.app.data.engine.pdf
 
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Reconstrói um documento editável a partir do que foi lido do PDF. Com árvore de
@@ -131,29 +132,165 @@ internal object ListMarkers {
     }
 }
 
-/** Sem tags: linhas → títulos, listas e parágrafos pela geometria. */
-internal class GeometricReflow(private val model: PdfModel, private val layout: PageLayout) {
+/** Sem tags: linhas → títulos, listas, parágrafos, tabelas e colunas pela geometria. */
+internal class GeometricReflow(private val model: PdfModel, initialLayout: PageLayout) {
+
+    private var layout = initialLayout
 
     fun reflow(): DocModel {
+        val pagesLines = model.pages.associate { page -> page.index to TextLines.build(page) }
+        val headerFooter = HeaderFooterDetector.detect(pagesLines, layout.pageHeight)
+        if (headerFooter.removed.isNotEmpty()) {
+            // Margens e corpo sem o cabeçalho e o rodapé.
+            val trimmed = PdfModel(
+                model.pages.map { page ->
+                    page.copy(glyphs = page.glyphs.filterNot { g -> headerFooter.removed.any { it.first == page.index && abs(it.second - g.baseline) < 1f } })
+                },
+                model.structure,
+            )
+            layout = PageLayout.of(trimmed)
+        }
         val blocks = mutableListOf<Block>()
         for (page in model.pages) {
-            val lines = TextLines.build(page).sortedWith(compareBy({ it.top }, { it.x }))
-            blocks += blocksOf(page, lines)
+            val lines = pagesLines.getValue(page.index)
+                .filterNot { line -> headerFooter.removed.any { it.first == page.index && abs(it.second - line.baseline) < 1f } }
+            blocks += pageBlocks(page, lines)
         }
-        return layout.toDoc(blocks)
+        return layout.toDoc(blocks, headerFooter.header, headerFooter.footer)
     }
 
-    private fun blocksOf(page: PdfPage, lines: List<Line>): List<Block> {
-        val body = layout.bodyFontSize
-        val headingSizes = lines.filter { isHeading(it) }.map { (it.fontSize * 2).toInt() / 2f }.distinct().sortedDescending()
+    /** Uma página: tabelas com grade primeiro, depois colunas, depois tabelas sem borda e o texto. */
+    private fun pageBlocks(page: PdfPage, allLines: List<Line>): List<Block> {
+        data class Placed(val top: Float, val blocks: List<Block>)
+        val placed = mutableListOf<Placed>()
+
+        // 1. Tabelas desenhadas: as palavras dentro delas saem do fluxo, célula a célula
+        //    (palavra a palavra, porque células vizinhas podem ficar a um espaço de distância).
+        val regions = GridTableDetector.detect(page.strokes)
+        val remaining = mutableListOf<Line>()
+        val cellChunks = mutableMapOf<TableRegion, MutableMap<Pair<Int, Int>, MutableList<Line>>>()
+        for (line in allLines) {
+            val outside = mutableListOf<Chunk>()
+            val cy = line.baseline - line.fontSize * 0.3f
+            for (chunk in line.chunks) {
+                var outsideWords = mutableListOf<Word>()
+                var cellWords = mutableListOf<Word>()
+                var currentCell: Pair<TableRegion, Pair<Int, Int>>? = null
+                fun flushCell() {
+                    val target = currentCell
+                    if (target != null && cellWords.isNotEmpty()) {
+                        cellChunks.getOrPut(target.first) { mutableMapOf() }.getOrPut(target.second) { mutableListOf() } += line.copy(chunks = listOf(Chunk(cellWords)))
+                    }
+                    cellWords = mutableListOf()
+                    currentCell = null
+                }
+                fun flushOutside() {
+                    if (outsideWords.isNotEmpty()) outside += Chunk(outsideWords)
+                    outsideWords = mutableListOf()
+                }
+                for (word in chunk.words) {
+                    val cx = (word.x + word.right) / 2
+                    val region = regions.firstOrNull { it.contains(cx, cy) }
+                    val cell = region?.cellAt(cx, cy)
+                    if (region != null && cell != null) {
+                        flushOutside()
+                        if (currentCell != null && currentCell != region to cell) flushCell()
+                        currentCell = region to cell
+                        cellWords += word
+                    } else {
+                        flushCell()
+                        outsideWords += word
+                    }
+                }
+                flushCell(); flushOutside()
+            }
+            if (outside.isNotEmpty()) remaining += line.copy(chunks = outside)
+        }
+        for (region in regions) {
+            val content = cellChunks[region].orEmpty()
+            if (content.isEmpty()) continue
+            placed += Placed(region.top, listOf(tableOf(region, content)))
+        }
+
+        // 2. Colunas e, dentro delas, tabelas sem borda e o texto corrido. O texto é cortado
+        //    onde uma tabela desenhada ou uma imagem se encaixa, para elas entrarem no lugar.
+        val cuts = regions.map { it.top } + page.images.filter { it.file != null }.map { it.y + it.height / 2 }
+        val columns = ColumnSplitter.split(remaining.sortedWith(compareBy({ it.top }, { it.x })), layout.textLeft, layout.textRight, layout.bodyFontSize)
+        for (region in columns) {
+            val lines = region.lines.sortedWith(compareBy({ it.top }, { it.x }))
+            for (segment in segmentAt(lines, cuts)) {
+                val tables = BorderlessTableDetector.detect(segment, region.right - region.left)
+                var cursor = 0
+                for (range in tables) {
+                    if (range.first > cursor) placed += Placed(segment[cursor].top, blocksOf(segment.subList(cursor, range.first), region.left, region.right))
+                    placed += Placed(segment[range.first].top, listOf(BorderlessTableDetector.build(segment.subList(range.first, range.last + 1), region.right)))
+                    cursor = range.last + 1
+                }
+                if (cursor < segment.size) placed += Placed(segment[cursor].top, blocksOf(segment.subList(cursor, segment.size), region.left, region.right))
+            }
+        }
+
+        // 3. Imagens, pela posição.
+        for (image in page.images) {
+            if (image.file == null) continue
+            if (regions.any { it.contains(image.x + image.width / 2, image.y + image.height / 2) }) continue
+            placed += Placed(image.y + image.height / 2, listOf(ImageBlock(image.file, image.width, image.height)))
+        }
+        return placed.sortedBy { it.top }.flatMap { it.blocks }
+    }
+
+    /** Divide as linhas onde um corte (topo de tabela, centro de imagem) cai entre duas delas. */
+    private fun segmentAt(lines: List<Line>, cuts: List<Float>): List<List<Line>> {
+        if (lines.isEmpty()) return emptyList()
+        val segments = mutableListOf<MutableList<Line>>(mutableListOf(lines.first()))
+        for (i in 1 until lines.size) {
+            val previous = lines[i - 1]
+            val line = lines[i]
+            if (cuts.any { it > previous.top && it < line.top }) segments += mutableListOf(line) else segments.last() += line
+        }
+        return segments
+    }
+
+    private fun tableOf(region: TableRegion, content: Map<Pair<Int, Int>, List<Line>>): Table {
+        val rows = (0 until region.rows).map { r ->
+            val cells = (0 until region.columns).mapNotNull { c ->
+                val span = region.cells[r to c] ?: return@mapNotNull null
+                val lines = content[r to c].orEmpty()
+                val merged = mergeSameBaseline(lines)
+                val left = region.columnBounds[c]
+                val right = region.columnBounds[min(c + span.colSpan, region.columns)]
+                Cell(blocksOf(merged, left, right), span.colSpan, span.rowSpan)
+            }
+            TableRow(cells)
+        }
+        val widths = (0 until region.columns).map { region.columnBounds[it + 1] - region.columnBounds[it] }
+        return Table(rows, widths, bordered = true)
+    }
+
+    /** Trechos de uma célula que estavam na mesma linha da página voltam a ser uma linha. */
+    private fun mergeSameBaseline(lines: List<Line>): List<Line> {
+        val sorted = lines.sortedWith(compareBy({ it.baseline }, { it.x }))
+        val out = mutableListOf<Line>()
+        for (line in sorted) {
+            val last = out.lastOrNull()
+            if (last != null && abs(last.baseline - line.baseline) < 1f) {
+                out[out.lastIndex] = last.copy(chunks = (last.chunks + line.chunks).sortedBy { it.x })
+            } else {
+                out += line
+            }
+        }
+        return out
+    }
+
+    private fun blocksOf(lines: List<Line>, regionLeft: Float, regionRight: Float): List<Block> {
+        val headingSizes = lines.filter { isHeading(it, regionRight - regionLeft) }.map { (it.fontSize * 2).toInt() / 2f }.distinct().sortedDescending()
         val blocks = mutableListOf<Block>()
-        val images = page.images.filter { it.file != null }.sortedBy { it.y }.toMutableList()
         var paragraph: MutableList<Line>? = null
         var list: Pair<Boolean, MutableList<MutableList<Word>>>? = null
         var listItemIndent = 0f
 
         fun flushParagraph() {
-            paragraph?.let { blocks += paragraphOf(it) }
+            paragraph?.let { blocks += paragraphOf(it, regionLeft, regionRight) }
             paragraph = null
         }
 
@@ -162,24 +299,15 @@ internal class GeometricReflow(private val model: PdfModel, private val layout: 
             list = null
         }
 
-        fun flushImagesAbove(top: Float) {
-            while (images.isNotEmpty() && images.first().y + images.first().height / 2 < top) {
-                val image = images.removeAt(0)
-                flushParagraph(); flushList()
-                blocks += ImageBlock(image.file!!, image.width, image.height)
-            }
-        }
-
         var previous: Line? = null
         for (line in lines) {
-            flushImagesAbove(line.top)
             val words = line.words
             val marker = ListMarkers.strip(words)
             when {
-                isHeading(line) -> {
+                isHeading(line, regionRight - regionLeft) -> {
                     flushParagraph(); flushList()
                     val level = (headingSizes.indexOf((line.fontSize * 2).toInt() / 2f) + 1).coerceIn(1, 6)
-                    blocks += Paragraph(Runs.of(listOf(words)), level, alignmentOf(listOf(line)))
+                    blocks += Paragraph(Runs.of(listOf(words)), level, alignmentOf(listOf(line), regionLeft, regionRight))
                 }
                 marker != null -> {
                     flushParagraph()
@@ -195,7 +323,7 @@ internal class GeometricReflow(private val model: PdfModel, private val layout: 
                 else -> {
                     flushList()
                     val current = paragraph
-                    if (current != null && previous != null && continuesParagraph(previous, line, current)) {
+                    if (current != null && previous != null && continuesParagraph(previous, line, current, regionRight)) {
                         current += line
                     } else {
                         flushParagraph()
@@ -206,15 +334,14 @@ internal class GeometricReflow(private val model: PdfModel, private val layout: 
             previous = line
         }
         flushParagraph(); flushList()
-        flushImagesAbove(Float.MAX_VALUE)
         return blocks
     }
 
-    private fun isHeading(line: Line): Boolean {
+    private fun isHeading(line: Line, regionWidth: Float): Boolean {
         val body = layout.bodyFontSize
         if (line.text.length > 120) return false
         if (line.fontSize >= body * 1.18f) return true
-        val short = (line.right - line.x) < layout.textWidth * 0.75f
+        val short = (line.right - line.x) < regionWidth * 0.75f
         return line.chunks.all { it.bold } && line.fontSize >= body * 1.02f && short && !line.text.trimEnd().endsWith(".")
     }
 
@@ -223,33 +350,34 @@ internal class GeometricReflow(private val model: PdfModel, private val layout: 
         return gap < layout.bodyFontSize * 0.9f && line.x >= indent - 2f && abs(line.fontSize - previous.fontSize) < 1f
     }
 
-    private fun continuesParagraph(previous: Line, line: Line, paragraph: List<Line>): Boolean {
+    private fun continuesParagraph(previous: Line, line: Line, paragraph: List<Line>, regionRight: Float): Boolean {
         val body = layout.bodyFontSize
         val gap = line.top - previous.bottom
         if (gap > body * 0.95f || gap < -body) return false
         if (abs(line.fontSize - previous.fontSize) > 1f) return false
         // Recuo de primeira linha: o parágrafo anterior acabou.
         val paragraphLeft = paragraph.minOf { it.x }
-        if (line.x > paragraphLeft + body * 0.8f && paragraph.size >= 1 && line.x > previous.x + body * 0.8f) return false
+        if (line.x > paragraphLeft + body * 0.8f && line.x > previous.x + body * 0.8f) return false
         // Linha anterior curta (acabou bem antes da margem direita): fim de parágrafo, a não
         // ser que a primeira palavra da linha seguinte simplesmente não coubesse lá.
-        val rightEdge = max(layout.textRight, paragraph.maxOf { it.right })
+        val rightEdge = max(min(regionRight, layout.textRight), paragraph.maxOf { it.right })
         val remaining = rightEdge - previous.right
         val firstWord = line.words.firstOrNull()?.width ?: 0f
         if (remaining > body * 1.6f && remaining > firstWord + body * 0.4f && line.x <= paragraphLeft + body * 0.8f) return false
         return true
     }
 
-    private fun paragraphOf(lines: List<Line>): Paragraph =
-        Paragraph(Runs.of(lines.map { it.words }), 0, alignmentOf(lines))
+    private fun paragraphOf(lines: List<Line>, left: Float, right: Float): Paragraph =
+        Paragraph(Runs.of(lines.map { it.words }), 0, alignmentOf(lines, left, right))
 
-    private fun alignmentOf(lines: List<Line>): Align {
-        val center = (layout.textLeft + layout.textRight) / 2
-        val centered = lines.all { abs((it.x + it.right) / 2 - center) < 4f && (it.right - it.x) < layout.textWidth * 0.9f }
-        if (centered && lines.all { it.x > layout.textLeft + 8f }) return Align.CENTER
-        val rightAligned = lines.all { abs(it.right - layout.textRight) < 3f && it.x > layout.textLeft + layout.bodyFontSize * 2 }
+    private fun alignmentOf(lines: List<Line>, left: Float, right: Float): Align {
+        val width = right - left
+        val center = (left + right) / 2
+        val centered = lines.all { abs((it.x + it.right) / 2 - center) < 4f && (it.right - it.x) < width * 0.9f }
+        if (centered && lines.all { it.x > left + 8f }) return Align.CENTER
+        val rightAligned = lines.all { abs(it.right - right) < 3f && it.x > left + layout.bodyFontSize * 2 }
         if (rightAligned) return Align.RIGHT
-        if (lines.size >= 2 && lines.dropLast(1).all { abs(it.right - layout.textRight) < 3f }) return Align.JUSTIFY
+        if (lines.size >= 2 && lines.dropLast(1).all { abs(it.right - right) < 3f }) return Align.JUSTIFY
         return Align.LEFT
     }
 }

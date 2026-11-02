@@ -53,6 +53,25 @@ jobs:
           disable-animations: true
           script: ./gradlew :app:connectedDebugAndroidTest --stacktrace
 
+      - name: Resultados (falhas no log)
+        if: always()
+        run: |
+          python3 - <<'EOF'
+          import glob, re, html
+          files = glob.glob('app/build/outputs/androidTest-results/connected/**/*.xml', recursive=True)
+          if not files:
+              print('Nenhum resultado de teste encontrado (o APK nem chegou a rodar?).')
+          for f in files:
+              s = open(f, encoding='utf-8').read()
+              m = re.search(r'tests="(\d+)" failures="(\d+)" errors="(\d+)" skipped="(\d+)"', s)
+              print(f, 'testes/falhas/erros/pulados =', m.groups() if m else '?')
+              for case in re.finditer(r'<testcase name="([^"]+)"[^>]*>(.*?)</testcase>', s, re.S):
+                  body = case.group(2)
+                  if '<failure' in body or '<error' in body:
+                      print('\n### FALHOU:', case.group(1))
+                      print(html.unescape(re.sub(r'<[^>]+>', '', body))[:4000])
+          EOF
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:

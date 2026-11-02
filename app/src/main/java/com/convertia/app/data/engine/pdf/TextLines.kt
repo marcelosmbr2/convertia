@@ -116,11 +116,35 @@ object TextLines {
         return Line(page, glyphs.first().baseline, top, chunks.map(::Chunk))
     }
 
+    /** Reagrupa palavras em trechos pela regra de vão (depois de dividir uma linha por colunas). */
+    fun rechunk(words: List<Word>): List<Chunk> {
+        val chunks = mutableListOf<MutableList<Word>>()
+        for (word in words.sortedBy { it.x }) {
+            val last = chunks.lastOrNull()
+            if (last != null && word.x - last.last().right <= max(last.last().fontSize, word.fontSize) * CHUNK_GAP_FRACTION) last += word
+            else chunks += mutableListOf(word)
+        }
+        return chunks.map(::Chunk)
+    }
+
+    /** Células prováveis de uma linha de tabela sem borda: palavras precedidas de um vão maior que um espaço. */
+    fun cellsOf(line: Line, gapFraction: Float = CELL_GAP_FRACTION): List<Chunk> {
+        val cells = mutableListOf<MutableList<Word>>()
+        for (word in line.words) {
+            val last = cells.lastOrNull()
+            if (last != null && word.x - last.last().right <= max(last.last().fontSize, word.fontSize) * gapFraction) last += word
+            else cells += mutableListOf(word)
+        }
+        return cells.map(::Chunk)
+    }
+
+    private const val CELL_GAP_FRACTION = 0.5f
+
     private const val BASELINE_TOLERANCE = 0.45f
 
     /** Vão maior que isto (em "em") separa palavras. */
     private const val SPACE_FRACTION = 0.18f
 
     /** Vão maior que isto (em "em") separa trechos (colunas ou células). */
-    private const val CHUNK_GAP_FRACTION = 2.2f
+    private const val CHUNK_GAP_FRACTION = 1.2f
 }
