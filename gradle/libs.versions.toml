@@ -10,6 +10,12 @@ coroutines = "1.11.0"
 junit = "4.13.2"
 youtubedl = "0.18.1"
 serialization = "1.12.0"
+heifwriter = "1.1.0"
+exifinterface = "1.4.2"
+androidsvg = "1.4"
+commonsCompress = "1.28.0"
+xz = "1.12"
+libarchive = "1.1.6"
 
 [libraries]
 # Com o Kotlin embutido do AGP 9, o KGP vem como dependência do próprio AGP.
@@ -41,6 +47,16 @@ youtubedl-android = { group = "io.github.junkfood02.youtubedl-android", name = "
 youtubedl-android-ffmpeg = { group = "io.github.junkfood02.youtubedl-android", name = "ffmpeg", version.ref = "youtubedl" }
 
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
+
+# Imagens: HEIC de saída, EXIF preservado e SVG de entrada.
+androidx-heifwriter = { group = "androidx.heifwriter", name = "heifwriter", version.ref = "heifwriter" }
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
+androidsvg = { group = "com.caverock", name = "androidsvg-aar", version.ref = "androidsvg" }
+
+# Compactados: ZIP/7Z/TAR/GZ/BZ2 em Java puro (roda nos testes) e RAR pela libarchive.
+commons-compress = { group = "org.apache.commons", name = "commons-compress", version.ref = "commonsCompress" }
+xz = { group = "org.tukaani", name = "xz", version.ref = "xz" }
+libarchive = { group = "me.zhanghai.android.libarchive", name = "library", version.ref = "libarchive" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 

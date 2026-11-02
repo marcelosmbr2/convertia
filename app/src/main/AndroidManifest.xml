@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- "Somente em Wi-Fi": saber se a rede atual é limitada. -->
@@ -15,6 +16,9 @@
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
+
+    <!-- O HeifWriter pede Android 9; o app só o chama a partir dessa versão. -->
+    <uses-sdk tools:overrideLibrary="androidx.heifwriter" />
 
     <application
         android:name=".ConvertiaApplication"

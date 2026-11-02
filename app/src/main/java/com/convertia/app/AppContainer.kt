@@ -20,6 +20,9 @@ import com.convertia.app.data.engine.MediaInspector
 import com.convertia.app.data.engine.SimulatedConversionEngine
 import com.convertia.app.data.engine.ffmpeg.Ffmpeg
 import com.convertia.app.data.engine.ffmpeg.FfmpegMediaConverter
+import com.convertia.app.data.engine.archive.ArchiveConverter
+import com.convertia.app.data.engine.archive.RarExtractor
+import com.convertia.app.data.engine.image.ImageConverter
 import com.convertia.app.data.engine.ytdlp.YtDlp
 import com.convertia.app.data.engine.ytdlp.YtDlpDownloadEngine
 import com.convertia.app.data.engine.ytdlp.YtDlpMediaInspector
@@ -113,7 +116,7 @@ class AppContainer(context: Context) {
         saver = mediaSaver,
         library = library,
         settings = settings,
-        converters = listOf(FfmpegMediaConverter(ffmpeg)),
+        converters = listOf(FfmpegMediaConverter(ffmpeg), ImageConverter(ffmpeg), ArchiveConverter(rarExtractor = RarExtractor())),
         fallback = SimulatedConversionEngine(),
     )
 

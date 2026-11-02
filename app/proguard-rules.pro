@@ -9,3 +9,11 @@
 -dontwarn com.fasterxml.jackson.**
 -dontwarn java.beans.**
 -dontwarn org.apache.commons.io.**
+
+# libarchive chama as classes Java pelo nome (JNI).
+-keep class me.zhanghai.android.libarchive.** { *; }
+# Compressores opcionais do Commons Compress que não embarcamos.
+-dontwarn com.github.luben.zstd.**
+-dontwarn org.brotli.dec.**
+-dontwarn org.objectweb.asm.**
+-dontwarn org.apache.commons.compress.**

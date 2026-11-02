@@ -100,6 +100,14 @@ dependencies {
     implementation(libs.youtubedl.android)
     implementation(libs.youtubedl.android.ffmpeg)
 
+    implementation(libs.androidx.heifwriter)
+    implementation(libs.androidx.exifinterface)
+    implementation(libs.androidsvg)
+
+    implementation(libs.commons.compress)
+    implementation(libs.xz)
+    implementation(libs.libarchive)
+
     implementation(platform(libs.kotlinx.coroutines.bom))
     implementation(libs.kotlinx.coroutines.android)
 
