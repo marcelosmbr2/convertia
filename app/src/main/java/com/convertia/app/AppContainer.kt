@@ -18,6 +18,8 @@ import com.convertia.app.data.download.NetworkMonitor
 import com.convertia.app.data.download.Notifications
 import com.convertia.app.data.engine.MediaInspector
 import com.convertia.app.data.engine.SimulatedConversionEngine
+import com.convertia.app.data.engine.ffmpeg.Ffmpeg
+import com.convertia.app.data.engine.ffmpeg.FfmpegMediaConverter
 import com.convertia.app.data.engine.ytdlp.YtDlp
 import com.convertia.app.data.engine.ytdlp.YtDlpDownloadEngine
 import com.convertia.app.data.engine.ytdlp.YtDlpMediaInspector
@@ -102,13 +104,16 @@ class AppContainer(context: Context) {
 
     private val workDir = WorkDir(File(context.noBackupFilesDir, "convert"), context.contentResolver, library)
 
-    /** Motores por par origem → destino; os reais entram nas próximas etapas. */
+    /** ffmpeg/ffprobe do youtubedl-android, para as conversões de áudio, vídeo e imagem. */
+    val ffmpeg = Ffmpeg(context.applicationContext, ytDlp)
+
+    /** Motores por par origem → destino; o que ainda não tem motor cai no simulado. */
     private val conversionEngine = CompositeConversionEngine(
         workDir = workDir,
         saver = mediaSaver,
         library = library,
         settings = settings,
-        converters = emptyList(),
+        converters = listOf(FfmpegMediaConverter(ffmpeg)),
         fallback = SimulatedConversionEngine(),
     )
 
