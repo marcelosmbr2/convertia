@@ -10,6 +10,9 @@ import com.convertia.app.data.DownloadQueue
 import com.convertia.app.data.LibraryRepository
 import com.convertia.app.data.SampleData
 import com.convertia.app.data.SettingsRepository
+import com.convertia.app.data.download.DownloadService
+import com.convertia.app.data.download.NetworkMonitor
+import com.convertia.app.data.download.Notifications
 import com.convertia.app.data.engine.MediaInspector
 import com.convertia.app.data.engine.SimulatedConversionEngine
 import com.convertia.app.data.engine.ytdlp.YtDlp
@@ -17,7 +20,10 @@ import com.convertia.app.data.engine.ytdlp.YtDlpDownloadEngine
 import com.convertia.app.data.engine.ytdlp.YtDlpMediaInspector
 import com.convertia.app.data.settingsDataStore
 import com.convertia.app.data.storage.MediaSaver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ProcessLifecycleOwner
 import com.convertia.app.domain.AppSettings
+import com.convertia.app.domain.DownloadStatus
 import com.convertia.app.domain.Preset
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +33,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.sample
@@ -71,12 +78,20 @@ class AppContainer(context: Context) {
     private val stateStore = AppStateStore(File(context.filesDir, "state.json"))
     val mediaInspector: MediaInspector = YtDlpMediaInspector(ytDlp)
 
+    private val network = NetworkMonitor(context.applicationContext)
+
+    /** "Somente em Wi-Fi" ligado e rede limitada: downloads esperam. */
+    val downloadsAllowed: StateFlow<Boolean> =
+        combine(settings.map { it.wifiOnly }, network.unmetered) { wifiOnly, unmetered -> !wifiOnly || unmetered }
+            .stateIn(appScope, SharingStarted.Eagerly, !settings.value.wifiOnly || network.unmetered.value)
+
     val downloads = DownloadQueue(
         scope = appScope,
         engine = YtDlpDownloadEngine(ytDlp, mediaSaver, File(context.cacheDir, "downloads")),
         library = library,
         clock = clock,
         concurrency = settings.map { it.concurrentDownloads }.stateIn(appScope, SharingStarted.Eagerly, settings.value.concurrentDownloads),
+        allowed = downloadsAllowed,
     )
 
     val conversions = ConversionQueue(
@@ -104,13 +119,25 @@ class AppContainer(context: Context) {
     }
 
     init {
+        val app = context.applicationContext
+        Notifications.createChannels(app)
         CompletionNotifier(
             scope = appScope,
             downloads = downloads,
             conversions = conversions,
             notificationsEnabled = settings.map { it.notifications }.stateIn(appScope, SharingStarted.Eagerly, true),
             messages = messages,
+            isForeground = { ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) },
+            notifyDownload = { job -> Notifications.downloadFinished(app, job) },
+            notifyConversions = { Notifications.conversionsFinished(app) },
         )
+        // Serviço em primeiro plano enquanto houver download baixando.
+        appScope.launch {
+            downloads.jobs
+                .map { jobs -> jobs.any { it.status == DownloadStatus.DOWNLOADING } }
+                .distinctUntilChanged()
+                .collect { downloading -> if (downloading) DownloadService.start(app) }
+        }
         restoreState()
         appScope.launch {
             // Erros aqui reaparecem (com mensagem) na primeira inspeção ou download.

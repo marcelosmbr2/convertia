@@ -206,6 +206,8 @@
     <string name="queue_remove">Remover</string>
     <string name="queue_download_active">%1$d%% · %2$s MB/s · %3$s restante</string>
     <string name="queue_download_queued">Na fila · aguardando vaga</string>
+    <string name="queue_download_waiting_wifi">Na fila · aguardando Wi-Fi</string>
+    <string name="queue_waiting_wifi">Aguardando Wi-Fi · ajuste "Somente em Wi-Fi" ligado</string>
     <string name="queue_download_paused">Pausado · %1$d%% · %2$s de %3$s</string>
     <string name="queue_download_done">Salvo · %1$s</string>
     <string name="queue_conversion_active">%1$d%% · no aparelho</string>
@@ -364,6 +366,16 @@
     <string name="time_today">Hoje</string>
     <string name="time_today_at">Hoje, %1$s</string>
     <string name="time_yesterday">Ontem</string>
+
+    <!-- Notificações -->
+    <string name="notification_channel_progress">Downloads em andamento</string>
+    <string name="notification_channel_done">Downloads e conversões concluídos</string>
+    <plurals name="notification_downloading">
+        <item quantity="one">Baixando %d arquivo</item>
+        <item quantity="many">Baixando %d arquivos</item>
+        <item quantity="other">Baixando %d arquivos</item>
+    </plurals>
+    <string name="notification_progress">%1$d%% · %2$s MB/s</string>
 
     <!-- Onboarding -->
     <string name="onboarding_start">Começar</string>

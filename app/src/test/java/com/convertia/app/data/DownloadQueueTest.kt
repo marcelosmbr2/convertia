@@ -129,6 +129,30 @@ class DownloadQueueTest {
     }
 
     @Test
+    fun `sem Wi-Fi os downloads esperam e continuam de onde pararam`() = runTest {
+        val allowed = MutableStateFlow(true)
+        val queue = DownloadQueue(backgroundScope, FakeDownloadEngine(), library, fixedClock, concurrency, allowed)
+        val id = queue.enqueue(request("a"))
+        advanceTimeBy(250)
+        runCurrent()
+        assertEquals(50.0, queue.find(id)!!.progress, 0.0)
+
+        allowed.value = false
+        advanceTimeBy(1_000)
+        runCurrent()
+        assertEquals(DownloadStatus.QUEUED, queue.find(id)?.status)
+        assertEquals(50.0, queue.find(id)!!.progress, 0.0)
+        val second = queue.enqueue(request("b"))
+        runCurrent()
+        assertEquals(DownloadStatus.QUEUED, queue.find(second)?.status)
+
+        allowed.value = true
+        advanceTimeBy(250)
+        runCurrent()
+        assertEquals(DownloadStatus.DONE, queue.find(id)?.status)
+    }
+
+    @Test
     fun `aumentar o limite inicia mais downloads`() = runTest {
         val queue = queue()
         val ids = listOf("a", "b", "c").map { queue.enqueue(request(it)) }

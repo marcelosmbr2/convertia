@@ -32,6 +32,8 @@ class DownloadQueue(
     private val library: LibraryRepository,
     private val clock: Clock,
     private val concurrency: StateFlow<Int>,
+    /** `false` segura os downloads (por exemplo, "Somente em Wi-Fi" com dados móveis). */
+    val allowed: StateFlow<Boolean> = MutableStateFlow(true),
 ) {
     private val _jobs = MutableStateFlow<List<DownloadJob>>(emptyList())
 
@@ -48,6 +50,17 @@ class DownloadQueue(
 
     init {
         scope.launch { concurrency.collect { schedule() } }
+        scope.launch {
+            allowed.collect { ok -> if (ok) schedule() else holdActive() }
+        }
+    }
+
+    /** Sem rede permitida: interrompe os downloads e devolve-os à fila para continuarem depois. */
+    private fun holdActive() {
+        _jobs.value.filter { it.status == DownloadStatus.DOWNLOADING }.forEach { stopWorker(it.id) }
+        _jobs.value = _jobs.value.map {
+            if (it.status == DownloadStatus.DOWNLOADING) it.copy(status = DownloadStatus.QUEUED, speedMbps = 0.0) else it
+        }
     }
 
     fun enqueue(request: DownloadRequest): Long {
@@ -111,6 +124,7 @@ class DownloadQueue(
     }
 
     private fun schedule() {
+        if (!allowed.value) return
         val jobs = _jobs.value
         // Downloads marcados como ativos sem worker (por exemplo, dados de exemplo).
         jobs.filter { it.status == DownloadStatus.DOWNLOADING && it.id !in workers }.forEach(::startWorker)
@@ -147,7 +161,7 @@ class DownloadQueue(
                 update(id) { it.copy(status = DownloadStatus.FAILED, speedMbps = 0.0, error = e.message ?: e.javaClass.simpleName) }
             } finally {
                 if (workers[id] === worker) workers.remove(id)
-                if (find(id)?.status != DownloadStatus.DOWNLOADING) schedule()
+                if (find(id)?.status != DownloadStatus.DOWNLOADING && allowed.value) schedule()
             }
         }
         workers[id] = worker

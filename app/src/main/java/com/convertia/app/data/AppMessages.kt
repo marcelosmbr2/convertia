@@ -1,5 +1,6 @@
 package com.convertia.app.data
 
+import com.convertia.app.domain.DownloadJob
 import com.convertia.app.domain.LibraryItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,8 +68,8 @@ class AppMessages {
 }
 
 /**
- * Avisa quando downloads e conversões terminam, se o ajuste Notificações estiver ligado.
- * Nesta fase o aviso é um toast; na Fase 2 entra aqui a notificação do sistema.
+ * Avisa quando downloads e conversões terminam, se o ajuste Notificações estiver ligado:
+ * toast com o app aberto, notificação do sistema com ele fechado.
  */
 class CompletionNotifier(
     scope: CoroutineScope,
@@ -76,16 +77,21 @@ class CompletionNotifier(
     conversions: ConversionQueue,
     notificationsEnabled: StateFlow<Boolean>,
     messages: AppMessages,
+    isForeground: () -> Boolean = { true },
+    notifyDownload: (DownloadJob) -> Unit = {},
+    notifyConversions: () -> Unit = {},
 ) {
     init {
         scope.launch {
             downloads.finished.collect { job ->
-                if (notificationsEnabled.value) messages.show(ToastEvent.DownloadFinished(job.id))
+                if (!notificationsEnabled.value) return@collect
+                if (isForeground()) messages.show(ToastEvent.DownloadFinished(job.id)) else notifyDownload(job)
             }
         }
         scope.launch {
             conversions.allFinished.collect {
-                if (notificationsEnabled.value) messages.show(ToastEvent.ConversionsFinished)
+                if (!notificationsEnabled.value) return@collect
+                if (isForeground()) messages.show(ToastEvent.ConversionsFinished) else notifyConversions()
             }
         }
     }

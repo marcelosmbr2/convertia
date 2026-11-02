@@ -124,6 +124,10 @@ class AppViewModel(
 
     fun showLibraryView(view: LibraryView) = setNav { it.copy(libraryView = view) }
 
+    /** Abre a Biblioteca já na visão pedida (notificação de conclusão). */
+    fun openLibrary(history: Boolean) =
+        setNav { NavState(tab = Tab.LIBRARY, libraryView = if (history) LibraryView.HISTORY else LibraryView.FILES) }
+
     fun openPresets() = setNav { it.copy(presetsOpen = true, sheet = null) }
 
     fun closePresets() = setNav { it.copy(presetsOpen = false) }

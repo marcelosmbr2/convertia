@@ -39,6 +39,8 @@ data class QueueOverview(
     val downloadingCount: Int,
     val totalSpeedMbps: Double,
     val convertingCount: Int,
+    /** Há downloads na fila segurados por "Somente em Wi-Fi". */
+    val waitingForWifi: Boolean = false,
 ) {
     val isEmpty: Boolean get() = sections.isEmpty()
     val isIdle: Boolean get() = downloadingCount == 0 && convertingCount == 0
@@ -52,7 +54,12 @@ data class QueueOverview(
             RowStatus.DONE to 4,
         )
 
-        fun build(jobs: List<DownloadJob>, items: List<ConversionItem>, conversionsRunning: Boolean): QueueOverview {
+        fun build(
+            jobs: List<DownloadJob>,
+            items: List<ConversionItem>,
+            conversionsRunning: Boolean,
+            downloadsAllowed: Boolean = true,
+        ): QueueOverview {
             // Arquivos prontos só aparecem enquanto a fila de conversão está ligada.
             val conversions = items
                 .filter { it.status != ConversionStatus.READY || conversionsRunning }
@@ -91,6 +98,7 @@ data class QueueOverview(
                 downloadingCount = downloading.size,
                 totalSpeedMbps = downloading.sumOf { it.speedMbps },
                 convertingCount = if (conversionsRunning) items.count { it.status == ConversionStatus.CONVERTING } else 0,
+                waitingForWifi = !downloadsAllowed && jobs.any { it.status == DownloadStatus.QUEUED },
             )
         }
     }

@@ -19,12 +19,17 @@ class QueueViewModel(
     private val conversions: ConversionQueue,
 ) : ViewModel() {
 
-    val overview: StateFlow<QueueOverview> = combine(downloads.jobs, conversions.items, conversions.running) { jobs, items, running ->
-        QueueOverview.build(jobs, items, running)
+    val overview: StateFlow<QueueOverview> = combine(
+        downloads.jobs,
+        conversions.items,
+        conversions.running,
+        downloads.allowed,
+    ) { jobs, items, running, allowed ->
+        QueueOverview.build(jobs, items, running, allowed)
     }.stateIn(
         viewModelScope,
         SharingStarted.Eagerly,
-        QueueOverview.build(downloads.jobs.value, conversions.items.value, conversions.running.value),
+        QueueOverview.build(downloads.jobs.value, conversions.items.value, conversions.running.value, downloads.allowed.value),
     )
 
     fun pause(row: QueueRow) = when (row) {

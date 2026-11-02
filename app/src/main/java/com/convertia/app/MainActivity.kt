@@ -47,16 +47,26 @@ class MainActivity : ComponentActivity() {
     private fun handleIntent(intent: Intent) {
         intent.getStringExtra(EXTRA_INSPECT_URL)?.let(appViewModel::openLink)
         if (intent.getBooleanExtra(EXTRA_OPEN_QUEUE, false)) appViewModel.selectTab(Tab.QUEUE)
+        if (intent.hasExtra(EXTRA_OPEN_LIBRARY)) {
+            appViewModel.openLibrary(history = intent.getBooleanExtra(EXTRA_OPEN_LIBRARY, false))
+        }
     }
 
     companion object {
         private const val EXTRA_INSPECT_URL = "com.convertia.app.extra.INSPECT_URL"
         private const val EXTRA_OPEN_QUEUE = "com.convertia.app.extra.OPEN_QUEUE"
+        private const val EXTRA_OPEN_LIBRARY = "com.convertia.app.extra.OPEN_LIBRARY"
 
         /** Abre o app na aba Baixar já inspecionando [url]. */
         fun inspectIntent(context: Context, url: String): Intent =
             Intent(context, MainActivity::class.java)
                 .putExtra(EXTRA_INSPECT_URL, url)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+
+        /** Abre o app na Biblioteca (em Histórico, com [history]). */
+        fun libraryIntent(context: Context, history: Boolean): Intent =
+            Intent(context, MainActivity::class.java)
+                .putExtra(EXTRA_OPEN_LIBRARY, history)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
         /** Abre o app na Fila. */

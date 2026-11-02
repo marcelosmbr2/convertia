@@ -112,7 +112,7 @@ fun QueueContent(overview: QueueOverview, clock: Clock, actions: QueueActions) {
                 ),
             )
             overview.sections.forEach { section ->
-                Section(section, overview.anyRunning, clock, actions, Modifier.padding(horizontal = 16.dp))
+                Section(section, overview.anyRunning, clock, actions, Modifier.padding(horizontal = 16.dp), overview.waitingForWifi)
             }
             if (overview.isEmpty) EmptyQueue()
         }
@@ -121,7 +121,14 @@ fun QueueContent(overview: QueueOverview, clock: Clock, actions: QueueActions) {
 }
 
 @Composable
-private fun Section(section: QueueSection, anyRunning: Boolean, clock: Clock, actions: QueueActions, modifier: Modifier) {
+private fun Section(
+    section: QueueSection,
+    anyRunning: Boolean,
+    clock: Clock,
+    actions: QueueActions,
+    modifier: Modifier,
+    waitingForWifi: Boolean,
+) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(
             Modifier
@@ -167,14 +174,14 @@ private fun Section(section: QueueSection, anyRunning: Boolean, clock: Clock, ac
         ListCard {
             section.rows.forEachIndexed { index, row ->
                 if (index > 0) RowDivider()
-                QueueRowItem(row, clock, actions)
+                QueueRowItem(row, clock, actions, waitingForWifi)
             }
         }
     }
 }
 
 @Composable
-private fun QueueRowItem(row: QueueRow, clock: Clock, actions: QueueActions) {
+private fun QueueRowItem(row: QueueRow, clock: Clock, actions: QueueActions, waitingForWifi: Boolean) {
     Column(
         Modifier.padding(start = 14.dp, end = 6.dp, top = 12.dp, bottom = 12.dp),
         verticalArrangement = Arrangement.spacedBy(9.dp),
@@ -209,7 +216,7 @@ private fun QueueRowItem(row: QueueRow, clock: Clock, actions: QueueActions) {
                 }
                 Text(title, style = BaseTextStyle.copy(fontWeight = FontWeight.Medium), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(
-                    rowLine(row, clock),
+                    rowLine(row, clock, waitingForWifi),
                     style = BaseTextStyle.copy(fontSize = 12.sp, color = row.lineColor(), fontFeatureSettings = TabularFeatures),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -266,7 +273,7 @@ private fun RowActions(row: QueueRow, actions: QueueActions) {
 }
 
 @Composable
-private fun rowLine(row: QueueRow, clock: Clock): String = when (row) {
+private fun rowLine(row: QueueRow, clock: Clock, waitingForWifi: Boolean): String = when (row) {
     is QueueRow.Download -> {
         val job = row.job
         val percent = job.progress.toInt()
@@ -277,7 +284,9 @@ private fun rowLine(row: QueueRow, clock: Clock): String = when (row) {
                 val remaining = if (job.speedMbps > 0 && job.sizeMb > 0) Formatters.minutesSeconds(remainingMb / job.speedMbps) else "–"
                 stringResource(R.string.queue_download_active, percent, Formatters.decimal(job.speedMbps, 1), remaining)
             }
-            RowStatus.QUEUED -> stringResource(R.string.queue_download_queued)
+            RowStatus.QUEUED -> stringResource(
+                if (waitingForWifi) R.string.queue_download_waiting_wifi else R.string.queue_download_queued,
+            )
             RowStatus.PAUSED -> stringResource(
                 R.string.queue_download_paused,
                 percent,
@@ -369,7 +378,11 @@ private fun StatusStrip(overview: QueueOverview) {
                 }
             }
             Text(
-                if (parts.isEmpty()) stringResource(R.string.queue_idle) else parts.joinToString(" · "),
+                when {
+                    parts.isNotEmpty() -> parts.joinToString(" · ")
+                    overview.waitingForWifi -> stringResource(R.string.queue_waiting_wifi)
+                    else -> stringResource(R.string.queue_idle)
+                },
                 style = BaseTextStyle.copy(fontSize = 12.sp, color = Palette.TextTertiary, fontFeatureSettings = TabularFeatures),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
