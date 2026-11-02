@@ -99,7 +99,9 @@ class OfficeRoundTripSmokeTest {
         }
         val out = folder.newFolder("epub")
         val book = EpubToHtml.convert(epub, out)
-        soffice("--infilter=HTML (StarWriter)", "--convert-to", "docx", "--outdir", folder.root.path, book.html.path)
+        val bookFodt = File(out, "book.fodt")
+        HtmlToFodt.convert(book.html, bookFodt, book.title, book.language)
+        soffice("--convert-to", "docx", "--outdir", folder.root.path, bookFodt.path)
         val docx = File(folder.root, "book.docx")
         assertTrue(docx.isFile && docx.length() > 0)
         val text = java.util.zip.ZipFile(docx).use { zip -> zip.getInputStream(zip.getEntry("word/document.xml")).bufferedReader().readText() }

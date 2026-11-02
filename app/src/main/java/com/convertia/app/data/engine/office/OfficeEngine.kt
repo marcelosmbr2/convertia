@@ -8,9 +8,10 @@ import com.convertia.app.domain.MediaCategory
 import java.io.File
 
 /**
- * Documentos, planilhas, apresentações e e-books pelo LibreOffice embutido. EPUB entra
- * convertido em HTML ([EpubToHtml]); a gravação no formato pedido fica com [OfficeExport].
- * Progresso em etapas, sem ETA: o LibreOffice não informa andamento.
+ * Documentos, planilhas, apresentações e e-books pelo LibreOffice embutido. HTML e EPUB
+ * (via [EpubToHtml]) entram como ODT plano ([HtmlToFodt]), porque o LibreOffice do Android
+ * não traz o Writer/Web; a gravação no formato pedido fica com [OfficeExport]. Progresso em
+ * etapas, sem ETA: o LibreOffice não informa andamento.
  */
 class OfficeEngine(private val client: OfficeClient) : FileConverter {
 
@@ -26,13 +27,15 @@ class OfficeEngine(private val client: OfficeClient) : FileConverter {
         progress.onProgress(5.0, null)
         var title: String? = null
         var language: String? = null
-        val input = if (item.ext == "epub") {
-            val book = EpubToHtml.convert(job.input, File(job.outputDir, "epub"))
-            title = book.title
-            language = book.language
-            book.html
-        } else {
-            job.input
+        val input = when (item.ext) {
+            "epub" -> {
+                val book = EpubToHtml.convert(job.input, File(job.outputDir, "epub"))
+                title = book.title
+                language = book.language
+                File(job.outputDir, "book.fodt").also { HtmlToFodt.convert(book.html, it, book.title, book.language) }
+            }
+            "html", "htm" -> File(job.outputDir, "page.fodt").also { HtmlToFodt.convert(job.input, it, null, null) }
+            else -> job.input
         }
         progress.onProgress(15.0, null)
         return OfficeExport.export(client, input, job, progress, title, language, from = 15.0)

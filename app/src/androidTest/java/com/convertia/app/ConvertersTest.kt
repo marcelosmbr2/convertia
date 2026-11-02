@@ -197,6 +197,8 @@ class ConvertersTest {
         run(engine, job(docx, "ODT"))
         run(engine, job(docx, "FB2"))
         run(engine, job(docx, "PNG"))
+        run(engine, job(docx, "HTML"))
+        run(engine, job(docx, "MD"))
     }
 
     @Test
