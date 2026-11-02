@@ -15,7 +15,6 @@
     </plurals>
 
     <string name="download_subtitle">Cole um link, escolha o formato e baixe.</string>
-    <string name="library_subtitle">Seus arquivos baixados e convertidos.</string>
     <string name="settings_subtitle">As alterações são salvas automaticamente.</string>
 
     <!-- Ações comuns -->
@@ -225,6 +224,24 @@
     <string name="queue_idle">Ocioso · salvando em Download/Convertia</string>
     <string name="queue_empty_title">Nada na fila</string>
     <string name="queue_empty_body">Downloads e conversões aparecem aqui enquanto rodam.</string>
+
+    <!-- Biblioteca -->
+    <string name="library_title">Biblioteca</string>
+    <plurals name="library_count">
+        <item quantity="one">%1$d arquivo · %2$s</item>
+        <item quantity="many">%1$d arquivos · %2$s</item>
+        <item quantity="other">%1$d arquivos · %2$s</item>
+    </plurals>
+    <string name="library_tab_files">Arquivos</string>
+    <string name="library_tab_history">Histórico</string>
+    <string name="library_search">Buscar arquivos</string>
+    <string name="library_empty">Nenhum arquivo encontrado.</string>
+    <string name="library_history_local">Armazenado só neste aparelho.</string>
+    <string name="library_clear">Limpar</string>
+    <string name="library_history_empty">Nenhuma conversão ainda.</string>
+    <string name="library_open_player">Abrir no player</string>
+    <string name="library_share">Compartilhar</string>
+    <string name="library_delete">Excluir</string>
 
     <!-- Formatos de saída (descrições do seletor) -->
     <string name="format_image_jpg">Com perdas · universal</string>

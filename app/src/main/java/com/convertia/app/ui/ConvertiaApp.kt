@@ -37,6 +37,10 @@ import com.convertia.app.ui.convert.InspectorActions
 import com.convertia.app.ui.convert.InspectorSheet
 import com.convertia.app.ui.convert.PickerActions
 import com.convertia.app.ui.download.DownloadScreen
+import com.convertia.app.ui.library.LibraryItemActions
+import com.convertia.app.ui.library.LibraryItemSheet
+import com.convertia.app.ui.library.LibraryScreen
+import com.convertia.app.ui.library.LibraryViewModel
 import com.convertia.app.ui.queue.QueueScreen
 import com.convertia.app.ui.components.SheetHost
 import com.convertia.app.ui.components.ToastHost
@@ -105,7 +109,11 @@ private fun TabContent(nav: NavState, appViewModel: AppViewModel) {
             ),
         )
         Tab.QUEUE -> QueueScreen(onConvertDownload = appViewModel::convertDownload)
-        Tab.LIBRARY -> PlaceholderScreen(R.string.tab_library, R.string.library_subtitle)
+        Tab.LIBRARY -> LibraryScreen(
+            view = nav.libraryView,
+            onViewChange = appViewModel::showLibraryView,
+            onOpenItem = { appViewModel.openSheet(AppSheet.LibraryActions(it)) },
+        )
         Tab.SETTINGS -> PlaceholderScreen(R.string.tab_settings, R.string.settings_subtitle)
     }
 }
@@ -154,7 +162,26 @@ private fun ColumnScope.SheetContent(sheet: AppSheet, appViewModel: AppViewModel
                 },
             ),
         )
-        is AppSheet.LibraryActions -> Text(sheet.toString(), style = TextStyles.RowTitle, modifier = Modifier.padding(20.dp))
+        is AppSheet.LibraryActions -> {
+            val library: LibraryViewModel = viewModel(factory = LibraryViewModel.Factory)
+            val libraryUi by library.uiState.collectAsStateWithLifecycle()
+            val item = libraryUi.items.firstOrNull { it.id == sheet.itemId } ?: return
+            LibraryItemSheet(
+                item = item,
+                actions = LibraryItemActions(
+                    onConvert = { appViewModel.convertLibraryItem(item.id) },
+                    onPlay = {
+                        appViewModel.closeSheet()
+                        library.openInPlayer()
+                    },
+                    onShare = {
+                        appViewModel.closeSheet()
+                        library.share()
+                    },
+                    onDelete = { library.delete(item.id) },
+                ),
+            )
+        }
     }
 }
 
