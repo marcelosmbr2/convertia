@@ -192,7 +192,7 @@ class AppContainer(context: Context) {
         restoreState()
         appScope.launch {
             // Erros aqui reaparecem (com mensagem) na primeira inspeção ou download.
-            runCatching { ytDlp.prepare() }
+            runCatching { ytDlp.updateIfStale() }
         }
     }
 

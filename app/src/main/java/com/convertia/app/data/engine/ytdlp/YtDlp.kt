@@ -1,6 +1,7 @@
 package com.convertia.app.data.engine.ytdlp
 
 import android.content.Context
+import com.convertia.app.data.engine.ffmpeg.WebpLibraries
 import com.yausername.ffmpeg.FFmpeg
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
@@ -27,6 +28,7 @@ class YtDlp(private val context: Context) {
     private val initLock = Mutex()
     @Volatile private var ready = false
     private val ids = AtomicLong()
+    private val prefs by lazy { context.getSharedPreferences(PREFS, Context.MODE_PRIVATE) }
 
     private val _version = MutableStateFlow<String?>(null)
 
@@ -38,6 +40,7 @@ class YtDlp(private val context: Context) {
             if (ready) return@withLock
             YoutubeDL.getInstance().init(context)
             FFmpeg.getInstance().init(context)
+            WebpLibraries.install(context)
             ready = true
             _version.value = runCatching { YoutubeDL.getInstance().version(context) }.getOrNull()
         }
@@ -67,10 +70,29 @@ class YtDlp(private val context: Context) {
     /** Atualiza o yt-dlp pelo canal estável. Devolve a versão nova, ou `null` se já estava em dia. */
     suspend fun update(): String? = withContext(Dispatchers.IO) {
         prepare()
+        initLock.withLock { updateLocked() }
+    }
+
+    /**
+     * Atualiza se a última verificação tem mais de um dia. O YouTube muda com frequência e
+     * o yt-dlp que vem na biblioteca envelhece: sem isso, os downloads falham com HTTP 403.
+     * Segura o mesmo lock do [prepare], então inspeções e downloads esperam a versão nova.
+     */
+    suspend fun updateIfStale() = withContext(Dispatchers.IO) {
+        prepare()
+        initLock.withLock {
+            val elapsed = System.currentTimeMillis() - prefs.getLong(KEY_LAST_UPDATE_CHECK, 0L)
+            if (elapsed in 0 until UPDATE_INTERVAL_MS) return@withLock
+            runCatching { updateLocked() }
+        }
+    }
+
+    private fun updateLocked(): String? {
         val status = YoutubeDL.getInstance().updateYoutubeDL(context, YoutubeDL.UpdateChannel.STABLE)
+        prefs.edit().putLong(KEY_LAST_UPDATE_CHECK, System.currentTimeMillis()).apply()
         val version = runCatching { YoutubeDL.getInstance().version(context) }.getOrNull()
         _version.value = version
-        if (status == YoutubeDL.UpdateStatus.DONE) version else null
+        return if (status == YoutubeDL.UpdateStatus.DONE) version else null
     }
 
     /**
@@ -101,6 +123,12 @@ class YtDlp(private val context: Context) {
     }
 
     data class Response(val out: String, val err: String)
+
+    private companion object {
+        const val PREFS = "ytdlp"
+        const val KEY_LAST_UPDATE_CHECK = "lastUpdateCheck"
+        const val UPDATE_INTERVAL_MS = 24 * 60 * 60 * 1000L
+    }
 }
 
 /** Erro do yt-dlp com a mensagem já limpa para mostrar ao usuário. */

@@ -140,6 +140,21 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Vazio quando o build não embute o LibreOffice.
         buildConfigField("String", "LIBREOFFICE_VERSION", "\"${if (officeEnabled) officeVersion else ""}\"")
+        externalNativeBuild {
+            cmake {
+                // Páginas de 16 KB só existem em 64 bits.
+                abiFilters("arm64-v8a", "x86_64")
+            }
+        }
+    }
+
+    // libwebp para aparelhos com páginas de 16 KB (src/main/cpp/CMakeLists.txt).
+    ndkVersion = "28.2.13676358"
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
 
     signingConfigs {

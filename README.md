@@ -22,7 +22,8 @@ As versões ficam em [`gradle/libs.versions.toml`](gradle/libs.versions.toml).
 
 ## Rodando
 
-Precisa de JDK 17 ou mais novo e do Android SDK com a API 37 instalada.
+Precisa de JDK 17 ou mais novo e do Android SDK com a API 37, o NDK 28.2 e o CMake 3.22.1
+(o Gradle instala os que faltarem se a licença do SDK estiver aceita).
 Abra a pasta do projeto no Android Studio, ou pela linha de comando:
 
 ```bash
@@ -39,6 +40,11 @@ assets. Sem acesso ao f-droid.org, compile com `-Pconvertia.office=false`; o app
 não oferece conversões de documentos. O workflow `libreoffice-inspect.yml` lista as
 versões disponíveis e regenera o `.properties`.
 
+O ffmpeg do youtubedl-android traz a libwebp alinhada a 4 KB, que o Android não carrega em
+aparelhos com páginas de 16 KB (e sem ela o ffmpeg não abre). O build compila a libwebp 1.6.0
+alinhada a 16 KB (`app/src/main/cpp`, fonte baixada com SHA-256 conferido) para arm64-v8a e
+x86_64, e nesses aparelhos o app troca as cópias extraídas por ela (`WebpLibraries.kt`).
+
 ## Estado atual
 
 Todas as telas do mockup (`mockup/Convertia v3.dc.html`) estão implementadas.
@@ -46,7 +52,8 @@ Todas as telas do mockup (`mockup/Convertia v3.dc.html`) estão implementadas.
 - **Download: real**, com o yt-dlp. Lê os formatos do link, baixa no formato e contêiner
   escolhidos (juntando vídeo e áudio com o ffmpeg) e salva em `Download/Convertia`.
   Continua com o app fechado, com notificação de progresso, e respeita
-  "Somente em Wi-Fi". O yt-dlp pode ser atualizado em Ajustes › Motor › Verificar.
+  "Somente em Wi-Fi". O yt-dlp se atualiza sozinho uma vez por dia, ao abrir o app (o que vem na biblioteca
+  envelhece e o YouTube passa a responder 403), e também em Ajustes › Motor › Verificar.
 - **Conversão: real.**
   - Áudio e vídeo com o ffmpeg empacotado (MediaCodec quando a aceleração por hardware
     está ligada, com volta automática para software).
