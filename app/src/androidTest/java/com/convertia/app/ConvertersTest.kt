@@ -14,6 +14,11 @@ import com.convertia.app.data.engine.archive.RarExtractor
 import com.convertia.app.data.engine.ffmpeg.Ffmpeg
 import com.convertia.app.data.engine.ffmpeg.FfmpegMediaConverter
 import com.convertia.app.data.engine.image.ImageConverter
+import com.convertia.app.data.engine.ocr.OcrDocumentConverter
+import com.convertia.app.data.engine.ocr.OcrEngine
+import com.convertia.app.data.engine.ocr.SearchablePdfWriter
+import com.convertia.app.data.engine.pdf.PdfBoxExtractor
+import com.convertia.app.data.engine.pdf.PdfDocumentConverter
 import com.convertia.app.data.engine.office.OfficeAvailability
 import com.convertia.app.data.engine.office.OfficeClient
 import com.convertia.app.data.engine.office.OfficeEngine
@@ -148,6 +153,35 @@ class ConvertersTest {
         assertEquals("sample.zip", run(converter, job(asset("sample.rar"), "ZIP")).first().name)
     }
 
+    /** Imagem com texto desenhado: o OCR precisa achar as palavras e o TXT sai sem LibreOffice. */
+    @Test
+    fun imagemComTextoParaTxtEPdfPesquisavel() {
+        val image = File(root, "texto.png").apply {
+            val bitmap = Bitmap.createBitmap(1200, 400, Bitmap.Config.ARGB_8888)
+            Canvas(bitmap).apply {
+                drawColor(Color.WHITE)
+                val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.BLACK; textSize = 64f }
+                drawText("Relatorio anual de vendas", 60f, 140f, paint)
+                drawText("Receita cresceu 12 por cento", 60f, 260f, paint)
+            }
+            outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        }
+        val ocr = OcrEngine()
+        val txt = run(OcrDocumentConverter(ocr, ffmpeg, null), job(image, "TXT")).first()
+        val text = txt.readText()
+        assertTrue(text, text.contains("Relatorio") && text.contains("vendas"))
+        val pdf = run(ImageConverter(ffmpeg, ocr, SearchablePdfWriter(context)), job(image, "PDF", ConversionOptions(ocr = true))).first()
+        assertTrue(pdf.length() > 1_000)
+    }
+
+    /** PDF digital → TXT pela reconstrução, sem LibreOffice. */
+    @Test
+    fun pdfParaTexto() {
+        val txt = run(PdfDocumentConverter(PdfBoxExtractor(context), null), job(asset("sample.pdf"), "TXT")).first()
+        val text = txt.readText()
+        assertTrue(text, text.contains("Relatório Trimestral") && text.contains("Sudeste"))
+    }
+
     @Test
     fun documentosPeloLibreOffice() {
         assumeTrue("APK sem LibreOffice", OfficeAvailability.isAvailable(context))
@@ -159,5 +193,8 @@ class ConvertersTest {
         run(engine, job(docx, "FB2"))
         run(engine, job(docx, "PNG"))
         assertEquals("sample.pdf", run(engine, job(asset("sample.epub"), "PDF")).first().name)
+        // PDF → DOCX: reconstrução + LibreOffice.
+        val rebuilt = run(PdfDocumentConverter(PdfBoxExtractor(context), OfficeClient(context, scope)), job(asset("sample.pdf"), "DOCX")).first()
+        assertEquals("sample.docx", rebuilt.name)
     }
 }

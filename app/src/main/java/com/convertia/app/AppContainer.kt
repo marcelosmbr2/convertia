@@ -26,6 +26,9 @@ import com.convertia.app.data.engine.image.ImageConverter
 import com.convertia.app.data.engine.office.OfficeAvailability
 import com.convertia.app.data.engine.office.OfficeClient
 import com.convertia.app.data.engine.office.OfficeEngine
+import com.convertia.app.data.engine.ocr.OcrDocumentConverter
+import com.convertia.app.data.engine.ocr.OcrEngine
+import com.convertia.app.data.engine.ocr.SearchablePdfWriter
 import com.convertia.app.data.engine.pdf.PdfBoxExtractor
 import com.convertia.app.data.engine.pdf.PdfDocumentConverter
 import com.convertia.app.data.engine.ytdlp.YtDlp
@@ -79,11 +82,11 @@ class AppContainer(context: Context) {
     val messages = AppMessages()
     val presets: List<Preset> = SampleData.presets
 
-    /** O que o motor de conversão deste build faz. OCR entra na próxima fase. */
+    /** O que o motor de conversão deste build faz. */
     val capabilities = EngineCapabilities(
         office = OfficeAvailability.isAvailable(context),
         pdfToDocument = true,
-        ocr = false,
+        ocr = true,
     )
 
     /** yt-dlp + ffmpeg empacotados; inicializa em segundo plano assim que o app abre. */
@@ -127,11 +130,13 @@ class AppContainer(context: Context) {
         settings = settings,
         converters = run {
             val office = if (capabilities.office) OfficeClient(context.applicationContext, appScope) else null
+            val ocr = OcrEngine()
             listOfNotNull(
                 FfmpegMediaConverter(ffmpeg),
-                ImageConverter(ffmpeg),
+                ImageConverter(ffmpeg, ocr, SearchablePdfWriter(context.applicationContext)),
                 ArchiveConverter(rarExtractor = RarExtractor()),
-                PdfDocumentConverter(PdfBoxExtractor(context.applicationContext), office),
+                PdfDocumentConverter(PdfBoxExtractor(context.applicationContext), office, ocr),
+                OcrDocumentConverter(ocr, ffmpeg, office),
                 office?.let(::OfficeEngine),
             )
         },

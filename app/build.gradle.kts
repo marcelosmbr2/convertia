@@ -220,6 +220,7 @@ dependencies {
     implementation(libs.libarchive)
 
     implementation(libs.pdfbox.android)
+    implementation(libs.mlkit.text.recognition)
 
     implementation(platform(libs.kotlinx.coroutines.bom))
     implementation(libs.kotlinx.coroutines.android)

@@ -13,6 +13,8 @@ Os protótipos de interface ficam em [`mockup/`](mockup/).
 | Compose BOM | 2026.09.00 (Material 3) |
 | Motor de download | yt-dlp via youtubedl-android 0.18.1 (Python 3.12, QuickJS, ffmpeg 7.1) |
 | Documentos | LibreOffice 26.2 (LibreOfficeKit), do APK do LibreOffice Viewer no F-Droid |
+| PDF → documento | PdfBox-Android 2.0.27 + reconstrução própria |
+| OCR | ML Kit Text Recognition 16.0.1 (modelo latino embutido) |
 | `minSdk` / `targetSdk` / `compileSdk` | 26 / 37 / 37 |
 
 As versões ficam em [`gradle/libs.versions.toml`](gradle/libs.versions.toml).
@@ -27,7 +29,7 @@ Abra a pasta do projeto no Android Studio, ou pela linha de comando:
 ```
 
 O build gera um APK por arquitetura (`arm64-v8a`, `armeabi-v7a`, `x86_64`), cada um com
-130–160 MB: Python e ffmpeg (~50 MB) mais o LibreOffice (~80 MB). Instalado ocupa mais,
+140–170 MB: Python e ffmpeg (~50 MB), OCR e PdfBox (~20 MB) e o LibreOffice (~80 MB). Instalado ocupa mais,
 porque as bibliotecas nativas são extraídas. A maioria dos celulares usa `arm64-v8a`.
 
 O LibreOffice vem do APK oficial do LibreOffice Viewer publicado pelo F-Droid: o build
@@ -53,7 +55,16 @@ Todas as telas do mockup (`mockup/Convertia v3.dc.html`) estão implementadas.
   - Documentos, planilhas, apresentações e e-books com o LibreOffice embutido, num
     processo à parte (`:office`): DOCX/ODT/RTF/TXT/HTML/MD/PDF/EPUB; FB2 por um gravador
     próprio; EPUB entra convertido em HTML.
-  - Ainda não: PDF → documento editável (Fase 3c) e OCR (Fase 3d). MOBI/AZW3 ficam fora.
+  - PDF → DOCX/ODT/RTF/HTML/MD/TXT/EPUB/FB2 por reconstrução própria (`data/engine/pdf`):
+    lê texto, desenhos e imagens com posição (PdfBox-Android), usa a árvore de estrutura
+    quando o PDF é tagueado e, quando não é, remonta parágrafos, títulos, listas, tabelas
+    (com e sem grade), colunas, cabeçalho e rodapé; grava um ODT plano que o LibreOffice
+    exporta. Bom em PDF digital; aproximado em layouts complexos.
+  - OCR com o ML Kit (modelo latino embutido, ~17 MB por arquitetura): imagem → texto/
+    documento, imagem → PDF pesquisável e páginas digitalizadas de PDF. O ML Kit é código
+    fechado do Google; as imagens não saem do aparelho, mas, pelos termos do Google, a
+    biblioteca pode enviar métricas de uso anônimas.
+  - MOBI/AZW3 ficam fora (formato fechado da Amazon; o Kindle aceita EPUB).
 - Biblioteca, histórico, links recentes e fila ficam salvos no aparelho. Downloads
   interrompidos voltam pausados.
 

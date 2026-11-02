@@ -10,6 +10,8 @@ import com.convertia.app.data.convert.FileConverter
 import com.convertia.app.data.convert.ProgressListener
 import com.convertia.app.data.engine.ffmpeg.Ffmpeg
 import com.convertia.app.data.engine.ffmpeg.FfmpegArgs
+import com.convertia.app.data.engine.ocr.OcrEngine
+import com.convertia.app.data.engine.ocr.SearchablePdfWriter
 import com.convertia.app.domain.ConversionItem
 import com.convertia.app.domain.ImageResize
 import com.convertia.app.domain.MediaCategory
@@ -24,7 +26,11 @@ import kotlin.math.ceil
  * imagem → PDF (uma página do tamanho da imagem; SVG fica vetorial) e PDF → imagens (uma
  * por página, a 150 dpi).
  */
-class ImageConverter(private val ffmpeg: Ffmpeg) : FileConverter {
+class ImageConverter(
+    private val ffmpeg: Ffmpeg,
+    private val ocr: OcrEngine? = null,
+    private val searchablePdf: SearchablePdfWriter? = null,
+) : FileConverter {
 
     override fun supports(item: ConversionItem): Boolean = when {
         item.category == MediaCategory.IMAGE -> item.target.category == MediaCategory.IMAGE || item.target.ext == "PDF"
@@ -81,6 +87,16 @@ class ImageConverter(private val ffmpeg: Ffmpeg) : FileConverter {
     private suspend fun imageToPdf(job: ConversionJob, progress: ProgressListener): File {
         val item = job.item
         val output = job.output
+        if (item.options.ocr && ocr != null && searchablePdf != null && item.ext != "svg") {
+            // PDF pesquisável: a imagem com o texto reconhecido invisível por cima.
+            val bitmap = decode(job, item.options.resize)
+            progress.onProgress(30.0, null)
+            val lines = ocr.recognize(bitmap)
+            progress.onProgress(70.0, null)
+            searchablePdf.write(listOf(bitmap to lines), output, item.options.quality)
+            bitmap.recycle()
+            return output
+        }
         val document = PdfDocument()
         try {
             if (item.ext == "svg") {
