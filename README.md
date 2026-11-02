@@ -24,13 +24,44 @@ Abra a pasta do projeto no Android Studio, ou pela linha de comando:
 ./gradlew :app:installDebug
 ```
 
+## Estado atual
+
+Todas as telas do mockup (`mockup/Convertia v3.dc.html`) estão implementadas: Onboarding,
+Baixar, Converter (com os sheets Adicionar, Inspetor e Seletor de formato), Fila,
+Biblioteca, Ajustes, Predefinições e o alvo do menu Compartilhar.
+
+**Download e conversão ainda são simulados**, como no protótipo: o progresso é falso e
+nenhum arquivo é baixado ou gerado. Já funcionam de verdade os ajustes (salvos no
+DataStore), as permissões, a área de transferência, o seletor de arquivos/galeria e o
+recebimento de links pelo menu Compartilhar. No build de debug o app abre com os dados de
+exemplo do mockup; no release, vazio.
+
 ## Estrutura
 
 ```
 app/src/main/java/com/convertia/app/
-├── MainActivity.kt        # ponto de entrada, edge-to-edge
+├── AppContainer.kt          # dependências (DI manual)
+├── MainActivity.kt          # onboarding ou app
+├── domain/                  # regras puras: catálogo de formatos, estimativas, modelos
+├── data/                    # filas, biblioteca, ajustes e motores simulados
+│   └── engine/              # interfaces de motor + implementações simuladas
+├── share/                   # ShareActivity (menu Compartilhar)
 └── ui/
-    ├── ConvertiaApp.kt    # Scaffold + barra de navegação inferior
-    ├── Destination.kt     # abas: Baixar, Converter, Fila, Biblioteca, Ajustes
-    └── theme/             # cores e tipografia tiradas do mockup
+    ├── AppViewModel.kt      # navegação (aba, sheet, voltar) e ações dos toasts
+    ├── ConvertiaApp.kt      # barra inferior, sheets e toasts
+    ├── components/          # design system do mockup
+    ├── theme/               # cores, fontes (Inter, JetBrains Mono) e ícones
+    └── download/ convert/ queue/ library/ settings/ onboarding/
 ```
+
+Os motores reais entram trocando as implementações de `data/engine` (`MediaInspector`,
+`DownloadEngine`, `ConversionEngine`); as filas e a interface não mudam.
+
+## Testes
+
+```bash
+./gradlew :app:testDebugUnitTest
+```
+
+Os valores esperados do domínio (tamanhos, formato sugerido, estimativas) foram obtidos
+rodando a lógica JavaScript do próprio mockup.

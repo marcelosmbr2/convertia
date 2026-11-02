@@ -289,6 +289,13 @@
     <string name="presets_intro">Regras salvas de formato e qualidade. Aplique a todos os arquivos correspondentes na lista de conversão.</string>
     <string name="presets_apply">Aplicar</string>
 
+    <!-- Compartilhar -->
+    <string name="share_title">Baixar este vídeo</string>
+    <string name="share_option_video">Vídeo · %1$s</string>
+    <string name="share_option_audio">Somente áudio</string>
+    <string name="share_option_detail">%1$s · %2$s · ≈ %3$s</string>
+    <string name="share_more_formats">Mais formatos</string>
+
     <!-- Formatos de saída (descrições do seletor) -->
     <string name="format_image_jpg">Com perdas · universal</string>
     <string name="format_image_png">Sem perdas</string>
