@@ -15,6 +15,7 @@ Os protótipos de interface ficam em [`mockup/`](mockup/).
 | Documentos | LibreOffice 26.2 (LibreOfficeKit), do APK do LibreOffice Viewer no F-Droid |
 | PDF → documento | PdfBox-Android 2.0.27 + reconstrução própria |
 | OCR | ML Kit Text Recognition 16.0.1 (modelo latino embutido) |
+| HTML | jsoup 1.23.2 (HTML → ODT plano) |
 | `minSdk` / `targetSdk` / `compileSdk` | 26 / 37 / 37 |
 
 As versões ficam em [`gradle/libs.versions.toml`](gradle/libs.versions.toml).
@@ -53,8 +54,10 @@ Todas as telas do mockup (`mockup/Convertia v3.dc.html`) estão implementadas.
     para AVIF/TIFF/BMP/GIF/ICO; imagem → PDF e PDF → imagens.
   - Compactados com o Commons Compress; RAR pela libarchive.
   - Documentos, planilhas, apresentações e e-books com o LibreOffice embutido, num
-    processo à parte (`:office`): DOCX/ODT/RTF/TXT/HTML/MD/PDF/EPUB; FB2 por um gravador
-    próprio; EPUB entra convertido em HTML.
+    processo à parte (`:office`): DOCX/ODT/RTF/TXT/HTML/MD/PDF/EPUB. O LibreOffice do
+    Android não abre HTML (não traz o Writer/Web), então páginas HTML e os capítulos de
+    EPUB viram ODT plano por um conversor próprio (jsoup) antes; FB2 sai de um gravador
+    próprio sobre o ODT plano exportado.
   - PDF → DOCX/ODT/RTF/HTML/MD/TXT/EPUB/FB2 por reconstrução própria (`data/engine/pdf`):
     lê texto, desenhos e imagens com posição (PdfBox-Android), usa a árvore de estrutura
     quando o PDF é tagueado e, quando não é, remonta parágrafos, títulos, listas, tabelas
