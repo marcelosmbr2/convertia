@@ -359,4 +359,26 @@
 
     <!-- Onboarding -->
     <string name="onboarding_start">Começar</string>
+    <string name="onboarding_continue">Continuar</string>
+    <string name="onboarding_skip">Pular</string>
+    <string name="onboarding_step">Passo %1$d de %2$d</string>
+    <string name="onboarding_welcome_eyebrow">Bem-vindo ao Convertia</string>
+    <string name="onboarding_welcome_title">Qualquer vídeo.\nQualquer formato.</string>
+    <string name="onboarding_welcome_body">Baixe por link e converta imagens, documentos, áudio e vídeo sem enviar nada para a nuvem.</string>
+    <string name="onboarding_privacy_eyebrow">Privacidade</string>
+    <string name="onboarding_privacy_title">Seus arquivos\nnão saem daqui.</string>
+    <string name="onboarding_privacy_body">As conversões rodam offline, sem conta e sem nuvem. Downloads vêm direto da fonte.</string>
+    <string name="onboarding_permissions_eyebrow">Último passo</string>
+    <string name="onboarding_permissions_title">Duas permissões\ne pronto.</string>
+    <string name="onboarding_permissions_body">Para avisar quando algo termina e salvar seus arquivos no aparelho.</string>
+    <string name="onboarding_zero_bytes">0 bytes enviados</string>
+    <string name="onboarding_notification_app">Convertia · agora</string>
+    <string name="onboarding_notification_file">Teclado mecânico do zero.mp4</string>
+    <string name="onboarding_share_with">Compartilhar com</string>
+    <string name="onboarding_perm_notifications">Notificações</string>
+    <string name="onboarding_perm_notifications_desc">Avisa quando um download ou conversão termina.</string>
+    <string name="onboarding_perm_files">Arquivos</string>
+    <string name="onboarding_perm_files_desc">Salvar downloads e abrir arquivos para converter.</string>
+    <string name="onboarding_perm_allow">Permitir</string>
+    <string name="onboarding_perm_granted">Permitido</string>
 </resources>
