@@ -7,6 +7,7 @@ import com.convertia.app.domain.Formatters
 import com.convertia.app.domain.MediaCategory
 import com.convertia.app.domain.MediaInfo
 import com.convertia.app.domain.SavedFile
+import com.convertia.app.data.storage.MediaSaver
 import com.convertia.app.domain.SizeEstimator
 import com.convertia.app.domain.siteOf
 import kotlinx.coroutines.delay
@@ -60,7 +61,8 @@ class SimulatedConversionEngine : ConversionEngine {
             delay(SIMULATION_TICK_MS)
             percent = min(100.0, percent + step)
             if (percent >= 100) {
-                emit(ConversionProgress.Finished(SizeEstimator.estimatedBytes(item)))
+                val bytes = SizeEstimator.estimatedBytes(item)
+                emit(ConversionProgress.Finished(listOf(SavedFile(null, item.outputName, bytes, MediaSaver.mimeTypeOf(item.outputName)))))
                 return@flow
             }
             emit(ConversionProgress.Running(percent, etaSeconds(percent, step)))

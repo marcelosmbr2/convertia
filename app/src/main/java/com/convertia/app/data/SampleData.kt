@@ -101,7 +101,7 @@ object SampleData {
                 source = ConversionSource.Sample,
                 targetExt = target,
                 options = ConversionOptions(ocr = ocr),
-            )
+            )!!
         return listOf(
             item(1, "IMG_4021.HEIC", 3_200_000, "DCIM/Camera", "JPG")
                 .copy(status = ConversionStatus.DONE, progress = 100.0, outputBytes = 4_100_000),

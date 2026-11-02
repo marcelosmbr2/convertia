@@ -31,6 +31,11 @@
     <string name="toast_download_queued">Na fila · %1$s</string>
     <string name="toast_shared_download_queued">Baixando no Convertia · %1$s</string>
     <string name="toast_file_deleted">Arquivo excluído</string>
+    <plurals name="toast_files_unsupported">
+        <item quantity="one">%d arquivo não suportado</item>
+        <item quantity="many">%d arquivos não suportados</item>
+        <item quantity="other">%d arquivos não suportados</item>
+    </plurals>
     <plurals name="toast_files_added">
         <item quantity="one">%d arquivo adicionado</item>
         <item quantity="many">%d arquivos adicionados</item>
@@ -121,6 +126,8 @@
     <string name="convert_converting_eta">Convertendo · %1$ds restantes</string>
     <string name="convert_paused">Pausado</string>
     <string name="convert_queued">Na fila</string>
+    <string name="convert_failed">Falhou</string>
+    <string name="convert_retry">Tentar de novo</string>
     <string name="convert_empty_title">Adicione arquivos</string>
     <string name="convert_empty_body">Imagens, documentos, áudio, vídeo, compactados e e-books. Tudo processado neste aparelho.</string>
     <string name="convert_choose_files">Escolher arquivos</string>
@@ -244,6 +251,11 @@
     <string name="library_history_local">Armazenado só neste aparelho.</string>
     <string name="library_clear">Limpar</string>
     <string name="library_history_empty">Nenhuma conversão ainda.</string>
+    <plurals name="library_history_files">
+        <item quantity="one">%d arquivo</item>
+        <item quantity="many">%d arquivos</item>
+        <item quantity="other">%d arquivos</item>
+    </plurals>
     <string name="library_open_player">Abrir no player</string>
     <string name="library_share">Compartilhar</string>
     <string name="library_delete">Excluir</string>
@@ -338,8 +350,6 @@
     <string name="format_archive_tar_gz">Unix · compactado</string>
     <string name="format_archive_tar">Unix</string>
     <string name="format_ebook_epub">Padrão aberto</string>
-    <string name="format_ebook_mobi">Kindle legado</string>
-    <string name="format_ebook_azw3">Kindle</string>
     <string name="format_ebook_fb2">FictionBook</string>
     <!-- Categorias -->
     <string name="category_image">Imagens</string>

@@ -13,6 +13,7 @@ import com.convertia.app.domain.ConversionItem
 import com.convertia.app.domain.ConversionOptions
 import com.convertia.app.domain.ConversionSource
 import com.convertia.app.domain.ConversionStatus
+import com.convertia.app.domain.EngineCapabilities
 import com.convertia.app.domain.LibraryItem
 import com.convertia.app.domain.OutputFormat
 import com.convertia.app.domain.Preset
@@ -52,7 +53,7 @@ data class ConvertUiState(
 
     val primary: PrimaryAction
         get() {
-            val pending = items.count { it.status != ConversionStatus.DONE }
+            val pending = items.count { it.isPending }
             return when {
                 running -> PrimaryAction.Pause
                 items.any { it.status == ConversionStatus.CONVERTING } -> PrimaryAction.Resume
@@ -67,6 +68,7 @@ class ConvertViewModel(
     private val library: LibraryRepository,
     private val messages: AppMessages,
     presets: List<Preset>,
+    private val capabilities: EngineCapabilities = EngineCapabilities.All,
 ) : ViewModel() {
 
     val uiState: StateFlow<ConvertUiState> = combine(
@@ -101,20 +103,25 @@ class ConvertViewModel(
         messages.show(ToastEvent.PresetApplied(preset.name, count, preset.sources))
     }
 
+    /** Adiciona os arquivos que o app converte; avisa quantos ficaram de fora. */
     fun addPicked(files: List<PickedFile>, location: String) {
         if (files.isEmpty()) return
-        val items = files.map {
+        val items = files.mapNotNull {
             ConversionItem.create(
                 id = conversions.newId(),
                 name = it.name,
                 sizeBytes = it.sizeBytes,
                 location = location,
                 source = ConversionSource.Document(it.uri),
+                capabilities = capabilities,
             )
         }
         conversions.add(items)
-        messages.show(ToastEvent.FilesAdded(items.size))
+        val unsupported = files.size - items.size
+        messages.show(if (unsupported > 0) ToastEvent.FilesUnsupported(unsupported) else ToastEvent.FilesAdded(items.size))
     }
+
+    fun retry(itemId: String) = conversions.retry(itemId)
 
     fun setTarget(itemId: String, target: OutputFormat) = conversions.setTarget(itemId, target)
 
@@ -140,7 +147,7 @@ class ConvertViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val c = convertiaContainer()
-                ConvertViewModel(c.conversions, c.library, c.messages, c.presets)
+                ConvertViewModel(c.conversions, c.library, c.messages, c.presets, c.capabilities)
             }
         }
     }

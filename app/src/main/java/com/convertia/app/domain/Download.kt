@@ -166,6 +166,10 @@ data class HistoryEntry(
     val inputBytes: Long,
     val outputBytes: Long,
     val at: Long,
+    /** `content://` do arquivo gerado (do primeiro, se forem vários); nulo em dados antigos. */
+    val uri: String? = null,
+    val mimeType: String? = null,
+    val fileCount: Int = 1,
 )
 
 /** Link inspecionado recentemente, listado no estado vazio do Baixar. */

@@ -102,7 +102,7 @@ class AppViewModel(
         container.conversions.running,
     ) { jobs, items, running ->
         val downloads = jobs.count { it.isActive }
-        val conversions = if (running) items.count { it.status != ConversionStatus.DONE } else 0
+        val conversions = if (running) items.count { it.isPending } else 0
         downloads + conversions
     }.stateIn(viewModelScope, SharingStarted.Eagerly, 0)
 
@@ -144,8 +144,10 @@ class AppViewModel(
             if (item.status == ConversionStatus.CONVERTING) return
             item.target.category
         } else {
-            items.filter { it.status != ConversionStatus.CONVERTING }
-                .groupingBy { it.category }.eachCount()
+            val pickable = items.filter { it.status != ConversionStatus.CONVERTING }
+            // Categoria de saída mais comum entre os arquivos editáveis.
+            pickable.flatMap { item -> item.targets.map { it.category }.distinct() }
+                .groupingBy { it }.eachCount()
                 .maxByOrNull { it.value }?.key ?: MediaCategory.IMAGE
         }
         openSheet(AppSheet.FormatPicker(itemId, category, backToInspector = fromInspector))
@@ -211,10 +213,12 @@ class AppViewModel(
         )
     }
 
-    /** "Converter" num arquivo da Biblioteca. */
+    /** "Converter" num arquivo da Biblioteca. Legendas e miniaturas não têm para onde ir. */
     fun convertLibraryItem(itemId: String) {
         val item = container.library.find(itemId) ?: return
-        sendToConverter(item.fileName, item.sizeBytes, item.kind, ConversionSource.Library(item.id))
+        if (!sendToConverter(item.fileName, item.sizeBytes, item.kind, ConversionSource.Library(item.id))) {
+            container.messages.show(ToastEvent.FilesUnsupported(1))
+        }
     }
 
     fun completeOnboarding() = container.updateSettings { it.copy(onboarded = true) }
@@ -227,7 +231,7 @@ class AppViewModel(
         selectTab(Tab.DOWNLOAD)
     }
 
-    private fun sendToConverter(name: String, sizeBytes: Long, kind: MediaKind, source: ConversionSource) {
+    private fun sendToConverter(name: String, sizeBytes: Long, kind: MediaKind, source: ConversionSource): Boolean {
         val conversions = container.conversions
         // Vídeo baixado vai para MP3 por padrão, como no mockup.
         val item = ConversionItem.create(
@@ -237,9 +241,11 @@ class AppViewModel(
             location = DOWNLOAD_FOLDER,
             source = source,
             targetExt = if (kind == MediaKind.VIDEO) "MP3" else null,
-        )
+            capabilities = container.capabilities,
+        ) ?: return false
         conversions.add(listOf(item))
         setNav { NavState(tab = Tab.CONVERT, libraryView = it.libraryView, sheet = AppSheet.Inspector(item.id)) }
+        return true
     }
 
     private inline fun setNav(transform: (NavState) -> NavState) {

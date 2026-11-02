@@ -46,12 +46,14 @@ sealed interface ConversionProgress {
         val etaSeconds: Int?,
     ) : ConversionProgress
 
-    data class Finished(val outputBytes: Long) : ConversionProgress
+    /** Conversão concluída e gravada no aparelho. O primeiro arquivo é o principal. */
+    data class Finished(val files: List<SavedFile>) : ConversionProgress
 }
 
 /**
- * Converte um arquivo. Mesmo contrato do [DownloadEngine]: cancelar é pausar, e a fila
- * retoma a partir de [ConversionItem.progress].
+ * Converte um arquivo. O fluxo emite o progresso e termina com [ConversionProgress.Finished];
+ * um erro no fluxo (ou terminar sem `Finished`) marca o item como falho. Cancelar a coleta
+ * é pausar: o motor descarta o trabalho parcial e a fila recomeça o arquivo ao retomar.
  */
 interface ConversionEngine {
     fun convert(item: ConversionItem, hardwareAcceleration: Boolean): Flow<ConversionProgress>

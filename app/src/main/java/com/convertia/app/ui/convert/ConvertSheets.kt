@@ -285,8 +285,11 @@ fun ColumnScope.InspectorSheet(item: ConversionItem, actions: InspectorActions) 
 
         when (target.category) {
             MediaCategory.VIDEO -> {
-                SegmentedField(stringResource(R.string.inspector_codec), VideoCodec.entries, options.codec, { it.label() }) { v ->
-                    actions.onOptions { it.copy(codec = v) }
+                val codecs = FormatCatalog.codecsFor(target.ext)
+                if (codecs.isNotEmpty()) {
+                    SegmentedField(stringResource(R.string.inspector_codec), codecs, options.codec, { it.label() }) { v ->
+                        actions.onOptions { it.copy(codec = v) }
+                    }
                 }
                 SegmentedField(stringResource(R.string.inspector_resolution), VideoResolution.entries, options.resolution, { it.label() }) { v ->
                     actions.onOptions { it.copy(resolution = v) }
@@ -311,16 +314,23 @@ fun ColumnScope.InspectorSheet(item: ConversionItem, actions: InspectorActions) 
                 }
             }
             MediaCategory.DOCUMENT -> {
-                InspectorToggle(R.string.inspector_compress, R.string.inspector_compress_desc, options.compressImages) { on ->
-                    actions.onOptions { it.copy(compressImages = on) }
+                if (target.ext == "PDF") {
+                    InspectorToggle(R.string.inspector_compress, R.string.inspector_compress_desc, options.compressImages) { on ->
+                        actions.onOptions { it.copy(compressImages = on) }
+                    }
                 }
-                InspectorToggle(R.string.inspector_ocr, R.string.inspector_ocr_desc, options.ocr) { on ->
-                    actions.onOptions { it.copy(ocr = on) }
+                // OCR: imagem digitalizada → PDF pesquisável, ou PDF sem texto → documento.
+                if (item.ocrAvailable && (item.category == MediaCategory.IMAGE && target.ext == "PDF" || item.ext == "pdf")) {
+                    InspectorToggle(R.string.inspector_ocr, R.string.inspector_ocr_desc, options.ocr) { on ->
+                        actions.onOptions { it.copy(ocr = on) }
+                    }
                 }
             }
             MediaCategory.ARCHIVE -> {
-                SegmentedField(stringResource(R.string.inspector_compression), CompressionLevel.entries, options.compressionLevel, { it.label() }) { v ->
-                    actions.onOptions { it.copy(compressionLevel = v) }
+                if (target.ext != "TAR") {
+                    SegmentedField(stringResource(R.string.inspector_compression), CompressionLevel.entries, options.compressionLevel, { it.label() }) { v ->
+                        actions.onOptions { it.copy(compressionLevel = v) }
+                    }
                 }
             }
             MediaCategory.EBOOK -> Unit
@@ -457,6 +467,7 @@ private fun QualityPreset.label(): Int = when (this) {
 private fun VideoCodec.label(): String = when (this) {
     VideoCodec.H264 -> "H.264"
     VideoCodec.HEVC -> "HEVC"
+    VideoCodec.VP9 -> "VP9"
     VideoCodec.AV1 -> "AV1"
 }
 
@@ -512,28 +523,28 @@ fun ColumnScope.FormatPickerSheet(
     actions: PickerActions,
 ) {
     val item = sheet.itemId?.let { id -> items.firstOrNull { it.id == id } }
-    val categories = if (item != null) {
-        FormatCatalog.compatible.getValue(item.category)
+    // Formatos possíveis: os do arquivo, ou a união dos arquivos editáveis ("Tudo para").
+    val available: Set<OutputFormat> = if (item != null) {
+        item.targets.toSet()
     } else {
-        items.filter { it.status != ConversionStatus.CONVERTING }
-            .flatMap { FormatCatalog.compatible.getValue(it.category) }
-            .distinct()
+        items.filter { it.status != ConversionStatus.CONVERTING }.flatMap { it.targets }.toSet()
     }
+    val categories = available.map { it.category }.distinct()
     val query = sheet.query.trim().lowercase()
     val currentLabel = stringResource(R.string.picker_current)
     val categoryLabels = MediaCategory.entries.associateWith { stringResource(FormatTexts.categoryLabel(it)) }
-    val formats = if (query.isEmpty()) {
-        FormatCatalog.outputs.getValue(sheet.category).map { OutputFormat(it, sheet.category) }
-    } else {
-        categories.flatMap { category -> FormatCatalog.outputs.getValue(category).map { OutputFormat(it, category) } }
-    }
+    // O próprio formato do arquivo aparece desabilitado como "Formato atual".
+    fun shown(format: OutputFormat) = format in available || (item != null && FormatCatalog.isSameFormat(item.ext, format.ext))
+    val formats = (if (query.isEmpty()) listOf(sheet.category) else categories)
+        .flatMap { category -> FormatCatalog.outputs.getValue(category).map { OutputFormat(it, category) } }
+        .filter(::shown)
     val tiles = formats.map { format ->
         PickerTile(format, format.descriptionText(), current = false, disabled = false)
     }.filter { tile ->
         query.isEmpty() || tile.format.ext.lowercase().contains(query) || tile.description.lowercase().contains(query)
     }.map { tile ->
         val current = item != null && tile.format == item.target
-        val disabled = item != null && FormatCatalog.isSameFormat(item.ext, tile.format.ext)
+        val disabled = tile.format !in available
         val description = when {
             disabled -> currentLabel
             query.isNotEmpty() -> "${categoryLabels.getValue(tile.format.category)} · ${tile.description}"

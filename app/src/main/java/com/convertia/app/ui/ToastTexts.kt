@@ -24,6 +24,8 @@ fun ToastMessage.toContent(): ToastContent {
             stringResource(R.string.toast_file_deleted) to stringResource(R.string.action_undo)
         is ToastEvent.FilesAdded ->
             pluralStringResource(R.plurals.toast_files_added, e.count, e.count) to null
+        is ToastEvent.FilesUnsupported ->
+            pluralStringResource(R.plurals.toast_files_unsupported, e.count, e.count) to null
         is ToastEvent.TargetSetForAll ->
             (if (e.count == 0) stringResource(R.string.toast_no_compatible_files)
             else pluralStringResource(R.plurals.toast_target_set, e.count, e.count, e.ext)) to null

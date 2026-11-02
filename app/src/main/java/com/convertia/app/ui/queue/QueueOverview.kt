@@ -68,6 +68,7 @@ data class QueueOverview(
                         ConversionStatus.CONVERTING -> if (conversionsRunning) RowStatus.ACTIVE else RowStatus.PAUSED
                         ConversionStatus.READY -> RowStatus.QUEUED
                         ConversionStatus.DONE -> RowStatus.DONE
+                        ConversionStatus.FAILED -> RowStatus.FAILED
                     }
                     QueueRow.Conversion(item, status)
                 }

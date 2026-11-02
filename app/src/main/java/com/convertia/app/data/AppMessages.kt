@@ -30,6 +30,9 @@ sealed interface ToastEvent {
 
     data class FilesAdded(val count: Int) : ToastEvent
 
+    /** "N arquivos não suportados": extensão desconhecida ou sem motor neste aparelho. */
+    data class FilesUnsupported(val count: Int) : ToastEvent
+
     /** "N arquivos definidos como EXT", ou "Nenhum arquivo compatível" com zero. */
     data class TargetSetForAll(val count: Int, val ext: String) : ToastEvent
 

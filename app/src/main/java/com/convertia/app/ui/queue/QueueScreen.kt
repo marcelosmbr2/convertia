@@ -308,7 +308,7 @@ private fun rowLine(row: QueueRow, clock: Clock, waitingForWifi: Boolean): Strin
             RowStatus.QUEUED -> stringResource(R.string.queue_conversion_queued)
             RowStatus.PAUSED -> stringResource(R.string.queue_conversion_paused, percent)
             RowStatus.DONE -> stringResource(R.string.queue_conversion_done, Formatters.size(item.outputBytes), item.outputName)
-            RowStatus.FAILED -> ""
+            RowStatus.FAILED -> item.error.orEmpty()
         }
     }
 }

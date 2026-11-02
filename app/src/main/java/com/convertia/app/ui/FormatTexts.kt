@@ -45,8 +45,6 @@ object FormatTexts {
         OutputFormat("TAR.GZ", MediaCategory.ARCHIVE) to R.string.format_archive_tar_gz,
         OutputFormat("TAR", MediaCategory.ARCHIVE) to R.string.format_archive_tar,
         OutputFormat("EPUB", MediaCategory.EBOOK) to R.string.format_ebook_epub,
-        OutputFormat("MOBI", MediaCategory.EBOOK) to R.string.format_ebook_mobi,
-        OutputFormat("AZW3", MediaCategory.EBOOK) to R.string.format_ebook_azw3,
         OutputFormat("FB2", MediaCategory.EBOOK) to R.string.format_ebook_fb2,
     )
 

@@ -5,10 +5,10 @@ import com.convertia.app.data.engine.ConversionProgress
 import com.convertia.app.domain.ConversionItem
 import com.convertia.app.domain.ConversionOptions
 import com.convertia.app.domain.ConversionStatus
-import com.convertia.app.domain.FormatCatalog
 import com.convertia.app.domain.HistoryEntry
 import com.convertia.app.domain.OutputFormat
 import com.convertia.app.domain.Preset
+import com.convertia.app.domain.SavedFile
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -24,8 +24,9 @@ import java.time.Clock
 /**
  * A lista do Converter é a própria fila de conversão: um interruptor global [running]
  * (o botão Converter/Pausar/Retomar) e até N conversões ao mesmo tempo, lido ao vivo dos
- * ajustes. Ao concluir cada arquivo, grava no Histórico; quando não sobra nada, emite
- * [allFinished] e para. Quem converte de fato é o [ConversionEngine].
+ * ajustes. Ao concluir cada arquivo, grava no Histórico; quando não sobra nada pendente,
+ * emite [allFinished] e para. Quem converte de fato é o [ConversionEngine]; um erro dele
+ * marca o item como falho e a fila segue para o próximo.
  *
  * Todas as mudanças acontecem no [scope], que deve ser confinado à main thread.
  */
@@ -49,8 +50,13 @@ class ConversionQueue(
 
     private val _allFinished = MutableSharedFlow<Unit>(extraBufferCapacity = 4)
 
-    /** Emite quando a fila esvazia depois de converter tudo. */
+    /** Emite quando a fila para depois de concluir ao menos um arquivo. */
     val allFinished: SharedFlow<Unit> = _allFinished.asSharedFlow()
+
+    private val _removed = MutableSharedFlow<ConversionItem>(extraBufferCapacity = 16)
+
+    /** Itens tirados da lista (para apagar o que sobrou na pasta de trabalho). */
+    val removed: SharedFlow<ConversionItem> = _removed.asSharedFlow()
 
     private val workers = mutableMapOf<String, Job>()
     private var nextId = 1L
@@ -71,14 +77,18 @@ class ConversionQueue(
 
     fun remove(id: String) {
         stopWorker(id)
+        val item = find(id)
         val remaining = _items.value.filterNot { it.id == id }
         _items.value = remaining
-        _running.value = _running.value && remaining.any { it.status != ConversionStatus.DONE }
+        _running.value = _running.value && remaining.any { it.isPending }
+        item?.let { _removed.tryEmit(it) }
         schedule()
     }
 
     fun clearDone() {
-        _items.value = _items.value.filterNot { it.status == ConversionStatus.DONE }
+        val (done, rest) = _items.value.partition { it.status == ConversionStatus.DONE }
+        _items.value = rest
+        done.forEach { _removed.tryEmit(it) }
     }
 
     /** Converter/Retomar. Não faz nada se não houver arquivo pendente. */
@@ -88,14 +98,29 @@ class ConversionQueue(
         schedule()
     }
 
-    /** Pausa tudo: as conversões em andamento mantêm o progresso. */
+    /**
+     * Pausa tudo. Os arquivos em andamento continuam marcados como "convertendo", mas o
+     * progresso volta a zero: o motor real recomeça o arquivo ao retomar.
+     */
     fun pause() {
         _running.value = false
         workers.values.forEach { it.cancel() }
         workers.clear()
+        _items.value = _items.value.map {
+            if (it.status == ConversionStatus.CONVERTING) it.copy(progress = 0.0) else it
+        }
+        _eta.value = emptyMap()
     }
 
-    fun setTarget(id: String, target: OutputFormat) = updateEditable(id) { it.copy(target = target).resetIfDone() }
+    /** Tenta de novo um arquivo que falhou (liga a fila se estava parada). */
+    fun retry(id: String) {
+        if (find(id)?.status != ConversionStatus.FAILED) return
+        update(id) { it.resetIfDone() }
+        _running.value = true
+        schedule()
+    }
+
+    fun setTarget(id: String, target: OutputFormat) = updateEditable(id) { it.withTarget(target) }
 
     fun updateOptions(id: String, transform: (ConversionOptions) -> ConversionOptions) =
         updateEditable(id) { it.copy(options = transform(it.options)) }
@@ -104,32 +129,25 @@ class ConversionQueue(
      * Define [target] em todos os arquivos que podem virar esse formato e ainda não estão
      * nele. Devolve quantos mudaram.
      */
-    fun setTargetForAll(target: OutputFormat): Int = updateMany { item ->
-        item.status != ConversionStatus.CONVERTING &&
-            target.category in FormatCatalog.compatible.getValue(item.category) &&
-            item.ext != target.ext.lowercase()
-    }.apply(target = { target })
+    fun setTargetForAll(target: OutputFormat): Int =
+        updateMany { it.status != ConversionStatus.CONVERTING && it.supports(target) }
+            .apply(target = { target })
 
-    /** Copia formato e ajustes de [sourceId] para os arquivos da mesma categoria. */
+    /** Copia formato e ajustes de [sourceId] para os arquivos da mesma categoria que aceitam o formato. */
     fun applyToSameCategory(sourceId: String): Int {
         val source = find(sourceId) ?: return 0
-        return updateMany { it.category == source.category && it.status != ConversionStatus.CONVERTING }
-            .apply(target = { source.target }, options = { source.options }, keepDone = sourceId)
+        return updateMany {
+            it.category == source.category && it.status != ConversionStatus.CONVERTING && (it.id == sourceId || it.supports(source.target))
+        }.apply(target = { source.target }, options = { source.options }, keepDone = sourceId)
     }
 
     /** Aplica a predefinição aos arquivos com extensão correspondente. */
     fun applyPreset(preset: Preset): Int {
         var count = 0
         _items.value = _items.value.map { item ->
-            if (item.status == ConversionStatus.CONVERTING || item.ext !in preset.sources) return@map item
+            if (item.status == ConversionStatus.CONVERTING || item.ext !in preset.sources || !item.supports(preset.target)) return@map item
             count++
-            item.copy(
-                target = preset.target,
-                status = ConversionStatus.READY,
-                progress = 0.0,
-                outputBytes = 0,
-                options = item.options.withQuality(preset.quality),
-            )
+            item.withTarget(preset.target).copy(options = item.options.withQuality(preset.quality)).resetIfDone()
         }
         schedule()
         return count
@@ -141,9 +159,6 @@ class ConversionQueue(
         _running.value = running
         schedule()
     }
-
-    private val ConversionItem.isPending: Boolean
-        get() = status == ConversionStatus.READY || status == ConversionStatus.CONVERTING
 
     private fun schedule() {
         if (!_running.value) return
@@ -173,11 +188,14 @@ class ConversionQueue(
                             update(id) { it.copy(progress = progress.percent) }
                             progress.etaSeconds?.let { eta -> _eta.value = _eta.value + (id to eta) }
                         }
-                        is ConversionProgress.Finished -> complete(id, progress.outputBytes)
+                        is ConversionProgress.Finished -> complete(id, progress.files)
                     }
                 }
+                if (find(id)?.status == ConversionStatus.CONVERTING) fail(id, NO_OUTPUT_ERROR)
             } catch (e: CancellationException) {
                 throw e
+            } catch (e: Exception) {
+                fail(id, e.message?.takeIf { it.isNotBlank() } ?: e.javaClass.simpleName)
             } finally {
                 if (workers[id] === worker) workers.remove(id)
             }
@@ -185,9 +203,9 @@ class ConversionQueue(
         workers[id] = worker
     }
 
-    private fun complete(id: String, outputBytes: Long) {
-        update(id) { it.copy(status = ConversionStatus.DONE, progress = 100.0, outputBytes = outputBytes) }
-        _eta.value = _eta.value - id
+    private fun complete(id: String, files: List<SavedFile>) {
+        val outputBytes = files.sumOf { it.sizeBytes }
+        update(id) { it.copy(status = ConversionStatus.DONE, progress = 100.0, outputBytes = outputBytes, outputs = files, error = null) }
         val item = find(id) ?: return
         library.addHistory(
             HistoryEntry(
@@ -198,11 +216,27 @@ class ConversionQueue(
                 inputBytes = item.sizeBytes,
                 outputBytes = outputBytes,
                 at = clock.millis(),
+                uri = files.firstOrNull()?.uri,
+                mimeType = files.firstOrNull()?.mimeType,
+                fileCount = files.size,
             ),
         )
+        settle(id)
+    }
+
+    private fun fail(id: String, message: String) {
+        update(id) { it.copy(status = ConversionStatus.FAILED, error = message) }
+        settle(id)
+    }
+
+    /** Depois que um item termina (bem ou mal): libera a vaga e avisa se a fila esvaziou. */
+    private fun settle(id: String) {
+        _eta.value = _eta.value - id
         val wasRunning = _running.value
         schedule()
-        if (wasRunning && !_running.value) _allFinished.tryEmit(Unit)
+        if (wasRunning && !_running.value && _items.value.any { it.status == ConversionStatus.DONE }) {
+            _allFinished.tryEmit(Unit)
+        }
     }
 
     private fun stopWorker(id: String) {
@@ -232,14 +266,15 @@ class ConversionQueue(
             _items.value = _items.value.map { item ->
                 if (!predicate(item)) return@map item
                 count++
-                val changed = item.copy(
-                    target = target(item),
-                    options = options?.invoke(item) ?: item.options,
-                )
-                if (item.id == keepDone) changed else changed.resetIfDone()
+                val changed = item.copy(options = options?.invoke(item) ?: item.options)
+                if (item.id == keepDone) changed.copy(target = target(item)) else changed.withTarget(target(item))
             }
             schedule()
             return count
         }
+    }
+
+    private companion object {
+        const val NO_OUTPUT_ERROR = "A conversão terminou sem gerar arquivo"
     }
 }

@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -70,6 +71,7 @@ fun LibraryScreen(
     clock: Clock = Clock.systemDefaultZone(),
 ) {
     val ui by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     LibraryContent(
         ui = ui,
         view = view,
@@ -77,6 +79,7 @@ fun LibraryScreen(
         onViewChange = onViewChange,
         onQueryChange = viewModel::onQueryChange,
         onOpenItem = onOpenItem,
+        onOpenHistory = { entry -> if (!LibraryIntents.open(context, entry.uri, entry.mimeType)) viewModel.fileUnavailable() },
         onClearHistory = viewModel::clearHistory,
     )
 }
@@ -90,6 +93,7 @@ fun LibraryContent(
     onQueryChange: (String) -> Unit,
     onOpenItem: (String) -> Unit,
     onClearHistory: () -> Unit,
+    onOpenHistory: (HistoryEntry) -> Unit = {},
 ) {
     Column(
         Modifier
@@ -112,7 +116,7 @@ fun LibraryContent(
         )
         when (view) {
             LibraryView.FILES -> FilesView(ui, clock, onQueryChange, onOpenItem)
-            LibraryView.HISTORY -> HistoryView(ui.history, clock, onClearHistory)
+            LibraryView.HISTORY -> HistoryView(ui.history, clock, onClearHistory, onOpenHistory)
         }
     }
 }
@@ -169,7 +173,7 @@ private fun LibraryRow(item: LibraryItem, clock: Clock, onClick: () -> Unit) {
 }
 
 @Composable
-private fun HistoryView(history: List<HistoryEntry>, clock: Clock, onClear: () -> Unit) {
+private fun HistoryView(history: List<HistoryEntry>, clock: Clock, onClear: () -> Unit, onOpen: (HistoryEntry) -> Unit) {
     Row(
         Modifier.padding(horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -190,17 +194,18 @@ private fun HistoryView(history: List<HistoryEntry>, clock: Clock, onClear: () -
         }
     }
     Column {
-        history.forEach { entry -> HistoryRow(entry, clock) }
+        history.forEach { entry -> HistoryRow(entry, clock, onClick = { onOpen(entry) }) }
         if (history.isEmpty()) EmptyText(stringResource(R.string.library_history_empty))
     }
 }
 
 @Composable
-private fun HistoryRow(entry: HistoryEntry, clock: Clock) {
+private fun HistoryRow(entry: HistoryEntry, clock: Clock, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 64.dp)
+            .then(if (entry.uri != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -213,6 +218,10 @@ private fun HistoryRow(entry: HistoryEntry, clock: Clock) {
                     append("${entry.fromExt} → ${entry.toExt}")
                     withStyle(SpanStyle(color = Palette.TextMuted)) { append("  ·  ") }
                     append("${Formatters.size(entry.inputBytes)} → ${Formatters.size(entry.outputBytes)}")
+                    if (entry.fileCount > 1) {
+                        withStyle(SpanStyle(color = Palette.TextMuted)) { append("  ·  ") }
+                        append(pluralStringResource(R.plurals.library_history_files, entry.fileCount, entry.fileCount))
+                    }
                 },
                 style = MonoTextStyle.copy(fontSize = 11.5.sp, color = Palette.TextMeta),
                 maxLines = 1,

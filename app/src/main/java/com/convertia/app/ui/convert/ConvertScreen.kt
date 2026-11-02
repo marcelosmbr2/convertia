@@ -78,6 +78,8 @@ data class ConvertNavigation(
     val openItem: (String) -> Unit = {},
     val openPicker: (itemId: String?) -> Unit = {},
     val openAddFiles: () -> Unit = {},
+    /** "Tentar de novo" num arquivo que falhou. */
+    val retry: (String) -> Unit = {},
 )
 
 @Composable
@@ -88,7 +90,7 @@ fun ConvertScreen(
     val ui by viewModel.uiState.collectAsStateWithLifecycle()
     ConvertContent(
         ui = ui,
-        navigation = navigation,
+        navigation = navigation.copy(retry = viewModel::retry),
         onPreset = viewModel::applyPreset,
         onClearDone = viewModel::clearDone,
         onPrimary = viewModel::onPrimary,
@@ -215,6 +217,7 @@ private fun FileList(ui: ConvertUiState, navigation: ConvertNavigation, onClearD
                 etaSeconds = ui.eta[item.id],
                 onOpen = { navigation.openItem(item.id) },
                 onPick = { navigation.openPicker(item.id) },
+                onRetry = { navigation.retry(item.id) },
             )
         }
     }
@@ -227,6 +230,7 @@ private fun FileCard(
     etaSeconds: Int?,
     onOpen: () -> Unit,
     onPick: () -> Unit,
+    onRetry: () -> Unit,
 ) {
     val shape = RoundedCornerShape(16.dp)
     Column(
@@ -303,6 +307,27 @@ private fun FileCard(
                 Text(
                     Formatters.sizeDelta(item.sizeBytes, item.outputBytes),
                     style = MonoTextStyle.copy(fontSize = 11.5.sp, color = Palette.TextTertiary),
+                )
+            }
+            item.status == ConversionStatus.FAILED -> Row(
+                Modifier.padding(start = 48.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    item.error ?: stringResource(R.string.convert_failed),
+                    style = BaseTextStyle.copy(fontSize = 12.5.sp, color = Palette.DangerText),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                TextPillButton(
+                    text = stringResource(R.string.convert_retry),
+                    onClick = onRetry,
+                    color = Palette.TextPrimary,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 12.5.sp,
+                    horizontalPadding = 10.dp,
                 )
             }
             running -> Text(

@@ -42,8 +42,9 @@ class QueueViewModel(
         is QueueRow.Conversion -> conversions.start()
     }
 
-    fun retry(row: QueueRow) {
-        if (row is QueueRow.Download) downloads.retry(row.job.id)
+    fun retry(row: QueueRow) = when (row) {
+        is QueueRow.Download -> downloads.retry(row.job.id)
+        is QueueRow.Conversion -> conversions.retry(row.item.id)
     }
 
     fun remove(row: QueueRow) = when (row) {

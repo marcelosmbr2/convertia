@@ -47,14 +47,29 @@ class FakeDownloadEngine(
 }
 
 /** Avança [step]% a cada [tickMs] ms; o arquivo de saída tem metade do tamanho. */
-class FakeConversionEngine(private val step: Double = 25.0, private val tickMs: Long = 100) : ConversionEngine {
+class FakeConversionEngine(
+    private val step: Double = 25.0,
+    private val tickMs: Long = 100,
+    /** Extensões de origem que falham no primeiro passo. */
+    private val failing: Set<String> = emptySet(),
+    /** Extensões cujo fluxo termina sem `Finished`. */
+    private val silent: Set<String> = emptySet(),
+) : ConversionEngine {
     override fun convert(item: ConversionItem, hardwareAcceleration: Boolean): Flow<ConversionProgress> = flow {
         var percent = item.progress
+        if (item.ext in failing) {
+            delay(tickMs)
+            error("Motor recusou ${item.name}")
+        }
+        if (item.ext in silent) {
+            delay(tickMs)
+            return@flow
+        }
         while (true) {
             delay(tickMs)
             percent = min(100.0, percent + step)
             if (percent >= 100) {
-                emit(ConversionProgress.Finished(item.sizeBytes / 2))
+                emit(ConversionProgress.Finished(listOf(SavedFile("content://convertia/${item.id}", item.outputName, item.sizeBytes / 2, "application/octet-stream"))))
                 return@flow
             }
             emit(ConversionProgress.Running(percent, null))

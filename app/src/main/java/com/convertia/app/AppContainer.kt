@@ -24,6 +24,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.convertia.app.domain.AppSettings
 import com.convertia.app.domain.DownloadStatus
+import com.convertia.app.domain.EngineCapabilities
 import com.convertia.app.domain.Preset
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -65,6 +66,9 @@ class AppContainer(context: Context) {
 
     val messages = AppMessages()
     val presets: List<Preset> = SampleData.presets
+
+    /** O que o motor de conversão deste build faz. LibreOffice, PDF → documento e OCR entram nas próximas fases. */
+    val capabilities = EngineCapabilities(office = false, pdfToDocument = false, ocr = false)
 
     /** yt-dlp + ffmpeg empacotados; inicializa em segundo plano assim que o app abre. */
     val ytDlp = YtDlp(context.applicationContext)

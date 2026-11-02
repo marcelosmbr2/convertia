@@ -9,7 +9,25 @@ enum class MediaCategory { IMAGE, DOCUMENT, AUDIO, VIDEO, ARCHIVE, EBOOK }
  */
 data class OutputFormat(val ext: String, val category: MediaCategory)
 
-/** Catálogo de formatos e regras de conversão (FORMATS, COMPAT, SRC_CAT… no mockup). */
+/**
+ * O que os motores deste build e deste aparelho conseguem fazer. Decide quais conversões o
+ * catálogo oferece: sem o LibreOffice, por exemplo, documentos nem entram na lista.
+ */
+data class EngineCapabilities(
+    /** LibreOffice embutido (documentos, planilhas, apresentações e e-books). */
+    val office: Boolean = true,
+    /** Reconstrução de PDF em documento editável. */
+    val pdfToDocument: Boolean = true,
+    /** Reconhecimento de texto em imagens e páginas digitalizadas. */
+    val ocr: Boolean = true,
+) {
+    companion object {
+        val All = EngineCapabilities()
+        val None = EngineCapabilities(office = false, pdfToDocument = false, ocr = false)
+    }
+}
+
+/** Catálogo de formatos e regras de conversão (FORMATS, SRC_CAT, DEFAULT_TARGET… no mockup). */
 object FormatCatalog {
 
     /** Formatos de saída por categoria, na ordem em que aparecem no seletor. */
@@ -19,17 +37,7 @@ object FormatCatalog {
         MediaCategory.AUDIO to listOf("MP3", "AAC", "M4A", "OPUS", "OGG", "FLAC", "WAV", "AIFF"),
         MediaCategory.VIDEO to listOf("MP4", "MOV", "WEBM", "MKV", "AVI", "GIF"),
         MediaCategory.ARCHIVE to listOf("ZIP", "7Z", "TAR.GZ", "TAR"),
-        MediaCategory.EBOOK to listOf("EPUB", "MOBI", "AZW3", "FB2"),
-    )
-
-    /** Para quais categorias cada categoria de origem pode ser convertida. */
-    val compatible: Map<MediaCategory, List<MediaCategory>> = mapOf(
-        MediaCategory.IMAGE to listOf(MediaCategory.IMAGE, MediaCategory.DOCUMENT),
-        MediaCategory.DOCUMENT to listOf(MediaCategory.DOCUMENT, MediaCategory.IMAGE, MediaCategory.EBOOK),
-        MediaCategory.AUDIO to listOf(MediaCategory.AUDIO),
-        MediaCategory.VIDEO to listOf(MediaCategory.VIDEO, MediaCategory.AUDIO, MediaCategory.IMAGE),
-        MediaCategory.ARCHIVE to listOf(MediaCategory.ARCHIVE),
-        MediaCategory.EBOOK to listOf(MediaCategory.EBOOK, MediaCategory.DOCUMENT),
+        MediaCategory.EBOOK to listOf("EPUB", "FB2"),
     )
 
     private val sourceCategories: Map<String, MediaCategory> = buildMap {
@@ -39,13 +47,16 @@ object FormatCatalog {
         add(MediaCategory.AUDIO, "mp3 wav flac aac ogg m4a opus aiff aif wma")
         add(MediaCategory.VIDEO, "mp4 mov mkv webm avi wmv m4v 3gp")
         add(MediaCategory.ARCHIVE, "zip 7z rar tar gz tgz bz2")
-        add(MediaCategory.EBOOK, "epub mobi azw3 fb2")
+        add(MediaCategory.EBOOK, "epub fb2")
     }
+
+    /** Planilhas e apresentações: o LibreOffice só exporta para PDF e imagem. */
+    private val officeOnlyDocs = setOf("xls", "xlsx", "csv", "ppt", "pptx")
 
     private val defaultTargets: Map<String, String> = mapOf(
         "heic" to "JPG", "heif" to "JPG", "png" to "WEBP", "jpg" to "WEBP", "jpeg" to "WEBP",
-        "webp" to "PNG", "pdf" to "DOCX", "mp3" to "WAV", "mp4" to "WEBM", "zip" to "7Z",
-        "epub" to "MOBI", "mov" to "MP4", "wav" to "MP3", "tiff" to "PDF", "7z" to "ZIP",
+        "webp" to "PNG", "pdf" to "PNG", "mp3" to "WAV", "mp4" to "WEBM", "zip" to "7Z",
+        "epub" to "PDF", "mov" to "MP4", "wav" to "MP3", "tiff" to "PDF", "7z" to "ZIP",
     )
 
     private val categoryDefaults: Map<MediaCategory, String> = mapOf(
@@ -64,8 +75,7 @@ object FormatCatalog {
         "RTF" to .8, "TXT" to .05, "HTML" to .3, "MD" to .04, "MP3" to .12, "AAC" to .1,
         "M4A" to .11, "OPUS" to .07, "OGG" to .1, "FLAC" to .55, "WAV" to 4.0, "AIFF" to 4.0,
         "MP4" to .38, "MOV" to 1.1, "WEBM" to .3, "MKV" to .9, "AVI" to 1.2, "ZIP" to 1.05,
-        "7Z" to .85, "TAR.GZ" to .95, "TAR" to 1.1, "EPUB" to .6, "MOBI" to .9, "AZW3" to .9,
-        "FB2" to .5,
+        "7Z" to .85, "TAR.GZ" to .95, "TAR" to 1.1, "EPUB" to .6, "FB2" to .5,
     )
 
     private val lossless = setOf("PNG", "TIFF", "BMP", "ICO", "GIF", "FLAC", "WAV", "AIFF")
@@ -74,25 +84,64 @@ object FormatCatalog {
     fun extensionOf(fileName: String): String =
         if ('.' in fileName) fileName.substringAfterLast('.').lowercase() else ""
 
-    /** Categoria de um arquivo de origem; extensões desconhecidas contam como documento. */
-    fun categoryOf(ext: String): MediaCategory = sourceCategories[ext.lowercase()] ?: MediaCategory.DOCUMENT
+    /** Categoria de um arquivo de origem; `null` para extensões que o app não converte. */
+    fun categoryOf(ext: String): MediaCategory? = sourceCategories[ext.lowercase()]
 
     /**
-     * Categoria de saída de [targetExt] para um arquivo de [source]: a primeira categoria
-     * compatível que tem esse formato (findCat no mockup).
+     * Tudo em que um arquivo com a extensão [sourceExt] pode ser convertido, na ordem do
+     * seletor (categoria de origem primeiro). Nunca inclui o próprio formato. Vazio para
+     * extensões não suportadas ou sem motor neste build.
      */
-    fun targetCategory(source: MediaCategory, targetExt: String): MediaCategory =
-        compatible.getValue(source).firstOrNull { targetExt in outputs.getValue(it) } ?: source
-
-    /** Formato sugerido para um arquivo novo; nunca o próprio formato de origem. */
-    fun defaultTarget(sourceExt: String): OutputFormat {
+    fun targetsFor(sourceExt: String, capabilities: EngineCapabilities = EngineCapabilities.All): List<OutputFormat> {
         val ext = sourceExt.lowercase()
-        val category = categoryOf(ext)
-        var target = defaultTargets[ext] ?: categoryDefaults.getValue(category)
-        if (target.lowercase() == ext) {
-            target = outputs.getValue(category).first { it.lowercase() != ext }
+        val category = categoryOf(ext) ?: return emptyList()
+        val office = capabilities.office
+        val images = pick(MediaCategory.IMAGE, "JPG", "PNG", "WEBP")
+        val editableDocs = pick(MediaCategory.DOCUMENT, "DOCX", "ODT", "RTF", "HTML", "MD")
+        val formats: List<OutputFormat> = when (category) {
+            MediaCategory.VIDEO -> all(MediaCategory.VIDEO) + all(MediaCategory.AUDIO) + images
+            MediaCategory.AUDIO -> all(MediaCategory.AUDIO)
+            MediaCategory.IMAGE -> buildList {
+                addAll(all(MediaCategory.IMAGE))
+                add(OutputFormat("PDF", MediaCategory.DOCUMENT))
+                if (capabilities.ocr) {
+                    if (office) addAll(editableDocs)
+                    add(OutputFormat("TXT", MediaCategory.DOCUMENT))
+                }
+            }
+            MediaCategory.DOCUMENT -> when {
+                ext == "pdf" -> buildList {
+                    addAll(images)
+                    if (capabilities.pdfToDocument) {
+                        if (office) addAll(editableDocs)
+                        add(OutputFormat("TXT", MediaCategory.DOCUMENT))
+                        if (office) addAll(all(MediaCategory.EBOOK))
+                    }
+                }
+                !office -> emptyList()
+                ext in officeOnlyDocs -> pick(MediaCategory.DOCUMENT, "PDF") + images
+                else -> all(MediaCategory.DOCUMENT) + all(MediaCategory.EBOOK) + images
+            }
+            MediaCategory.ARCHIVE -> all(MediaCategory.ARCHIVE)
+            MediaCategory.EBOOK -> if (office) all(MediaCategory.EBOOK) + all(MediaCategory.DOCUMENT) else emptyList()
         }
-        return OutputFormat(target, targetCategory(category, target))
+        return formats.filterNot { isSameFormat(ext, it.ext) }
+    }
+
+    /** Formato sugerido para um arquivo novo; `null` se ele não puder ser convertido. */
+    fun defaultTarget(sourceExt: String, capabilities: EngineCapabilities = EngineCapabilities.All): OutputFormat? {
+        val ext = sourceExt.lowercase()
+        val targets = targetsFor(ext, capabilities)
+        if (targets.isEmpty()) return null
+        val preferred = defaultTargets[ext] ?: categoryOf(ext)?.let(categoryDefaults::get)
+        return targets.firstOrNull { it.ext == preferred } ?: targets.first()
+    }
+
+    /** Codecs que cabem em cada contêiner de vídeo; vazio quando não há escolha (AVI, GIF). */
+    fun codecsFor(containerExt: String): List<VideoCodec> = when (containerExt.uppercase()) {
+        "MP4", "MOV", "MKV" -> listOf(VideoCodec.H264, VideoCodec.HEVC, VideoCodec.AV1)
+        "WEBM" -> listOf(VideoCodec.VP9, VideoCodec.AV1)
+        else -> emptyList()
     }
 
     fun isLossless(targetExt: String): Boolean = targetExt in lossless
@@ -104,6 +153,12 @@ object FormatCatalog {
         val src = sourceExt.lowercase()
         return targetExt.lowercase() == src ||
             (targetExt == "JPG" && src == "jpeg") ||
-            (targetExt == "TIFF" && src == "tif")
+            (targetExt == "TIFF" && src == "tif") ||
+            (targetExt == "HTML" && src == "htm") ||
+            (targetExt == "AIFF" && src == "aif")
     }
+
+    private fun all(category: MediaCategory) = outputs.getValue(category).map { OutputFormat(it, category) }
+
+    private fun pick(category: MediaCategory, vararg exts: String) = exts.map { OutputFormat(it, category) }
 }

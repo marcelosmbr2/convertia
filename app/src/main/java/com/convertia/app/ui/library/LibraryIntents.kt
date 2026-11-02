@@ -11,10 +11,12 @@ import com.convertia.app.domain.LibraryItem
 object LibraryIntents {
 
     /** Abre no player/visualizador padrão. `false` se não houver arquivo ou app que abra. */
-    fun open(context: Context, item: LibraryItem): Boolean {
-        val uri = item.uri?.toUri() ?: return false
+    fun open(context: Context, item: LibraryItem): Boolean = open(context, item.uri, item.mimeType)
+
+    /** Abre um arquivo qualquer gravado pelo app (entrada do Histórico, por exemplo). */
+    fun open(context: Context, uri: String?, mimeType: String?): Boolean {
         val intent = Intent(Intent.ACTION_VIEW)
-            .setDataAndType(uri, item.mimeType ?: "*/*")
+            .setDataAndType((uri ?: return false).toUri(), mimeType ?: "*/*")
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
         return start(context, intent)
     }
