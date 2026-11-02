@@ -13,9 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -27,7 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.convertia.app.R
-import com.convertia.app.ui.components.ScreenHeader
+import com.convertia.app.ui.components.SheetHost
+import com.convertia.app.ui.components.ToastHost
 import com.convertia.app.ui.convert.AddFilesSheet
 import com.convertia.app.ui.convert.ConvertNavigation
 import com.convertia.app.ui.convert.ConvertScreen
@@ -42,10 +40,10 @@ import com.convertia.app.ui.library.LibraryItemSheet
 import com.convertia.app.ui.library.LibraryScreen
 import com.convertia.app.ui.library.LibraryViewModel
 import com.convertia.app.ui.queue.QueueScreen
-import com.convertia.app.ui.components.SheetHost
-import com.convertia.app.ui.components.ToastHost
+import com.convertia.app.ui.settings.PresetsScreen
+import com.convertia.app.ui.settings.SettingsScreen
+import com.convertia.app.ui.settings.SettingsViewModel
 import com.convertia.app.ui.theme.Palette
-import com.convertia.app.ui.theme.TextStyles
 
 /** App principal: aba atual, barra inferior, bottom sheet e toast. */
 @Composable
@@ -114,7 +112,23 @@ private fun TabContent(nav: NavState, appViewModel: AppViewModel) {
             onViewChange = appViewModel::showLibraryView,
             onOpenItem = { appViewModel.openSheet(AppSheet.LibraryActions(it)) },
         )
-        Tab.SETTINGS -> PlaceholderScreen(R.string.tab_settings, R.string.settings_subtitle)
+        Tab.SETTINGS -> if (nav.presetsOpen) {
+            val convert: ConvertViewModel = viewModel(factory = ConvertViewModel.Factory)
+            val settings: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory)
+            PresetsScreen(
+                presets = settings.presets,
+                onBack = appViewModel::closePresets,
+                onApply = { preset ->
+                    convert.applyPreset(preset)
+                    appViewModel.selectTab(Tab.CONVERT)
+                },
+            )
+        } else {
+            SettingsScreen(
+                onOpenPresets = appViewModel::openPresets,
+                onRestartOnboarding = appViewModel::restartOnboarding,
+            )
+        }
     }
 }
 
@@ -182,13 +196,5 @@ private fun ColumnScope.SheetContent(sheet: AppSheet, appViewModel: AppViewModel
                 ),
             )
         }
-    }
-}
-
-/** Tela provisória, substituída tela a tela. */
-@Composable
-private fun PlaceholderScreen(title: Int, subtitle: Int) {
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        ScreenHeader(stringResource(title), stringResource(subtitle))
     }
 }

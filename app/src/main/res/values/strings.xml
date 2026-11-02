@@ -243,6 +243,52 @@
     <string name="library_share">Compartilhar</string>
     <string name="library_delete">Excluir</string>
 
+    <!-- Ajustes -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_privacy_title">Conversões no aparelho</string>
+    <string name="settings_privacy_body">Seus arquivos nunca são enviados. Downloads vêm direto da fonte.</string>
+    <string name="settings_section_general">Geral</string>
+    <string name="settings_save_folder">Pasta de salvamento</string>
+    <string name="settings_detect_links">Detectar links copiados</string>
+    <string name="settings_detect_links_desc">Oferece inspecionar um link da área de transferência.</string>
+    <string name="settings_notifications">Notificações</string>
+    <string name="settings_notifications_desc">Avisa quando um download ou conversão termina.</string>
+    <string name="settings_section_downloads">Downloads</string>
+    <string name="settings_preferred_quality">Qualidade preferida</string>
+    <string name="settings_concurrent_downloads">Downloads simultâneos</string>
+    <string name="settings_wifi_only">Somente em Wi-Fi</string>
+    <string name="settings_wifi_only_desc">Pausa downloads nos dados móveis.</string>
+    <string name="settings_name_template">Modelo de nome</string>
+    <string name="settings_section_conversion">Conversão</string>
+    <string name="settings_presets">Predefinições</string>
+    <plurals name="settings_preset_count">
+        <item quantity="one">%d regra salva</item>
+        <item quantity="many">%d regras salvas</item>
+        <item quantity="other">%d regras salvas</item>
+    </plurals>
+    <string name="settings_conflict">Se o arquivo já existir</string>
+    <string name="settings_conflict_rename">Renomear</string>
+    <string name="settings_conflict_replace">Substituir</string>
+    <string name="settings_conflict_skip">Ignorar</string>
+    <string name="settings_parallel_conversions">Conversões simultâneas</string>
+    <string name="settings_hardware_acceleration">Aceleração de hardware</string>
+    <string name="settings_hardware_acceleration_desc">Usa o codificador de mídia do aparelho para vídeo.</string>
+    <string name="settings_keep_originals">Manter originais</string>
+    <string name="settings_keep_originals_desc">Os originais continuam onde estão.</string>
+    <string name="settings_section_engine">Motor</string>
+    <string name="settings_ytdlp_version">%1$s · atualizado</string>
+    <string name="settings_ffmpeg_version">%1$s · incluído no app</string>
+    <string name="settings_check">Verificar</string>
+    <string name="settings_ready">Pronto</string>
+    <string name="settings_section_other">Outros</string>
+    <string name="settings_review_intro">Rever introdução</string>
+    <string name="settings_version">Convertia %1$s</string>
+
+    <!-- Predefinições -->
+    <string name="presets_title">Predefinições</string>
+    <string name="presets_intro">Regras salvas de formato e qualidade. Aplique a todos os arquivos correspondentes na lista de conversão.</string>
+    <string name="presets_apply">Aplicar</string>
+
     <!-- Formatos de saída (descrições do seletor) -->
     <string name="format_image_jpg">Com perdas · universal</string>
     <string name="format_image_png">Sem perdas</string>
