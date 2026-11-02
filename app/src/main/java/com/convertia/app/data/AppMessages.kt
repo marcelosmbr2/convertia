@@ -43,6 +43,10 @@ sealed interface ToastEvent {
 
     data class EngineUpToDate(val engine: String, val version: String) : ToastEvent
 
+    data class EngineUpdated(val engine: String, val version: String) : ToastEvent
+
+    data object EngineUpdateFailed : ToastEvent
+
     /** O texto compartilhado não tinha link. */
     data object NoLinkShared : ToastEvent
 

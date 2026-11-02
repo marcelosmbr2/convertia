@@ -63,9 +63,13 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory),
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val engineVersion by viewModel.ytDlpVersion.collectAsStateWithLifecycle()
+    val checking by viewModel.checking.collectAsStateWithLifecycle()
     SettingsContent(
         settings = settings,
         presetCount = viewModel.presets.size,
+        engineVersion = engineVersion,
+        checkingEngine = checking,
         onUpdate = viewModel::update,
         onCheckEngine = viewModel::checkEngineUpdates,
         onOpenPresets = onOpenPresets,
@@ -77,6 +81,8 @@ fun SettingsScreen(
 fun SettingsContent(
     settings: AppSettings,
     presetCount: Int,
+    engineVersion: String?,
+    checkingEngine: Boolean,
     onUpdate: ((AppSettings) -> AppSettings) -> Unit,
     onCheckEngine: () -> Unit,
     onOpenPresets: () -> Unit,
@@ -179,11 +185,14 @@ fun SettingsContent(
             }
 
             Section(R.string.settings_section_engine) {
-                SettingRow(title = "yt-dlp", subtitle = stringResource(R.string.settings_ytdlp_version, SettingsViewModel.YT_DLP_VERSION), mono = true) {
-                    SmallOutlinedButton(stringResource(R.string.settings_check), onCheckEngine)
+                SettingRow(title = "yt-dlp", subtitle = engineVersion ?: stringResource(R.string.settings_engine_preparing), mono = true) {
+                    SmallOutlinedButton(
+                        stringResource(if (checkingEngine) R.string.settings_checking else R.string.settings_check),
+                        onClick = onCheckEngine,
+                    )
                 }
                 RowDivider()
-                SettingRow(title = "ffmpeg", subtitle = stringResource(R.string.settings_ffmpeg_version, SettingsViewModel.FFMPEG_VERSION), mono = true) {
+                SettingRow(title = "ffmpeg", subtitle = stringResource(R.string.settings_ffmpeg_included), mono = true) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         Box(Modifier.size(6.dp).clip(CircleShape).background(Palette.TextSecondary))
                         Text(stringResource(R.string.settings_ready), style = BaseTextStyle.copy(fontSize = 12.5.sp, color = Palette.TextSecondary))
@@ -353,7 +362,7 @@ fun PresetsScreen(presets: List<Preset>, onBack: () -> Unit, onApply: (Preset) -
 @Composable
 private fun SettingsPreview() {
     ConvertiaTheme {
-        SettingsContent(AppSettings(), 5, {}, {}, {}, {})
+        SettingsContent(AppSettings(), 5, "2025.11.12", false, {}, {}, {}, {})
     }
 }
 

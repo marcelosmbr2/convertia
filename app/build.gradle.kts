@@ -4,6 +4,21 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+/**
+ * Assinatura do release vinda de variáveis de ambiente (no GitHub Actions, das secrets do
+ * repositório). Sem elas, o release sai sem assinatura — útil para testar o build local.
+ */
+val releaseKeystore: String? = System.getenv("CONVERTIA_KEYSTORE_FILE")
+
+/** Versão: no GitHub Actions vem da tag (v0.2.0 → 0.2.0); localmente, o valor padrão. */
+val appVersionName: String = System.getenv("CONVERTIA_VERSION_NAME")?.removePrefix("v") ?: "0.2.0"
+
+/** 1.2.3 → 10203: cresce a cada versão, como o Android exige para atualizar por cima. */
+val appVersionCode: Int = appVersionName.substringBefore('-').split('.')
+    .map { it.toIntOrNull() ?: 0 }
+    .let { (it + listOf(0, 0, 0)).take(3) }
+    .let { (major, minor, patch) -> major * 10_000 + minor * 100 + patch }
+
 android {
     namespace = "com.convertia.app"
     compileSdk = 37
@@ -12,12 +27,24 @@ android {
         applicationId = "com.convertia.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
+    }
+
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = file(releaseKeystore)
+                storePassword = System.getenv("CONVERTIA_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("CONVERTIA_KEY_ALIAS")
+                keyPassword = System.getenv("CONVERTIA_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
+            if (releaseKeystore != null) signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -54,6 +81,11 @@ android {
             isUniversalApk = false
         }
     }
+}
+
+// APKs nomeados como "Convertia-0.2.0-arm64-v8a-release.apk".
+base {
+    archivesName = "Convertia-$appVersionName"
 }
 
 dependencies {

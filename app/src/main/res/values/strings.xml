@@ -55,6 +55,8 @@
     </plurals>
     <string name="toast_file_unavailable">Não foi possível abrir este arquivo</string>
     <string name="toast_engine_up_to_date">%1$s %2$s está atualizado</string>
+    <string name="toast_engine_updated">%1$s atualizado para %2$s</string>
+    <string name="toast_engine_update_failed">Não foi possível verificar atualizações</string>
     <string name="toast_no_link_shared">Nenhum link encontrado no que foi compartilhado</string>
     <string name="toast_no_link_clipboard">Nenhum link na área de transferência</string>
 
@@ -279,9 +281,10 @@
     <string name="settings_keep_originals">Manter originais</string>
     <string name="settings_keep_originals_desc">Os originais continuam onde estão.</string>
     <string name="settings_section_engine">Motor</string>
-    <string name="settings_ytdlp_version">%1$s · atualizado</string>
-    <string name="settings_ffmpeg_version">%1$s · incluído no app</string>
+    <string name="settings_engine_preparing">Preparando…</string>
+    <string name="settings_ffmpeg_included">Incluído no app</string>
     <string name="settings_check">Verificar</string>
+    <string name="settings_checking">Verificando…</string>
     <string name="settings_ready">Pronto</string>
     <string name="settings_section_other">Outros</string>
     <string name="settings_review_intro">Rever introdução</string>

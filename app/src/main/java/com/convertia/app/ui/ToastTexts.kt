@@ -33,7 +33,9 @@ fun ToastMessage.toContent(): ToastContent {
         is ToastEvent.OptionsApplied ->
             pluralStringResource(R.plurals.toast_options_applied, e.count, e.count) to null
         ToastEvent.FileUnavailable -> stringResource(R.string.toast_file_unavailable) to null
-        is ToastEvent.EngineUpToDate -> stringResource(R.string.toast_engine_up_to_date, e.engine, e.version) to null
+        is ToastEvent.EngineUpToDate -> stringResource(R.string.toast_engine_up_to_date, e.engine, e.version).trim() to null
+        is ToastEvent.EngineUpdated -> stringResource(R.string.toast_engine_updated, e.engine, e.version) to null
+        ToastEvent.EngineUpdateFailed -> stringResource(R.string.toast_engine_update_failed) to null
         ToastEvent.NoLinkShared -> stringResource(R.string.toast_no_link_shared) to null
         ToastEvent.NoLinkInClipboard -> stringResource(R.string.toast_no_link_clipboard) to null
     }

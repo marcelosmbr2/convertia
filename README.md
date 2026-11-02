@@ -11,6 +11,7 @@ Os protótipos de interface ficam em [`mockup/`](mockup/).
 | Gradle | 9.6.1 |
 | Kotlin | 2.4.21 |
 | Compose BOM | 2026.09.00 (Material 3) |
+| Motor de download | yt-dlp via youtubedl-android 0.18.1 (Python 3.12, QuickJS, ffmpeg) |
 | `minSdk` / `targetSdk` / `compileSdk` | 26 / 37 / 37 |
 
 As versões ficam em [`gradle/libs.versions.toml`](gradle/libs.versions.toml).
@@ -24,17 +25,22 @@ Abra a pasta do projeto no Android Studio, ou pela linha de comando:
 ./gradlew :app:installDebug
 ```
 
+O build gera um APK por arquitetura (`arm64-v8a`, `armeabi-v7a`, `x86_64`), cada um com
+50–70 MB por causa do Python e do ffmpeg empacotados. A maioria dos celulares usa
+`arm64-v8a`.
+
 ## Estado atual
 
-Todas as telas do mockup (`mockup/Convertia v3.dc.html`) estão implementadas: Onboarding,
-Baixar, Converter (com os sheets Adicionar, Inspetor e Seletor de formato), Fila,
-Biblioteca, Ajustes, Predefinições e o alvo do menu Compartilhar.
+Todas as telas do mockup (`mockup/Convertia v3.dc.html`) estão implementadas.
 
-**Download e conversão ainda são simulados**, como no protótipo: o progresso é falso e
-nenhum arquivo é baixado ou gerado. Já funcionam de verdade os ajustes (salvos no
-DataStore), as permissões, a área de transferência, o seletor de arquivos/galeria e o
-recebimento de links pelo menu Compartilhar. No build de debug o app abre com os dados de
-exemplo do mockup; no release, vazio.
+- **Download: real**, com o yt-dlp. Lê os formatos do link, baixa no formato e contêiner
+  escolhidos (juntando vídeo e áudio com o ffmpeg) e salva em `Download/Convertia`.
+  Continua com o app fechado, com notificação de progresso, e respeita
+  "Somente em Wi-Fi". O yt-dlp pode ser atualizado em Ajustes › Motor › Verificar.
+- **Conversão: ainda simulada**, como no protótipo (progresso falso, nenhum arquivo
+  gerado). É a próxima fase.
+- Biblioteca, histórico, links recentes e fila ficam salvos no aparelho. Downloads
+  interrompidos voltam pausados.
 
 ## Estrutura
 
@@ -43,8 +49,10 @@ app/src/main/java/com/convertia/app/
 ├── AppContainer.kt          # dependências (DI manual)
 ├── MainActivity.kt          # onboarding ou app
 ├── domain/                  # regras puras: catálogo de formatos, estimativas, modelos
-├── data/                    # filas, biblioteca, ajustes e motores simulados
-│   └── engine/              # interfaces de motor + implementações simuladas
+├── data/                    # filas, biblioteca, ajustes, estado salvo
+│   ├── engine/              # interfaces de motor, yt-dlp e motores simulados
+│   ├── download/            # serviço em primeiro plano, notificações, rede
+│   └── storage/             # gravação em Download/Convertia
 ├── share/                   # ShareActivity (menu Compartilhar)
 └── ui/
     ├── AppViewModel.kt      # navegação (aba, sheet, voltar) e ações dos toasts
@@ -54,8 +62,41 @@ app/src/main/java/com/convertia/app/
     └── download/ convert/ queue/ library/ settings/ onboarding/
 ```
 
-Os motores reais entram trocando as implementações de `data/engine` (`MediaInspector`,
-`DownloadEngine`, `ConversionEngine`); as filas e a interface não mudam.
+Os motores ficam atrás das interfaces de `data/engine` (`MediaInspector`,
+`DownloadEngine`, `ConversionEngine`): o de download é o yt-dlp (`data/engine/ytdlp`); o
+de conversão ainda é o simulado.
+
+## Publicar no GitHub
+
+O workflow `.github/workflows/release.yml` gera os APKs assinados e cria um release a cada
+tag `v*`. A versão do app vem da tag (`v0.2.0` → 0.2.0).
+
+1. Crie a chave de assinatura (uma vez só, e **guarde-a bem**: sem ela não dá para
+   publicar atualizações que instalem por cima):
+
+   ```bash
+   keytool -genkeypair -keystore convertia-release.jks -alias convertia -keyalg RSA -keysize 4096 -validity 10000
+   ```
+
+2. Em **Settings › Secrets and variables › Actions** do repositório, crie as secrets:
+   - `KEYSTORE_BASE64`: o conteúdo de `base64 -w0 convertia-release.jks`
+   - `KEYSTORE_PASSWORD`: a senha do keystore
+   - `KEY_ALIAS`: `convertia` (ou o alias que você usou)
+   - `KEY_PASSWORD`: a senha da chave
+
+3. Publique uma versão:
+
+   ```bash
+   git tag v0.2.0
+   ```
+
+   ```bash
+   git push origin v0.2.0
+   ```
+
+Para assinar um build local, exporte `CONVERTIA_KEYSTORE_FILE`,
+`CONVERTIA_KEYSTORE_PASSWORD`, `CONVERTIA_KEY_ALIAS` e `CONVERTIA_KEY_PASSWORD` antes de
+`./gradlew :app:assembleRelease`. O workflow `ci.yml` roda testes, lint e build a cada push.
 
 ## Testes
 
@@ -64,4 +105,6 @@ Os motores reais entram trocando as implementações de `data/engine` (`MediaIns
 ```
 
 Os valores esperados do domínio (tamanhos, formato sugerido, estimativas) foram obtidos
-rodando a lógica JavaScript do próprio mockup.
+rodando a lógica JavaScript do próprio mockup. O leitor de formatos do yt-dlp é testado
+com a saída real de um vídeo do YouTube com licença Creative Commons
+(`app/src/test/resources/ytdlp/`).
