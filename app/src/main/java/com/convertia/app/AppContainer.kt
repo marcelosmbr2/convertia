@@ -10,7 +10,10 @@ import com.convertia.app.data.DownloadQueue
 import com.convertia.app.data.LibraryRepository
 import com.convertia.app.data.SampleData
 import com.convertia.app.data.SettingsRepository
-import com.convertia.app.data.download.DownloadService
+import com.convertia.app.data.convert.CompositeConversionEngine
+import com.convertia.app.data.convert.WorkDir
+import com.convertia.app.data.download.ActiveWork
+import com.convertia.app.data.download.WorkService
 import com.convertia.app.data.download.NetworkMonitor
 import com.convertia.app.data.download.Notifications
 import com.convertia.app.data.engine.MediaInspector
@@ -23,7 +26,6 @@ import com.convertia.app.data.storage.MediaSaver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.convertia.app.domain.AppSettings
-import com.convertia.app.domain.DownloadStatus
 import com.convertia.app.domain.EngineCapabilities
 import com.convertia.app.domain.Preset
 import kotlinx.coroutines.CoroutineScope
@@ -98,9 +100,21 @@ class AppContainer(context: Context) {
         allowed = downloadsAllowed,
     )
 
+    private val workDir = WorkDir(File(context.noBackupFilesDir, "convert"), context.contentResolver, library)
+
+    /** Motores por par origem → destino; os reais entram nas próximas etapas. */
+    private val conversionEngine = CompositeConversionEngine(
+        workDir = workDir,
+        saver = mediaSaver,
+        library = library,
+        settings = settings,
+        converters = emptyList(),
+        fallback = SimulatedConversionEngine(),
+    )
+
     val conversions = ConversionQueue(
         scope = appScope,
-        engine = SimulatedConversionEngine(),
+        engine = conversionEngine,
         library = library,
         clock = clock,
         parallelism = settings.map { it.parallelConversions }.stateIn(appScope, SharingStarted.Eagerly, settings.value.parallelConversions),
@@ -135,13 +149,15 @@ class AppContainer(context: Context) {
             notifyDownload = { job -> Notifications.downloadFinished(app, job) },
             notifyConversions = { Notifications.conversionsFinished(app) },
         )
-        // Serviço em primeiro plano enquanto houver download baixando.
+        // Serviço em primeiro plano enquanto houver download baixando ou conversão rodando.
         appScope.launch {
-            downloads.jobs
-                .map { jobs -> jobs.any { it.status == DownloadStatus.DOWNLOADING } }
+            combine(downloads.jobs, conversions.items, conversions.running, ActiveWork::of)
+                .map { it.isBusy }
                 .distinctUntilChanged()
-                .collect { downloading -> if (downloading) DownloadService.start(app) }
+                .collect { busy -> if (busy) WorkService.start(app) }
         }
+        appScope.launch { conversions.removed.collect { item -> withContext(Dispatchers.IO) { workDir.discard(item) } } }
+        appScope.launch(Dispatchers.IO) { runCatching { workDir.cleanAll() } }
         restoreState()
         appScope.launch {
             // Erros aqui reaparecem (com mensagem) na primeira inspeção ou download.

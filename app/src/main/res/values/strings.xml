@@ -381,7 +381,7 @@
     <string name="time_yesterday">Ontem</string>
 
     <!-- Notificações -->
-    <string name="notification_channel_progress">Downloads em andamento</string>
+    <string name="notification_channel_progress">Downloads e conversões em andamento</string>
     <string name="notification_channel_done">Downloads e conversões concluídos</string>
     <plurals name="notification_downloading">
         <item quantity="one">Baixando %d arquivo</item>
@@ -389,6 +389,13 @@
         <item quantity="other">Baixando %d arquivos</item>
     </plurals>
     <string name="notification_progress">%1$d%% · %2$s MB/s</string>
+    <plurals name="notification_converting">
+        <item quantity="one">Convertendo %d arquivo</item>
+        <item quantity="many">Convertendo %d arquivos</item>
+        <item quantity="other">Convertendo %d arquivos</item>
+    </plurals>
+    <string name="notification_mixed">%1$s · %2$s</string>
+    <string name="notification_conversion_progress">%1$d%% · no aparelho</string>
 
     <!-- Onboarding -->
     <string name="onboarding_start">Começar</string>

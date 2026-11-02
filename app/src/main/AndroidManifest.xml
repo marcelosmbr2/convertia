@@ -7,6 +7,8 @@
     <!-- Downloads continuam com o app fechado, com notificação de progresso. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- Conversões continuam com o app fechado (Android 15+ exige o tipo "processamento de mídia"). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROCESSING" />
     <!-- Avisar quando um download ou conversão termina (Android 13+). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Salvar em Download/Convertia até o Android 9; depois disso não é preciso permissão. -->
@@ -34,9 +36,9 @@
         </activity>
 
         <service
-            android:name=".data.download.DownloadService"
+            android:name=".data.download.WorkService"
             android:exported="false"
-            android:foregroundServiceType="dataSync" />
+            android:foregroundServiceType="dataSync|mediaProcessing" />
 
         <!-- Até o Android 9, os arquivos em Download/Convertia são compartilhados por aqui. -->
         <provider

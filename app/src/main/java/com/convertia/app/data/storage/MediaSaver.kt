@@ -1,8 +1,10 @@
 package com.convertia.app.data.storage
 
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.media.MediaScannerConnection
+import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
@@ -10,6 +12,7 @@ import android.webkit.MimeTypeMap
 import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
+import com.convertia.app.domain.ConflictPolicy
 import com.convertia.app.domain.SavedFile
 import java.io.File
 
@@ -19,9 +22,49 @@ import java.io.File
  */
 class MediaSaver(private val context: Context) {
 
-    fun save(file: File): SavedFile {
+    /**
+     * Grava [file] em `Download/Convertia`. Se já existir um arquivo com o mesmo nome:
+     * RENAME acrescenta " (1)"; REPLACE apaga o antigo, se for do app (de outro dono,
+     * renomeia); SKIP mantém o antigo e devolve-o sem gravar nada.
+     */
+    fun save(file: File, policy: ConflictPolicy = ConflictPolicy.RENAME): SavedFile {
         val mime = mimeTypeOf(file.name)
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) saveToMediaStore(file, mime) else saveToPublicFolder(file, mime)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            when (policy) {
+                ConflictPolicy.RENAME -> Unit
+                ConflictPolicy.REPLACE -> existingInMediaStore(file.name)?.let { if (it.ownedByApp) context.contentResolver.delete(it.uri, null, null) }
+                ConflictPolicy.SKIP -> existingInMediaStore(file.name)?.let { return SavedFile(it.uri.toString(), file.name, it.sizeBytes, mime) }
+            }
+            return saveToMediaStore(file, mime)
+        }
+        val existing = File(legacyFolder(), file.name)
+        when (policy) {
+            ConflictPolicy.RENAME -> Unit
+            ConflictPolicy.REPLACE -> existing.delete()
+            ConflictPolicy.SKIP -> if (existing.isFile) {
+                val uri = FileProvider.getUriForFile(context, fileProviderAuthority(context), existing)
+                return SavedFile(uri.toString(), existing.name, existing.length(), mime)
+            }
+        }
+        return saveToPublicFolder(file, mime)
+    }
+
+    private class Existing(val uri: Uri, val sizeBytes: Long, val ownedByApp: Boolean)
+
+    /** Arquivo com esse nome já em `Download/Convertia`, de qualquer app. */
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun existingInMediaStore(name: String): Existing? {
+        val projection = arrayOf(MediaStore.Downloads._ID, MediaStore.Downloads.SIZE, MediaStore.Downloads.OWNER_PACKAGE_NAME)
+        val selection = "${MediaStore.Downloads.DISPLAY_NAME} = ? AND ${MediaStore.Downloads.RELATIVE_PATH} = ?"
+        val args = arrayOf(name, "${Environment.DIRECTORY_DOWNLOADS}/$FOLDER/")
+        return context.contentResolver.query(MediaStore.Downloads.EXTERNAL_CONTENT_URI, projection, selection, args, null)?.use { cursor ->
+            if (!cursor.moveToFirst()) return null
+            Existing(
+                uri = ContentUris.withAppendedId(MediaStore.Downloads.EXTERNAL_CONTENT_URI, cursor.getLong(0)),
+                sizeBytes = cursor.getLong(1),
+                ownedByApp = cursor.getString(2) == context.packageName,
+            )
+        }
     }
 
     /** Apaga um arquivo salvo antes; `false` se não deu (por exemplo, criado por outra instalação). */

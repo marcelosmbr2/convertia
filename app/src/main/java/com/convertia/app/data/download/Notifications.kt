@@ -34,26 +34,35 @@ object Notifications {
         )
     }
 
-    /** Notificação fixa do serviço: quantos estão baixando e o progresso médio. */
-    fun progress(context: Context, active: List<DownloadJob>): Notification {
+    /** Notificação fixa do serviço: o que está baixando e convertendo, com o progresso médio. */
+    fun progress(context: Context, work: ActiveWork): Notification {
+        val active = work.downloads
+        val converting = work.conversions
         val downloading = active.filter { it.status == DownloadStatus.DOWNLOADING }
-        val percent = if (downloading.isEmpty()) 0 else downloading.map { it.progress }.average().roundToInt()
+        val running = downloading.map { it.progress } + converting.map { it.progress }
+        val percent = if (running.isEmpty()) 0 else running.average().roundToInt()
         val speed = downloading.sumOf { it.speedMbps }
-        val title = if (active.size == 1) {
-            active.first().request.title
-        } else {
-            context.resources.getQuantityString(R.plurals.notification_downloading, active.size, active.size)
+        val title = when {
+            active.isEmpty() && converting.size == 1 -> converting.first().name
+            active.isEmpty() -> context.resources.getQuantityString(R.plurals.notification_converting, converting.size, converting.size)
+            converting.isEmpty() && active.size == 1 -> active.first().request.title
+            converting.isEmpty() -> context.resources.getQuantityString(R.plurals.notification_downloading, active.size, active.size)
+            else -> context.getString(
+                R.string.notification_mixed,
+                context.resources.getQuantityString(R.plurals.notification_downloading, active.size, active.size),
+                context.resources.getQuantityString(R.plurals.notification_converting, converting.size, converting.size).lowercase(),
+            )
         }
-        val text = if (downloading.isEmpty()) {
-            context.getString(R.string.queue_download_queued)
-        } else {
-            context.getString(R.string.notification_progress, percent, Formatters.decimal(speed, 1))
+        val text = when {
+            downloading.isNotEmpty() -> context.getString(R.string.notification_progress, percent, Formatters.decimal(speed, 1))
+            converting.isNotEmpty() -> context.getString(R.string.notification_conversion_progress, percent)
+            else -> context.getString(R.string.queue_download_queued)
         }
         return NotificationCompat.Builder(context, CHANNEL_PROGRESS)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(text)
-            .setProgress(100, percent, downloading.isEmpty())
+            .setProgress(100, percent, running.isEmpty())
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setSilent(true)
@@ -63,9 +72,9 @@ object Notifications {
     }
 
     /** Atualiza a notificação fixa do serviço. */
-    fun updateProgress(context: Context, active: List<DownloadJob>) {
+    fun updateProgress(context: Context, work: ActiveWork) {
         try {
-            NotificationManagerCompat.from(context).notify(PROGRESS_ID, progress(context, active))
+            NotificationManagerCompat.from(context).notify(PROGRESS_ID, progress(context, work))
         } catch (_: SecurityException) {
             // Sem permissão de notificação: o serviço continua, só sem atualizar o texto.
         }

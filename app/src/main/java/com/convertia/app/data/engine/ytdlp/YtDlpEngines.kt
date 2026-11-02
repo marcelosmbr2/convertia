@@ -45,7 +45,7 @@ class YtDlpDownloadEngine(
 
         val outputs = outputsIn(dir)
         if (outputs.isEmpty()) error("O yt-dlp terminou sem gerar arquivo")
-        val saved = outputs.map(saver::save)
+        val saved = outputs.map { saver.save(it) }
         dir.deleteRecursively()
         send(DownloadEvent.Completed(saved))
     }.flowOn(Dispatchers.IO)
