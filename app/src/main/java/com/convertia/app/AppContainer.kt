@@ -26,6 +26,8 @@ import com.convertia.app.data.engine.image.ImageConverter
 import com.convertia.app.data.engine.office.OfficeAvailability
 import com.convertia.app.data.engine.office.OfficeClient
 import com.convertia.app.data.engine.office.OfficeEngine
+import com.convertia.app.data.engine.pdf.PdfBoxExtractor
+import com.convertia.app.data.engine.pdf.PdfDocumentConverter
 import com.convertia.app.data.engine.ytdlp.YtDlp
 import com.convertia.app.data.engine.ytdlp.YtDlpDownloadEngine
 import com.convertia.app.data.engine.ytdlp.YtDlpMediaInspector
@@ -77,10 +79,10 @@ class AppContainer(context: Context) {
     val messages = AppMessages()
     val presets: List<Preset> = SampleData.presets
 
-    /** O que o motor de conversão deste build faz. PDF → documento e OCR entram nas próximas fases. */
+    /** O que o motor de conversão deste build faz. OCR entra na próxima fase. */
     val capabilities = EngineCapabilities(
         office = OfficeAvailability.isAvailable(context),
-        pdfToDocument = false,
+        pdfToDocument = true,
         ocr = false,
     )
 
@@ -123,12 +125,16 @@ class AppContainer(context: Context) {
         saver = mediaSaver,
         library = library,
         settings = settings,
-        converters = listOfNotNull(
-            FfmpegMediaConverter(ffmpeg),
-            ImageConverter(ffmpeg),
-            ArchiveConverter(rarExtractor = RarExtractor()),
-            if (capabilities.office) OfficeEngine(OfficeClient(context.applicationContext, appScope)) else null,
-        ),
+        converters = run {
+            val office = if (capabilities.office) OfficeClient(context.applicationContext, appScope) else null
+            listOfNotNull(
+                FfmpegMediaConverter(ffmpeg),
+                ImageConverter(ffmpeg),
+                ArchiveConverter(rarExtractor = RarExtractor()),
+                PdfDocumentConverter(PdfBoxExtractor(context.applicationContext), office),
+                office?.let(::OfficeEngine),
+            )
+        },
         fallback = SimulatedConversionEngine(),
     )
 

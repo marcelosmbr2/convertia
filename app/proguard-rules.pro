@@ -20,3 +20,8 @@
 
 # LibreOfficeKit: o código nativo chama estas classes e seus métodos pelo nome.
 -keep class org.libreoffice.kit.** { *; }
+
+# PdfBox-Android carrega recursos (fontes, mapas) pelo nome e usa BouncyCastle opcional.
+-keep class com.tom_roush.pdfbox.** { *; }
+-dontwarn com.tom_roush.pdfbox.**
+-dontwarn org.bouncycastle.**

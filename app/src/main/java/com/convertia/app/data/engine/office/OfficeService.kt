@@ -30,7 +30,7 @@ class OfficeService : Service() {
 
     private val worker = HandlerThread("lokit").apply { start() }
     private val workerHandler = Handler(worker.looper)
-    private val messenger = Messenger(IncomingHandler())
+    private val messenger = Messenger(IncomingHandler(this))
     private var office: Office? = null
 
     override fun onBind(intent: Intent?): IBinder = messenger.binder
@@ -47,8 +47,17 @@ class OfficeService : Service() {
         exitProcess(0)
     }
 
-    private inner class IncomingHandler : Handler(Looper.getMainLooper()) {
+    private class IncomingHandler(service: OfficeService) : Handler(Looper.getMainLooper()) {
+        private val ref = java.lang.ref.WeakReference(service)
+
         override fun handleMessage(msg: Message) {
+            val service = ref.get() ?: return
+            service.handle(msg)
+        }
+    }
+
+    private fun handle(msg: Message) {
+        run {
             val reply = msg.replyTo ?: return
             when (msg.what) {
                 OfficeProtocol.MSG_HELLO -> reply.send(Message.obtain(null, OfficeProtocol.MSG_HELLO, Process.myPid(), 0))
