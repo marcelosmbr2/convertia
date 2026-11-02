@@ -1,0 +1,123 @@
+name: Inspecionar LibreOffice (F-Droid)
+
+# Baixa os APKs do LibreOffice Viewer publicados pelo F-Droid e imprime o que o build do
+# Convertia precisa saber para empacotá-los: versão, códigos por arquitetura, SHA-256,
+# bibliotecas nativas (e alinhamento de 16 KB), assets (guardados × comprimidos), classes
+# Java que o código nativo usa e se os filtros prometidos existem. O resultado vai para
+# o resumo do job e para gradle/libreoffice.properties (como artefato).
+#
+# Este contêiner de desenvolvimento não alcança f-droid.org; o workflow faz isso por ele.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Versão do LibreOffice Viewer (vazio = a sugerida pelo F-Droid)"
+        required: false
+        default: ""
+  push:
+    paths:
+      - ".github/workflows/libreoffice-inspect.yml"
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Versões disponíveis no F-Droid
+        id: versions
+        env:
+          WANTED: ${{ github.event.inputs.version }}
+        run: |
+          set -euo pipefail
+          curl -fsSL "https://f-droid.org/api/v1/packages/org.documentfoundation.libreoffice" -o api.json
+          echo "## API do F-Droid" >> "$GITHUB_STEP_SUMMARY"
+          jq -r '"Sugerida: \(.suggestedVersionCode)"' api.json | tee -a "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          jq -r '.packages[] | "\(.versionName)\t\(.versionCode)"' api.json | head -40 | tee -a "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$WANTED" ]; then
+            VERSION="$WANTED"
+          else
+            SUGGESTED=$(jq -r '.suggestedVersionCode' api.json)
+            VERSION=$(jq -r --argjson c "$SUGGESTED" '.packages[] | select(.versionCode == $c) | .versionName' api.json | head -1)
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          jq -r --arg v "$VERSION" '.packages[] | select(.versionName == $v) | .versionCode' api.json > codes.txt
+          echo "Versão escolhida: $VERSION, códigos: $(tr '\n' ' ' < codes.txt)"
+
+      - name: Baixar e inspecionar cada APK
+        env:
+          VERSION: ${{ steps.versions.outputs.version }}
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq && sudo apt-get install -y -qq binutils >/dev/null
+          mkdir -p apks out
+          PKG=org.documentfoundation.libreoffice
+          {
+            echo "# LibreOffice Viewer do F-Droid empacotado no Convertia (gerado por libreoffice-inspect.yml)."
+            echo "libreoffice.version=$VERSION"
+          } > out/libreoffice.properties
+          echo "## APKs ($VERSION)" >> "$GITHUB_STEP_SUMMARY"
+          while read -r CODE; do
+            [ -z "$CODE" ] && continue
+            FILE="apks/${PKG}_${CODE}.apk"
+            URL="https://f-droid.org/repo/${PKG}_${CODE}.apk"
+            if ! curl -fsSL "$URL" -o "$FILE"; then
+              URL="https://f-droid.org/archive/${PKG}_${CODE}.apk"
+              curl -fsSL "$URL" -o "$FILE"
+            fi
+            SHA=$(sha256sum "$FILE" | cut -d' ' -f1)
+            SIZE=$(stat -c %s "$FILE")
+            ABIS=$(unzip -Z1 "$FILE" | grep -oE '^lib/[^/]+/' | sort -u | cut -d/ -f2 | tr '\n' ' ')
+            ABI=$(echo "$ABIS" | awk '{print $1}')
+            echo "### $CODE → $ABI ($((SIZE / 1024 / 1024)) MB)" | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "url=$URL sha256=$SHA abis=[$ABIS]" | tee -a "$GITHUB_STEP_SUMMARY"
+            {
+              echo "libreoffice.$ABI.code=$CODE"
+              echo "libreoffice.$ABI.url=$URL"
+              echo "libreoffice.$ABI.sha256=$SHA"
+            } >> out/libreoffice.properties
+
+            WORK="work-$CODE"; mkdir -p "$WORK"; cd "$WORK"
+            unzip -q "../$FILE" 'lib/*' 'assets/*' 'AndroidManifest.xml' 'META-INF/*.RSA' 'META-INF/*.SF' 2>/dev/null || true
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo "-- bibliotecas nativas (nome, bytes, maior alinhamento de LOAD)" | tee -a "$GITHUB_STEP_SUMMARY"
+            for SO in lib/*/*.so; do
+              ALIGN=$(readelf -lW "$SO" | awk '$1=="LOAD"{print $NF}' | sort -u | tr '\n' ',')
+              printf '%s\t%s\t%s\n' "$SO" "$(stat -c %s "$SO")" "$ALIGN" | tee -a "$GITHUB_STEP_SUMMARY"
+            done
+            echo "-- entradas do APK: Stored × Deflated por pasta de assets" | tee -a "$GITHUB_STEP_SUMMARY"
+            unzip -v "../$FILE" | awk 'NR>3 && $NF ~ /^assets\// {split($NF,a,"/"); key=a[2]"/"a[3]; m=$2; c[key" "m]++} END {for (k in c) print k, c[k]}' | sort | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "-- extensões guardadas sem compressão (Stored)" | tee -a "$GITHUB_STEP_SUMMARY"
+            unzip -v "../$FILE" | awk 'NR>3 && $2=="Stored" && $NF ~ /^assets\// {n=split($NF,p,"."); if (n>1) e[p[n]]++} END {for (k in e) print k, e[k]}' | sort | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "-- tamanho dos assets (KB)" | tee -a "$GITHUB_STEP_SUMMARY"
+            du -sk assets/* 2>/dev/null | sort -n | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "-- classes Java referenciadas pelo liblo-native-code.so" | tee -a "$GITHUB_STEP_SUMMARY"
+            strings -a lib/*/liblo-native-code.so | grep -oE 'org/libreoffice/[A-Za-z0-9_/$]+' | sort -u | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "-- métodos JNI exportados" | tee -a "$GITHUB_STEP_SUMMARY"
+            nm -D --defined-only lib/*/liblo-native-code.so 2>/dev/null | grep -oE 'Java_org_libreoffice_[A-Za-z0-9_]+' | sort -u | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "-- filtros no registro (share/registry/*.xcd)" | tee -a "$GITHUB_STEP_SUMMARY"
+            for F in Markdown FictionBook EPUB "Text - txt - csv (StarCalc)" calc_pdf_Export impress_pdf_Export writer_pdf_Export writer_png_Export "HTML (StarWriter)" "Office Open XML Text" "MS Word 97" "Rich Text Format" writer8 "Text (encoded)" draw_pdf_Export; do
+              COUNT=$(grep -rl --include='*.xcd' -F "$F" assets/share/registry 2>/dev/null | wc -l)
+              printf '%-32s %s\n' "$F" "$COUNT" | tee -a "$GITHUB_STEP_SUMMARY"
+            done
+            echo "-- fontes em assets/unpack/user/fonts" | tee -a "$GITHUB_STEP_SUMMARY"
+            ls assets/unpack/user/fonts 2>/dev/null | tr '\n' ' ' | tee -a "$GITHUB_STEP_SUMMARY"; echo
+            echo "-- pastas de primeiro nível em assets" | tee -a "$GITHUB_STEP_SUMMARY"
+            find assets -maxdepth 2 -type d | sort | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "-- assinatura" | tee -a "$GITHUB_STEP_SUMMARY"
+            for RSA in META-INF/*.RSA; do keytool -printcert -file "$RSA" 2>/dev/null | grep -E 'Owner|SHA256' | tee -a "$GITHUB_STEP_SUMMARY"; done
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            cd ..
+          done < codes.txt
+          echo "## libreoffice.properties" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat out/libreoffice.properties | tee -a "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: libreoffice-properties
+          path: out/libreoffice.properties
