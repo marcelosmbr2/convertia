@@ -17,3 +17,6 @@
 -dontwarn org.brotli.dec.**
 -dontwarn org.objectweb.asm.**
 -dontwarn org.apache.commons.compress.**
+
+# LibreOfficeKit: o código nativo chama estas classes e seus métodos pelo nome.
+-keep class org.libreoffice.kit.** { *; }

@@ -1,3 +1,9 @@
+import org.gradle.work.DisableCachingByDefault
+import java.net.URI
+import java.security.MessageDigest
+import java.util.Properties
+import java.util.zip.ZipFile
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -19,6 +25,108 @@ val appVersionCode: Int = appVersionName.substringBefore('-').split('.')
     .let { (it + listOf(0, 0, 0)).take(3) }
     .let { (major, minor, patch) -> major * 10_000 + minor * 100 + patch }
 
+/**
+ * LibreOffice embutido: o build baixa os APKs do LibreOffice Viewer publicados pelo F-Droid
+ * (versão e SHA-256 em gradle/libreoffice.properties), confere e extrai as bibliotecas
+ * nativas e os assets. `-Pconvertia.office=false` desliga (para compilar sem acesso ao
+ * f-droid.org); o app então não oferece conversões de documentos.
+ */
+val officeEnabled: Boolean = providers.gradleProperty("convertia.office").map { it.toBoolean() }.getOrElse(true)
+val officeProperties = Properties().apply { rootProject.file("gradle/libreoffice.properties").inputStream().use(::load) }
+val officeVersion: String = officeProperties.getProperty("libreoffice.version")
+val officeAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+
+@DisableCachingByDefault(because = "Baixa ~250 MB; não vale guardar no build cache")
+abstract class PrepareLibreOffice : DefaultTask() {
+    @get:Input abstract val version: Property<String>
+    @get:Input abstract val urls: MapProperty<String, String>
+    @get:Input abstract val checksums: MapProperty<String, String>
+    @get:Internal abstract val downloadCache: DirectoryProperty
+    @get:OutputDirectory abstract val jniLibsDir: DirectoryProperty
+    @get:OutputDirectory abstract val assetsDir: DirectoryProperty
+
+    @TaskAction
+    fun prepare() {
+        val jni = jniLibsDir.get().asFile.apply { deleteRecursively(); mkdirs() }
+        val assets = assetsDir.get().asFile.apply { deleteRecursively(); mkdirs() }
+        var assetsDone = false
+        for ((abi, url) in urls.get()) {
+            val expected = checksums.get().getValue(abi)
+            val apk = File(downloadCache.get().asFile, "libreoffice-${version.get()}-$abi.apk")
+            if (!apk.isFile || sha256(apk) != expected) {
+                download(url, apk)
+                val actual = sha256(apk)
+                check(actual == expected) { "SHA-256 inesperado para $url: $actual (esperado $expected)" }
+            }
+            ZipFile(apk).use { zip ->
+                for (entry in zip.entries()) {
+                    val name = entry.name
+                    val target = when {
+                        name.startsWith("lib/$abi/") && name.endsWith(".so") -> File(jni, "$abi/${name.substringAfterLast('/')}")
+                        !assetsDone && ASSET_DIRS.any { name.startsWith("assets/$it/") } && !entry.isDirectory ->
+                            File(assets, name.removePrefix("assets/"))
+                        else -> null
+                    } ?: continue
+                    target.parentFile.mkdirs()
+                    zip.getInputStream(entry).use { input -> target.outputStream().use { input.copyTo(it) } }
+                }
+            }
+            assetsDone = true
+        }
+    }
+
+    private fun download(url: String, target: File) {
+        target.parentFile.mkdirs()
+        val temp = File(target.path + ".part")
+        var lastError: Exception? = null
+        repeat(3) { attempt ->
+            try {
+                logger.lifecycle("LibreOffice: baixando $url" + if (attempt > 0) " (tentativa ${attempt + 1})" else "")
+                val connection = URI(url).toURL().openConnection().apply { connectTimeout = 30_000; readTimeout = 120_000 }
+                connection.getInputStream().use { input -> temp.outputStream().use { input.copyTo(it) } }
+                check(temp.renameTo(target) || (target.delete() && temp.renameTo(target)))
+                return
+            } catch (e: Exception) {
+                lastError = e
+                temp.delete()
+            }
+        }
+        throw GradleException("Não foi possível baixar $url", lastError)
+    }
+
+    private fun sha256(file: File): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        file.inputStream().use { input ->
+            val buffer = ByteArray(1 shl 16)
+            while (true) {
+                val read = input.read(buffer)
+                if (read < 0) break
+                digest.update(buffer, 0, read)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it) }
+    }
+
+    private companion object {
+        val ASSET_DIRS = listOf("program", "share", "unpack")
+    }
+}
+
+if (officeEnabled) {
+    val prepareLibreOffice = tasks.register<PrepareLibreOffice>("prepareLibreOffice") {
+        version.set(officeVersion)
+        urls.set(officeAbis.associateWith { officeProperties.getProperty("libreoffice.$it.url") })
+        checksums.set(officeAbis.associateWith { officeProperties.getProperty("libreoffice.$it.sha256") })
+        downloadCache.set(File(gradle.gradleUserHomeDir, "caches/convertia-libreoffice"))
+    }
+    androidComponents {
+        onVariants { variant ->
+            variant.sources.jniLibs?.addGeneratedSourceDirectory(prepareLibreOffice, PrepareLibreOffice::jniLibsDir)
+            variant.sources.assets?.addGeneratedSourceDirectory(prepareLibreOffice, PrepareLibreOffice::assetsDir)
+        }
+    }
+}
+
 android {
     namespace = "com.convertia.app"
     compileSdk = 37
@@ -29,6 +137,8 @@ android {
         targetSdk = 37
         versionCode = appVersionCode
         versionName = appVersionName
+        // Vazio quando o build não embute o LibreOffice.
+        buildConfigField("String", "LIBREOFFICE_VERSION", "\"${if (officeEnabled) officeVersion else ""}\"")
     }
 
     signingConfigs {

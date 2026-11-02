@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,6 +42,7 @@ import com.convertia.app.domain.AppSettings
 import com.convertia.app.domain.ConflictPolicy
 import com.convertia.app.domain.Preset
 import com.convertia.app.ui.components.IconCircleButton
+import com.convertia.app.ui.components.TextPillButton
 import com.convertia.app.ui.components.ListCard
 import com.convertia.app.ui.components.RowDivider
 import com.convertia.app.ui.components.ScreenHeader
@@ -192,6 +194,19 @@ fun SettingsContent(
                     )
                 }
                 RowDivider()
+                SettingRow(
+                    title = "LibreOffice",
+                    subtitle = if (BuildConfig.LIBREOFFICE_VERSION.isEmpty()) stringResource(R.string.settings_libreoffice_missing) else stringResource(R.string.settings_libreoffice_included, BuildConfig.LIBREOFFICE_VERSION),
+                    mono = true,
+                ) {
+                    val uriHandler = LocalUriHandler.current
+                    TextPillButton(
+                        text = stringResource(R.string.settings_license),
+                        onClick = { uriHandler.openUri("https://www.libreoffice.org/about-us/licenses/") },
+                        color = Palette.TextSecondary,
+                        fontWeight = FontWeight.Medium,
+                    )
+                }
                 SettingRow(title = "ffmpeg", subtitle = stringResource(R.string.settings_ffmpeg_included), mono = true) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         Box(Modifier.size(6.dp).clip(CircleShape).background(Palette.TextSecondary))

@@ -23,6 +23,9 @@ import com.convertia.app.data.engine.ffmpeg.FfmpegMediaConverter
 import com.convertia.app.data.engine.archive.ArchiveConverter
 import com.convertia.app.data.engine.archive.RarExtractor
 import com.convertia.app.data.engine.image.ImageConverter
+import com.convertia.app.data.engine.office.OfficeAvailability
+import com.convertia.app.data.engine.office.OfficeClient
+import com.convertia.app.data.engine.office.OfficeEngine
 import com.convertia.app.data.engine.ytdlp.YtDlp
 import com.convertia.app.data.engine.ytdlp.YtDlpDownloadEngine
 import com.convertia.app.data.engine.ytdlp.YtDlpMediaInspector
@@ -74,8 +77,12 @@ class AppContainer(context: Context) {
     val messages = AppMessages()
     val presets: List<Preset> = SampleData.presets
 
-    /** O que o motor de conversão deste build faz. LibreOffice, PDF → documento e OCR entram nas próximas fases. */
-    val capabilities = EngineCapabilities(office = false, pdfToDocument = false, ocr = false)
+    /** O que o motor de conversão deste build faz. PDF → documento e OCR entram nas próximas fases. */
+    val capabilities = EngineCapabilities(
+        office = OfficeAvailability.isAvailable(context),
+        pdfToDocument = false,
+        ocr = false,
+    )
 
     /** yt-dlp + ffmpeg empacotados; inicializa em segundo plano assim que o app abre. */
     val ytDlp = YtDlp(context.applicationContext)
@@ -116,7 +123,12 @@ class AppContainer(context: Context) {
         saver = mediaSaver,
         library = library,
         settings = settings,
-        converters = listOf(FfmpegMediaConverter(ffmpeg), ImageConverter(ffmpeg), ArchiveConverter(rarExtractor = RarExtractor())),
+        converters = listOfNotNull(
+            FfmpegMediaConverter(ffmpeg),
+            ImageConverter(ffmpeg),
+            ArchiveConverter(rarExtractor = RarExtractor()),
+            if (capabilities.office) OfficeEngine(OfficeClient(context.applicationContext, appScope)) else null,
+        ),
         fallback = SimulatedConversionEngine(),
     )
 

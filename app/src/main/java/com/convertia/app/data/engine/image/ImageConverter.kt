@@ -1,13 +1,10 @@
 package com.convertia.app.data.engine.image
 
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.pdf.PdfDocument
-import android.graphics.pdf.PdfRenderer
-import android.os.ParcelFileDescriptor
 import com.convertia.app.data.convert.ConversionJob
 import com.convertia.app.data.convert.FileConverter
 import com.convertia.app.data.convert.ProgressListener
@@ -116,57 +113,12 @@ class ImageConverter(private val ffmpeg: Ffmpeg) : FileConverter {
         return maxOf(1, ceil(width * scale).toInt()) to maxOf(1, ceil(height * scale).toInt())
     }
 
-    private suspend fun pdfToImages(job: ConversionJob, progress: ProgressListener): List<File> {
-        val item = job.item
-        val descriptor = ParcelFileDescriptor.open(job.input, ParcelFileDescriptor.MODE_READ_ONLY)
-        val renderer = try {
-            PdfRenderer(descriptor)
-        } catch (e: SecurityException) {
-            descriptor.close()
-            throw IOException("PDF protegido por senha")
-        } catch (e: IOException) {
-            descriptor.close()
-            throw IOException("Não foi possível abrir o PDF (${e.message})")
-        }
-        val outputs = mutableListOf<File>()
-        try {
-            val count = renderer.pageCount
-            if (count == 0) throw IOException("O PDF não tem páginas")
-            val scale = when (item.options.resize) {
-                ImageResize.ORIGINAL -> RENDER_DPI / 72f
-                ImageResize.HALF -> RENDER_DPI / 72f / 2
-                ImageResize.MAX_2560 -> RENDER_DPI / 72f
-            }
-            for (index in 0 until count) {
-                coroutineContext.ensureActive()
-                renderer.openPage(index).use { page ->
-                    var w = ceil(page.width * scale).toInt()
-                    var h = ceil(page.height * scale).toInt()
-                    if (item.options.resize == ImageResize.MAX_2560 && maxOf(w, h) > 2560) {
-                        val k = 2560f / maxOf(w, h)
-                        w = ceil(w * k).toInt(); h = ceil(h * k).toInt()
-                    }
-                    val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-                    Canvas(bitmap).drawColor(Color.WHITE)
-                    page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-                    val output = if (count == 1) job.output else job.output(index + 1)
-                    ImageIo.encode(bitmap, item.target.ext, item.options.quality, output)
-                    bitmap.recycle()
-                    outputs += output
-                }
-                progress.onProgress((index + 1) * 100.0 / count, null)
-            }
-        } finally {
-            renderer.close()
-            descriptor.close()
-        }
-        return outputs
-    }
+    private suspend fun pdfToImages(job: ConversionJob, progress: ProgressListener): List<File> =
+        PdfRasterizer.render(job.input, job, progress)
 
     private companion object {
         val BITMAP_FORMATS = setOf("JPG", "PNG", "WEBP")
         const val PAGE_LONG_SIDE_PT = 842f
-        const val RENDER_DPI = 150f
     }
 }
 

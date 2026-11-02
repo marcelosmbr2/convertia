@@ -295,6 +295,9 @@
     <string name="settings_section_engine">Motor</string>
     <string name="settings_engine_preparing">Preparando…</string>
     <string name="settings_ffmpeg_included">Incluído no app</string>
+    <string name="settings_libreoffice_included">%1$s · MPL-2.0</string>
+    <string name="settings_libreoffice_missing">Não incluído neste build</string>
+    <string name="settings_license">Licença</string>
     <string name="settings_check">Verificar</string>
     <string name="settings_checking">Verificando…</string>
     <string name="settings_ready">Pronto</string>

@@ -18,6 +18,12 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      - name: Cache dos APKs do LibreOffice
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches/convertia-libreoffice
+          key: libreoffice-${{ hashFiles('gradle/libreoffice.properties') }}
+
       - name: Android SDK (API 37)
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" "build-tools;36.0.0" > /dev/null
 

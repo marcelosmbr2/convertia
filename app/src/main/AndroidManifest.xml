@@ -44,6 +44,12 @@
             android:exported="false"
             android:foregroundServiceType="dataSync|mediaProcessing" />
 
+        <!-- LibreOffice embutido, em processo separado: se travar, o app continua. -->
+        <service
+            android:name=".data.engine.office.OfficeService"
+            android:exported="false"
+            android:process=":office" />
+
         <!-- Até o Android 9, os arquivos em Download/Convertia são compartilhados por aqui. -->
         <provider
             android:name="androidx.core.content.FileProvider"
