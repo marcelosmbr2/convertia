@@ -3,11 +3,12 @@ package com.convertia.app.data
 import com.convertia.app.data.engine.ConversionEngine
 import com.convertia.app.data.engine.ConversionProgress
 import com.convertia.app.data.engine.DownloadEngine
-import com.convertia.app.data.engine.DownloadProgress
+import com.convertia.app.data.engine.DownloadEvent
 import com.convertia.app.domain.ConversionItem
 import com.convertia.app.domain.DownloadJob
 import com.convertia.app.domain.DownloadRequest
 import com.convertia.app.domain.MediaKind
+import com.convertia.app.domain.SavedFile
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -21,15 +22,27 @@ class FakeDownloadEngine(
     private val step: Double = 25.0,
     private val tickMs: Long = 100,
     private val failAt: Double? = null,
+    private val extraFiles: Int = 0,
 ) : DownloadEngine {
-    override fun download(job: DownloadJob): Flow<DownloadProgress> = flow {
+    val discarded = mutableListOf<Long>()
+
+    override fun download(job: DownloadJob): Flow<DownloadEvent> = flow {
         var percent = job.progress
         while (percent < 100) {
             delay(tickMs)
             percent = min(100.0, percent + step)
             if (failAt != null && percent >= failAt) error("HTTP 403")
-            emit(DownloadProgress(percent, 5.0))
+            emit(DownloadEvent.Progress(percent, 5.0))
         }
+        val files = buildList {
+            add(SavedFile("content://media/${job.id}", "${job.request.title}.${job.request.container}", 1_000, "video/mp4"))
+            repeat(extraFiles) { add(SavedFile("content://media/${job.id}-$it", "Capítulo $it.mp4", 500, "video/mp4")) }
+        }
+        emit(DownloadEvent.Completed(files))
+    }
+
+    override fun discard(job: DownloadJob) {
+        discarded += job.id
     }
 }
 

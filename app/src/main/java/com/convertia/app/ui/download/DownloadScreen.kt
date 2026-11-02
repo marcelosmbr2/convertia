@@ -69,6 +69,7 @@ import com.convertia.app.ui.components.PillButton
 import com.convertia.app.ui.components.PillTextField
 import com.convertia.app.ui.components.PrimaryButton
 import com.convertia.app.ui.components.RadioRow
+import com.convertia.app.ui.components.RemoteThumbnail
 import com.convertia.app.ui.components.RowDivider
 import com.convertia.app.ui.components.ScreenHeader
 import com.convertia.app.ui.components.SectionLabel
@@ -379,7 +380,8 @@ private fun MediaCard(media: MediaInfo) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 StripedThumbnail(Modifier.size(width = 120.dp, height = 68.dp)) {
-                    DurationBadge(media.duration)
+                    RemoteThumbnail(media.thumbnailUrl)
+                    if (media.duration.isNotEmpty()) DurationBadge(media.duration)
                 }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
@@ -388,7 +390,12 @@ private fun MediaCard(media: MediaInfo) {
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    Text("${media.channel} · ${media.site}", style = BaseTextStyle.copy(fontSize = 12.sp, color = Palette.TextMeta))
+                    Text(
+                        listOf(media.channel, media.site).filter { it.isNotBlank() }.joinToString(" · "),
+                        style = BaseTextStyle.copy(fontSize = 12.sp, color = Palette.TextMeta),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
             }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -435,7 +442,7 @@ private fun FormatsCard(ui: DownloadUiState, actions: DownloadActions) {
                 onClick = { actions.onSelectFormat(format.id) },
                 showDivider = index > 0,
                 trailing = {
-                    Text(Formatters.size(format.sizeMb * 1e6), style = BaseTextStyle.copy(fontSize = 13.sp, color = Palette.TextEmphasis))
+                    Text(sizeLabel(format.sizeMb), style = BaseTextStyle.copy(fontSize = 13.sp, color = Palette.TextEmphasis))
                 },
             )
         }
@@ -531,12 +538,14 @@ private fun SummaryBar(ui: DownloadUiState, onDownload: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                val size = Formatters.size(format.sizeMb * 1e6)
                 val container = ui.state.container.uppercase()
-                val summary = if (ui.state.kind == MediaKind.VIDEO) {
-                    stringResource(R.string.download_summary_video, format.quality, container, size)
-                } else {
-                    stringResource(R.string.download_summary_audio, container, format.quality, size)
+                val summary = when {
+                    format.sizeMb <= 0 && ui.state.kind == MediaKind.VIDEO ->
+                        stringResource(R.string.download_summary_video_unknown, format.quality, container)
+                    format.sizeMb <= 0 -> stringResource(R.string.download_summary_audio_unknown, container, format.quality)
+                    ui.state.kind == MediaKind.VIDEO ->
+                        stringResource(R.string.download_summary_video, format.quality, container, sizeLabel(format.sizeMb))
+                    else -> stringResource(R.string.download_summary_audio, container, format.quality, sizeLabel(format.sizeMb))
                 }
                 Text(summary, style = BaseTextStyle.copy(fontSize = 13.5.sp, fontWeight = FontWeight.SemiBold), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(stringResource(R.string.download_folder), style = BaseTextStyle.copy(fontSize = 12.sp, color = Palette.TextMeta2))
@@ -551,9 +560,15 @@ private fun SummaryBar(ui: DownloadUiState, onDownload: () -> Unit) {
 }
 
 @Composable
-private fun DownloadFormat.subtitle(): String =
-    if (kind == MediaKind.VIDEO) stringResource(R.string.download_format_video, codec, detail, container.uppercase())
-    else "$codec · $detail"
+private fun DownloadFormat.subtitle(): String = when {
+    kind == MediaKind.VIDEO && detail.isNotEmpty() -> stringResource(R.string.download_format_video, codec, detail, container.uppercase())
+    kind == MediaKind.VIDEO -> "$codec · ${container.uppercase()}"
+    detail.isNotEmpty() -> "$codec · $detail"
+    else -> codec
+}
+
+/** Tamanho em MB, ou "—" quando o site não informa. */
+internal fun sizeLabel(sizeMb: Double): String = if (sizeMb > 0) Formatters.size(sizeMb * 1e6) else "—"
 
 private fun FormatBadge.label(): Int = when (this) {
     FormatBadge.RECOMMENDED -> R.string.badge_recommended

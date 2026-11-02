@@ -270,11 +270,11 @@ private fun rowLine(row: QueueRow, clock: Clock): String = when (row) {
     is QueueRow.Download -> {
         val job = row.job
         val percent = job.progress.toInt()
-        val total = job.request.sizeMb * 1e6
+        val total = job.sizeMb * 1e6
         when (row.status) {
             RowStatus.ACTIVE -> {
-                val remainingMb = job.request.sizeMb * (100 - job.progress) / 100
-                val remaining = if (job.speedMbps > 0) Formatters.minutesSeconds(remainingMb / job.speedMbps) else "–"
+                val remainingMb = job.sizeMb * (100 - job.progress) / 100
+                val remaining = if (job.speedMbps > 0 && job.sizeMb > 0) Formatters.minutesSeconds(remainingMb / job.speedMbps) else "–"
                 stringResource(R.string.queue_download_active, percent, Formatters.decimal(job.speedMbps, 1), remaining)
             }
             RowStatus.QUEUED -> stringResource(R.string.queue_download_queued)

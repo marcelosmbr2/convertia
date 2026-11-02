@@ -1,10 +1,12 @@
 package com.convertia.app.data
 
 import com.convertia.app.data.engine.DownloadEngine
+import com.convertia.app.data.engine.DownloadEvent
 import com.convertia.app.domain.DownloadJob
 import com.convertia.app.domain.DownloadRequest
 import com.convertia.app.domain.DownloadStatus
 import com.convertia.app.domain.LibraryItem
+import com.convertia.app.domain.SavedFile
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -79,6 +81,7 @@ class DownloadQueue(
 
     fun remove(id: Long) {
         stopWorker(id)
+        find(id)?.takeIf { it.status != DownloadStatus.DONE }?.let(engine::discard)
         _jobs.value = _jobs.value.filterNot { it.id == id }
         schedule()
     }
@@ -127,10 +130,17 @@ class DownloadQueue(
         lateinit var worker: Job
         worker = scope.launch {
             try {
-                engine.download(job).collect { progress ->
-                    update(id) { it.copy(progress = progress.percent, speedMbps = progress.speedMbps) }
+                engine.download(job).collect { event ->
+                    when (event) {
+                        is DownloadEvent.Progress -> update(id) {
+                            it.copy(progress = event.percent, speedMbps = event.speedMbps, totalMb = event.totalMb ?: it.totalMb)
+                        }
+                        is DownloadEvent.Completed -> complete(id, event.files)
+                    }
                 }
-                complete(id)
+                if (find(id)?.status == DownloadStatus.DOWNLOADING) {
+                    update(id) { it.copy(status = DownloadStatus.FAILED, speedMbps = 0.0, error = NO_OUTPUT_ERROR) }
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -143,12 +153,20 @@ class DownloadQueue(
         workers[id] = worker
     }
 
-    private fun complete(id: Long) {
+    private fun complete(id: Long, files: List<SavedFile>) {
         val now = clock.millis()
-        val item = find(id)?.toLibraryItem(now) ?: return
-        library.add(item)
+        val job = find(id) ?: return
+        // O primeiro arquivo é o principal; os demais (capítulos separados) entram depois dele.
+        val items = files.mapIndexed { index, file -> job.toLibraryItem(file, index, now) }
+        items.asReversed().forEach(library::add)
         update(id) {
-            it.copy(status = DownloadStatus.DONE, progress = 100.0, speedMbps = 0.0, finishedAt = now, libraryItemId = item.id)
+            it.copy(
+                status = DownloadStatus.DONE,
+                progress = 100.0,
+                speedMbps = 0.0,
+                finishedAt = now,
+                libraryItemId = items.firstOrNull()?.id,
+            )
         }
         find(id)?.let { _finished.tryEmit(it) }
     }
@@ -157,18 +175,24 @@ class DownloadQueue(
         workers.remove(id)?.cancel()
     }
 
+    private companion object {
+        const val NO_OUTPUT_ERROR = "O download terminou sem gerar arquivo"
+    }
+
     private inline fun update(id: Long, transform: (DownloadJob) -> DownloadJob) {
         _jobs.value = _jobs.value.map { if (it.id == id) transform(it) else it }
     }
 
-    private fun DownloadJob.toLibraryItem(now: Long) = LibraryItem(
-        id = "download-$id-$now",
-        title = request.title,
-        format = request.container.uppercase(),
+    private fun DownloadJob.toLibraryItem(file: SavedFile, index: Int, now: Long) = LibraryItem(
+        id = "download-$id-$now-$index",
+        title = if (index == 0) request.title else file.name.substringBeforeLast('.'),
+        format = file.name.substringAfterLast('.', request.container).uppercase(),
         detail = request.resolution,
-        sizeBytes = (request.sizeMb * 1e6).toLong(),
-        duration = request.duration,
+        sizeBytes = file.sizeBytes,
+        duration = if (index == 0) request.duration else "",
         addedAt = now,
         kind = request.kind,
+        uri = file.uri,
+        mimeType = file.mimeType.ifEmpty { null },
     )
 }

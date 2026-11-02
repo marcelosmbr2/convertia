@@ -12,14 +12,13 @@ import com.convertia.app.data.ToastEvent
 import com.convertia.app.data.engine.MediaInspector
 import com.convertia.app.domain.AppSettings
 import com.convertia.app.domain.DownloadFormat
-import com.convertia.app.domain.DownloadRequest
 import com.convertia.app.domain.FormatBadge
 import com.convertia.app.domain.MediaInfo
 import com.convertia.app.domain.MediaKind
 import com.convertia.app.domain.RecentLink
 import com.convertia.app.domain.SaveContainers
 import com.convertia.app.domain.firstUrlIn
-import com.convertia.app.domain.siteOf
+import com.convertia.app.domain.requestFor
 import com.convertia.app.ui.convertiaContainer
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -208,18 +207,7 @@ class DownloadViewModel(
         val ui = currentUi()
         val media = ui.media ?: return
         val format = ui.selectedFormat ?: return
-        val request = DownloadRequest(
-            url = media.url,
-            title = media.title,
-            kind = ui.state.kind,
-            formatId = format.id,
-            container = ui.state.container,
-            quality = format.quality,
-            resolution = format.resolution,
-            site = siteOf(media.url) ?: media.site,
-            sizeMb = format.sizeMb,
-            duration = media.duration,
-        )
+        val request = media.requestFor(format, ui.state.container, ui.settings.downloadOptions)
         downloads.enqueue(request)
         messages.show(ToastEvent.DownloadQueued(request.formatLabel))
     }

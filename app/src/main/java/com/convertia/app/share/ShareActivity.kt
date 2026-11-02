@@ -52,7 +52,11 @@ class ShareActivity : ComponentActivity() {
         val subject = intent.getStringExtra(Intent.EXTRA_SUBJECT)?.takeIf { it.isNotBlank() }
         val container = (application as ConvertiaApplication).container
         viewModelFactory {
-            initializer { ShareViewModel(firstUrlIn(text), subject, container.mediaInspector, container.downloads) }
+            initializer {
+                ShareViewModel(firstUrlIn(text), subject, container.mediaInspector, container.downloads) {
+                    container.settings.value.downloadOptions
+                }
+            }
         }
     }
 

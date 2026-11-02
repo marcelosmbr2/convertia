@@ -5,10 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.convertia.app.data.DownloadQueue
 import com.convertia.app.data.engine.MediaInspector
 import com.convertia.app.domain.DownloadFormat
-import com.convertia.app.domain.DownloadRequest
+import com.convertia.app.domain.DownloadOptions
 import com.convertia.app.domain.MediaInfo
 import com.convertia.app.domain.MediaKind
-import com.convertia.app.domain.siteOf
+import com.convertia.app.domain.requestFor
 import com.convertia.app.ui.download.defaultFormat
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,6 +58,8 @@ class ShareViewModel(
     subject: String?,
     private val inspector: MediaInspector,
     private val downloads: DownloadQueue,
+    /** Opções de "Mais opções" salvas nos ajustes. */
+    private val options: () -> DownloadOptions = { DownloadOptions() },
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<ShareState>(if (url == null) ShareState.NoLink else ShareState.Loading(url, subject))
@@ -89,18 +91,7 @@ class ShareViewModel(
         val ready = _state.value as? ShareState.Ready ?: return null
         val option = ready.selected ?: return null
         val media = ready.media
-        val request = DownloadRequest(
-            url = media.url,
-            title = media.title,
-            kind = option.kind,
-            formatId = option.format.id,
-            container = option.container,
-            quality = option.format.quality,
-            resolution = option.format.resolution,
-            site = siteOf(media.url) ?: media.site,
-            sizeMb = option.format.sizeMb,
-            duration = media.duration,
-        )
+        val request = media.requestFor(option.format, option.container, options())
         downloads.enqueue(request)
         return request.formatLabel
     }

@@ -22,6 +22,10 @@ data class AppSettings(
     val hardwareAcceleration: Boolean = true,
     val keepOriginals: Boolean = true,
 ) {
+    /** Opções de "Mais opções" para um pedido de download. */
+    val downloadOptions: DownloadOptions
+        get() = DownloadOptions(embedThumbnail, embedMetadata, subtitles, splitChapters)
+
     companion object {
         val concurrentDownloadChoices = listOf(1, 2, 3, 4)
         val parallelConversionChoices = listOf(1, 2, 4)

@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -35,6 +36,24 @@ android {
         compose = true
         buildConfig = true
     }
+
+    packaging {
+        jniLibs {
+            // O yt-dlp roda o Python e o ffmpeg como processos a partir da pasta de bibliotecas
+            // nativas, então elas precisam ser extraídas na instalação.
+            useLegacyPackaging = true
+        }
+    }
+
+    splits {
+        abi {
+            // Um APK por arquitetura: o Python e o ffmpeg pesam ~50 MB cada uma.
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86_64")
+            isUniversalApk = false
+        }
+    }
 }
 
 dependencies {
@@ -43,6 +62,11 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.lifecycle.process)
+    implementation(libs.kotlinx.serialization.json)
+
+    implementation(libs.youtubedl.android)
+    implementation(libs.youtubedl.android.ffmpeg)
 
     implementation(platform(libs.kotlinx.coroutines.bom))
     implementation(libs.kotlinx.coroutines.android)

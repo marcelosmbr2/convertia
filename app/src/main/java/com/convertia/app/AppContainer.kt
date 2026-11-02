@@ -10,9 +10,11 @@ import com.convertia.app.data.SampleData
 import com.convertia.app.data.SettingsRepository
 import com.convertia.app.data.engine.MediaInspector
 import com.convertia.app.data.engine.SimulatedConversionEngine
-import com.convertia.app.data.engine.SimulatedDownloadEngine
-import com.convertia.app.data.engine.SimulatedMediaInspector
+import com.convertia.app.data.engine.ytdlp.YtDlp
+import com.convertia.app.data.engine.ytdlp.YtDlpDownloadEngine
+import com.convertia.app.data.engine.ytdlp.YtDlpMediaInspector
 import com.convertia.app.data.settingsDataStore
+import com.convertia.app.data.storage.MediaSaver
 import com.convertia.app.domain.AppSettings
 import com.convertia.app.domain.Preset
 import kotlinx.coroutines.CoroutineScope
@@ -25,8 +27,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.File
 import java.time.Clock
-import kotlin.random.Random
 
 /**
  * Dependências do app (DI manual). Vive enquanto o processo vive, então a fila continua
@@ -50,12 +52,16 @@ class AppContainer(context: Context) {
 
     val messages = AppMessages()
     val library = LibraryRepository()
-    val mediaInspector: MediaInspector = SimulatedMediaInspector()
     val presets: List<Preset> = SampleData.presets
+
+    /** yt-dlp + ffmpeg empacotados; inicializa em segundo plano assim que o app abre. */
+    val ytDlp = YtDlp(context.applicationContext)
+    val mediaSaver = MediaSaver(context.applicationContext)
+    val mediaInspector: MediaInspector = YtDlpMediaInspector(ytDlp)
 
     val downloads = DownloadQueue(
         scope = appScope,
-        engine = SimulatedDownloadEngine(Random.Default),
+        engine = YtDlpDownloadEngine(ytDlp, mediaSaver, File(context.cacheDir, "downloads")),
         library = library,
         clock = clock,
         concurrency = settings.map { it.concurrentDownloads }.stateIn(appScope, SharingStarted.Eagerly, settings.value.concurrentDownloads),
@@ -93,13 +99,9 @@ class AppContainer(context: Context) {
             notificationsEnabled = settings.map { it.notifications }.stateIn(appScope, SharingStarted.Eagerly, true),
             messages = messages,
         )
-        if (BuildConfig.DEBUG) seedSampleData()
-    }
-
-    /** No debug, o app abre com os dados do mockup para todas as telas terem conteúdo. */
-    private fun seedSampleData() {
-        library.seed(SampleData.libraryItems(clock), SampleData.history(clock), SampleData.recents(clock))
-        downloads.seed(SampleData.downloadJobs(clock))
-        conversions.seed(SampleData.conversionItems(), running = true)
+        appScope.launch {
+            // Erros aqui reaparecem (com mensagem) na primeira inspeção ou download.
+            runCatching { ytDlp.prepare() }
+        }
     }
 }

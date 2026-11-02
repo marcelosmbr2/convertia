@@ -29,6 +29,7 @@ import com.convertia.app.ui.components.DurationBadge
 import com.convertia.app.ui.components.ListCard
 import com.convertia.app.ui.components.PrimaryButton
 import com.convertia.app.ui.components.RadioRow
+import com.convertia.app.ui.components.RemoteThumbnail
 import com.convertia.app.ui.components.SecondaryButton
 import com.convertia.app.ui.components.StripedThumbnail
 import com.convertia.app.ui.theme.BaseTextStyle
@@ -70,7 +71,12 @@ fun ShareSheetContent(
 
         when (state) {
             is ShareState.Ready -> {
-                MediaRow(state.media.title, "${state.media.channel} · ${state.media.site}", state.media.duration)
+                MediaRow(
+                    title = state.media.title,
+                    meta = listOf(state.media.channel, state.media.site).filter { it.isNotBlank() }.joinToString(" · "),
+                    duration = state.media.duration.ifEmpty { null },
+                    thumbnailUrl = state.media.thumbnailUrl,
+                )
                 ListCard {
                     state.options.forEachIndexed { index, option ->
                         RadioRow(
@@ -117,9 +123,10 @@ fun ShareSheetContent(
 }
 
 @Composable
-private fun MediaRow(title: String, meta: String, duration: String?) {
+private fun MediaRow(title: String, meta: String, duration: String?, thumbnailUrl: String? = null) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         StripedThumbnail(Modifier.size(width = 96.dp, height = 54.dp), shape = RoundedCornerShape(8.dp), stripe = 6.dp) {
+            RemoteThumbnail(thumbnailUrl)
             if (duration != null) DurationBadge(duration, fontSize = 10.sp, inset = 4.dp)
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -156,5 +163,6 @@ private fun QuickOption.title(): String =
 @Composable
 private fun QuickOption.subtitle(): String {
     val detail = if (kind == MediaKind.VIDEO) format.codec.substringBefore(" + ") else format.quality
+    if (format.sizeMb <= 0) return "${container.uppercase()} · $detail"
     return stringResource(R.string.share_option_detail, container.uppercase(), detail, Formatters.size(format.sizeMb * 1e6))
 }

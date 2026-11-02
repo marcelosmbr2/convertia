@@ -6,6 +6,7 @@ import com.convertia.app.domain.DownloadJob
 import com.convertia.app.domain.Formatters
 import com.convertia.app.domain.MediaCategory
 import com.convertia.app.domain.MediaInfo
+import com.convertia.app.domain.SavedFile
 import com.convertia.app.domain.SizeEstimator
 import com.convertia.app.domain.siteOf
 import kotlinx.coroutines.delay
@@ -27,18 +28,25 @@ class SimulatedMediaInspector(private val delayMs: Long = 1_100) : MediaInspecto
     }
 }
 
-/** Progresso com velocidade oscilante entre 1,5 e 14 MB/s, como no mockup. */
+/** Progresso com velocidade oscilante entre 1,5 e 14 MB/s, como no mockup. Não grava nada. */
 class SimulatedDownloadEngine(private val random: Random) : DownloadEngine {
-    override fun download(job: DownloadJob): Flow<DownloadProgress> = flow {
+    override fun download(job: DownloadJob): Flow<DownloadEvent> = flow {
         var percent = job.progress
         var speed = if (job.speedMbps > 0) job.speedMbps else 5 + random.nextDouble() * 5
-        emit(DownloadProgress(percent, speed))
+        val sizeMb = job.request.sizeMb.takeIf { it > 0 } ?: 100.0
+        emit(DownloadEvent.Progress(percent, speed))
         while (percent < 100) {
             delay(SIMULATION_TICK_MS)
             speed = (speed + (random.nextDouble() - 0.5) * 1.6).coerceIn(1.5, 14.0)
-            percent = min(100.0, percent + speed * 0.75 / job.request.sizeMb * 100)
-            emit(DownloadProgress(percent, speed))
+            percent = min(100.0, percent + speed * 0.75 / sizeMb * 100)
+            emit(DownloadEvent.Progress(percent, speed))
         }
+        val request = job.request
+        emit(
+            DownloadEvent.Completed(
+                listOf(SavedFile(uri = null, name = "${request.title}.${request.container}", sizeBytes = (sizeMb * 1e6).toLong(), mimeType = "")),
+            ),
+        )
     }
 }
 

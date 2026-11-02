@@ -97,6 +97,8 @@
     <string name="download_disclaimer">Salve apenas conteúdo que seja seu ou que você tenha permissão para baixar.</string>
     <string name="download_summary_video">%1$s · %2$s · ≈ %3$s</string>
     <string name="download_summary_audio">Áudio · %1$s · %2$s · ≈ %3$s</string>
+    <string name="download_summary_video_unknown">%1$s · %2$s</string>
+    <string name="download_summary_audio_unknown">Áudio · %1$s · %2$s</string>
     <string name="download_folder">Download/Convertia</string>
     <string name="download_action">Baixar</string>
     <string name="badge_recommended">Recomendado</string>

@@ -1,0 +1,72 @@
+{
+ "id": "884213301",
+ "title": "Gravação de campo: chuva no telhado de zinco",
+ "uploader": "Field Notes",
+ "duration": 7212.4,
+ "webpage_url": "https://vimeo.com/884213301",
+ "webpage_url_domain": "vimeo.com",
+ "extractor_key": "Vimeo",
+ "chapters": [
+  {
+   "start_time": 0,
+   "end_time": 3600,
+   "title": "Parte 1"
+  },
+  {
+   "start_time": 3600,
+   "end_time": 7212,
+   "title": "Parte 2"
+  }
+ ],
+ "subtitles": {
+  "en": [],
+  "pt-BR": [],
+  "de": [],
+  "ja": [],
+  "live_chat": []
+ },
+ "formats": [
+  {
+   "format_id": "hls-fastly_skyfire-1080p",
+   "ext": "mp4",
+   "vcodec": "avc1.640028",
+   "acodec": "mp4a.40.2",
+   "height": 1080,
+   "width": 1920,
+   "fps": 25,
+   "tbr": 5100,
+   "protocol": "m3u8_native"
+  },
+  {
+   "format_id": "hls-fastly_skyfire-720p",
+   "ext": "mp4",
+   "vcodec": "avc1.64001F",
+   "acodec": "mp4a.40.2",
+   "height": 720,
+   "width": 1280,
+   "fps": 25,
+   "tbr": 2600,
+   "protocol": "m3u8_native"
+  },
+  {
+   "format_id": "http-540p",
+   "ext": "mp4",
+   "vcodec": "avc1",
+   "acodec": "mp4a",
+   "height": 540,
+   "width": 960,
+   "fps": 25,
+   "filesize": 612000000,
+   "protocol": "https"
+  },
+  {
+   "format_id": "hls-fastly_skyfire-audio-high",
+   "ext": "mp4",
+   "vcodec": "none",
+   "acodec": "mp4a.40.2",
+   "abr": 192,
+   "asr": 48000,
+   "protocol": "m3u8_native"
+  }
+ ]
+}
