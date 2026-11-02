@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.convertia.app.data.convert.ConversionJob
 import com.convertia.app.data.convert.FileConverter
 import com.convertia.app.data.engine.archive.ArchiveConverter
@@ -80,8 +81,9 @@ class ConvertersTest {
         outputs
     }
 
+    /** Os arquivos de amostra ficam no APK de teste, não no do app. */
     private fun asset(name: String): File = File(root, name).also { file ->
-        context.assets.open(name).use { input -> file.outputStream().use { input.copyTo(it) } }
+        InstrumentationRegistry.getInstrumentation().context.assets.open(name).use { input -> file.outputStream().use { input.copyTo(it) } }
     }
 
     private fun sampleVideo(): File = File(root, "sample.mp4").also { out ->
