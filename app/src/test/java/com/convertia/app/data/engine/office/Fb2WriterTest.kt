@@ -8,55 +8,53 @@ import javax.xml.parsers.DocumentBuilderFactory
 
 class Fb2WriterTest {
 
-    /** Trecho no formato que o LibreOffice exporta como XHTML. */
-    private val xhtml = """<!DOCTYPE html>
-<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"/><title></title></head>
-<body lang="pt-BR" text="#000000" dir="ltr">
-<h1 class="western" align="left"> Relatório Trimestral</h1>
-<p class="western">Este documento resume os <b>resultados de vendas</b> do terceiro trimestre, com <i>comentários</i>&nbsp;da equipe.</p>
-<h2 class="western">Destaques</h2>
-<ul><li><p class="western">Receita cresceu 12%.</p></li><li><p class="western">Novos clientes: 340.</p></li></ul>
-<table width="223" cellpadding="2" cellspacing="0"><col width="61"/><tr><th><p align="center">Região</p></th><th><p>Q3</p></th></tr><tr><td><p>Sul</p></td><td><p>1.380</p></td></tr></table>
-<p class="western"><img src="grafico.png" name="Image1" width="320" height="180"/></p>
-<p class="western">Conclusão: positivo &amp; otimista.</p>
-</body></html>"""
+    private fun fodt(name: String) = checkNotNull(Fb2WriterTest::class.java.getResourceAsStream("/office/$name")).bufferedReader().readText()
 
+    private fun parse(xml: String) = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xml.byteInputStream())
+
+    /** ODT plano exportado pelo LibreOffice a partir do DOCX de teste (título, lista, tabela, imagem). */
     @Test
-    fun `secoes, paragrafos, enfase, lista, tabela e imagem`() {
-        val fb2 = Fb2Writer.convert(xhtml, title = null, language = null) { src -> if (src == "grafico.png") byteArrayOf(1, 2, 3) else null }
-        // XML válido.
-        val doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(fb2.byteInputStream())
+    fun `odt plano do LibreOffice vira FB2 com secoes, lista, tabela e imagem`() {
+        val fb2 = Fb2Writer.convert(fodt("relatorio.fodt"), title = null, language = "pt-BR")
+        val doc = parse(fb2)
         assertEquals("FictionBook", doc.documentElement.tagName)
         assertEquals("Relatório Trimestral", doc.getElementsByTagName("book-title").item(0).textContent)
-        assertEquals("pt", doc.getElementsByTagName("lang").item(0).textContent)
-        assertEquals(2, doc.getElementsByTagName("section").length)
-        assertEquals(2, doc.getElementsByTagName("title").length)
-        assertTrue(fb2.contains("<strong>resultados de vendas</strong>"))
-        assertTrue(fb2.contains("<emphasis>comentários</emphasis>"))
-        assertTrue(fb2.contains("<p>• Receita cresceu 12%.</p>"))
+        assertEquals("pt-BR", doc.getElementsByTagName("lang").item(0).textContent)
+        // Título principal + Destaques + Tabela + Gráfico.
+        assertEquals(4, doc.getElementsByTagName("section").length)
+        assertTrue(fb2, fb2.contains("<strong>resultados de vendas</strong>"))
+        assertTrue(fb2, fb2.contains("<emphasis>comentários</emphasis>"))
+        assertTrue(fb2, fb2.contains("<p>• Receita cresceu 12% em relação ao trimestre anterior.</p>"))
         assertEquals(1, doc.getElementsByTagName("table").length)
-        assertEquals(2, doc.getElementsByTagName("tr").length)
-        assertTrue(fb2.contains("""<image l:href="#img1.png"/>"""))
+        assertEquals(4, doc.getElementsByTagName("tr").length)
+        assertTrue(fb2, fb2.contains("<td><strong>Região</strong></td>"))
+        assertEquals(1, doc.getElementsByTagName("binary").length)
+        assertTrue(fb2, fb2.contains("""<image l:href="#img1.png"/>"""))
         val binary = doc.getElementsByTagName("binary").item(0)
         assertEquals("image/png", binary.attributes.getNamedItem("content-type").textContent)
-        assertTrue(byteArrayOf(1, 2, 3).contentEquals(Base64.getMimeDecoder().decode(binary.textContent.trim())))
-        assertTrue(fb2.contains("positivo &amp; otimista"))
+        val bytes = Base64.getMimeDecoder().decode(binary.textContent.trim())
+        assertTrue(bytes.size > 100 && bytes[1].toInt().toChar() == 'P')
+        assertTrue(fb2, fb2.contains("Conclusão: o trimestre foi positivo"))
     }
 
     @Test
-    fun `titulo e idioma informados prevalecem e documento vazio ainda e valido`() {
-        val fb2 = Fb2Writer.convert("<html><body></body></html>", title = "Meu livro", language = "en") { null }
-        val doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(fb2.byteInputStream())
+    fun `titulo informado prevalece, listas numeradas e documento vazio valido`() {
+        val xml = """<?xml version="1.0" encoding="UTF-8"?>
+<office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0">
+<office:styles><text:list-style style:name="LN"><text:list-level-style-number text:level="1"/></text:list-style>
+<style:style style:name="Bold" style:family="paragraph"><style:text-properties fo:font-weight="bold"/></style:style></office:styles>
+<office:body><office:text>
+<text:p text:style-name="Bold">Negrito &amp; cia</text:p>
+<text:list text:style-name="LN"><text:list-item><text:p>Um</text:p></text:list-item><text:list-item><text:p>Dois</text:p></text:list-item></text:list>
+</office:text></office:body></office:document>"""
+        val fb2 = Fb2Writer.convert(xml, title = "Meu livro", language = null)
+        val doc = parse(fb2)
         assertEquals("Meu livro", doc.getElementsByTagName("book-title").item(0).textContent)
-        assertEquals("en", doc.getElementsByTagName("lang").item(0).textContent)
-        assertEquals(1, doc.getElementsByTagName("section").length)
-    }
+        assertEquals("pt", doc.getElementsByTagName("lang").item(0).textContent)
+        assertTrue(fb2, fb2.contains("<p><strong>Negrito &amp; cia</strong></p>"))
+        assertTrue(fb2, fb2.contains("<p>1. Um</p>") && fb2.contains("<p>2. Dois</p>"))
 
-    @Test
-    fun `imagem em data URI`() {
-        val png = Base64.getEncoder().encodeToString(byteArrayOf(9, 9))
-        val fb2 = Fb2Writer.convert("""<html><body><p>x</p><img src="data:image/jpeg;base64,$png"/></body></html>""", null, null) { null }
-        assertTrue(fb2.contains("""content-type="image/jpeg""""))
-        assertTrue(fb2.contains("""<image l:href="#img1.jpg"/>"""))
+        val empty = Fb2Writer.convert("""<office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"><office:body><office:text/></office:body></office:document>""", null, null)
+        assertEquals(1, parse(empty).getElementsByTagName("section").length)
     }
 }

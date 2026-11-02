@@ -9,7 +9,7 @@ import java.io.IOException
 
 /**
  * Grava um documento que o LibreOffice abre ([input]) no formato pedido pelo item:
- * direto (PDF, DOCX, ODT, RTF, TXT, HTML, MD, EPUB), por XHTML → FB2, ou por PDF →
+ * direto (PDF, DOCX, ODT, RTF, TXT, HTML, MD, EPUB), por ODT plano → FB2, ou por PDF →
  * imagens. Compartilhado pelo motor de documentos e pelo de PDF → documento.
  */
 object OfficeExport {
@@ -36,10 +36,11 @@ object OfficeExport {
                 PdfRasterizer.render(pdf, job, progress, from = mid).also { pdf.delete() }
             }
             target == "FB2" -> {
-                val xhtml = File(job.outputDir, "book.xhtml")
-                client.convert(input, xhtml, "xhtml", "")
+                // ODT plano (XML único): o exportador XHTML precisa de XSLT, que o build Android não traz.
+                val fodt = File(job.outputDir, "book.fodt")
+                client.convert(input, fodt, "fodt", "")
                 progress.onProgress(from + (100 - from) * 0.8, null)
-                Fb2Writer.write(xhtml, job.output, title ?: item.name.substringBeforeLast('.'), language)
+                Fb2Writer.write(fodt, job.output, title ?: item.name.substringBeforeLast('.'), language)
                 listOf(job.output)
             }
             else -> {

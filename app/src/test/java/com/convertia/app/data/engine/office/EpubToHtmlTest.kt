@@ -85,14 +85,14 @@ class EpubToHtmlRealFileTest {
 /**
  * Quando há um LibreOffice de desktop no PATH (contêiner de desenvolvimento e runners do
  * GitHub), confere que o HTML montado pelo [EpubToHtml] abre no LibreOffice e vira DOCX
- * com o conteúdo, e que o XHTML que ele exporta passa pelo [Fb2Writer].
+ * com o conteúdo, e que o ODT plano que ele exporta passa pelo [Fb2Writer].
  */
 class OfficeRoundTripSmokeTest {
     @get:Rule
     val folder = TemporaryFolder()
 
     @Test
-    fun `epub para html para docx, e docx para xhtml para fb2`() {
+    fun `epub para html para docx, e docx para odt plano para fb2`() {
         org.junit.Assume.assumeTrue("soffice não está no PATH", sofficeAvailable())
         val epub = folder.newFile("relatorio.epub").apply {
             checkNotNull(OfficeRoundTripSmokeTest::class.java.getResourceAsStream("/office/relatorio.epub")).use { input -> outputStream().use { input.copyTo(it) } }
@@ -106,11 +106,11 @@ class OfficeRoundTripSmokeTest {
         assertTrue(text.contains("Relatório Trimestral"))
         assertTrue(text.contains("<w:tbl>"))
 
-        soffice("--convert-to", "xhtml", "--outdir", folder.root.path, docx.path)
-        val xhtml = File(folder.root, "book.xhtml")
-        assertTrue(xhtml.isFile)
+        soffice("--convert-to", "fodt", "--outdir", folder.root.path, docx.path)
+        val fodt = File(folder.root, "book.fodt")
+        assertTrue(fodt.isFile)
         val fb2 = File(folder.root, "book.fb2")
-        Fb2Writer.write(xhtml, fb2, book.title, book.language)
+        Fb2Writer.write(fodt, fb2, book.title, book.language)
         val doc = javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(fb2)
         // O exportador de EPUB do LibreOffice troca títulos por parágrafos estilizados, então
         // a volta não recupera as seções; o conteúdo, sim.
