@@ -11,7 +11,8 @@ Os protótipos de interface ficam em [`mockup/`](mockup/).
 | Gradle | 9.6.1 |
 | Kotlin | 2.4.21 |
 | Compose BOM | 2026.09.00 (Material 3) |
-| Motor de download | yt-dlp via youtubedl-android 0.18.1 (Python 3.12, QuickJS, ffmpeg) |
+| Motor de download | yt-dlp via youtubedl-android 0.18.1 (Python 3.12, QuickJS, ffmpeg 7.1) |
+| Documentos | LibreOffice 26.2 (LibreOfficeKit), do APK do LibreOffice Viewer no F-Droid |
 | `minSdk` / `targetSdk` / `compileSdk` | 26 / 37 / 37 |
 
 As versões ficam em [`gradle/libs.versions.toml`](gradle/libs.versions.toml).
@@ -26,8 +27,14 @@ Abra a pasta do projeto no Android Studio, ou pela linha de comando:
 ```
 
 O build gera um APK por arquitetura (`arm64-v8a`, `armeabi-v7a`, `x86_64`), cada um com
-50–70 MB por causa do Python e do ffmpeg empacotados. A maioria dos celulares usa
-`arm64-v8a`.
+130–160 MB: Python e ffmpeg (~50 MB) mais o LibreOffice (~80 MB). Instalado ocupa mais,
+porque as bibliotecas nativas são extraídas. A maioria dos celulares usa `arm64-v8a`.
+
+O LibreOffice vem do APK oficial do LibreOffice Viewer publicado pelo F-Droid: o build
+baixa, confere o SHA-256 (`gradle/libreoffice.properties`) e extrai as bibliotecas e os
+assets. Sem acesso ao f-droid.org, compile com `-Pconvertia.office=false`; o app então
+não oferece conversões de documentos. O workflow `libreoffice-inspect.yml` lista as
+versões disponíveis e regenera o `.properties`.
 
 ## Estado atual
 
@@ -37,8 +44,16 @@ Todas as telas do mockup (`mockup/Convertia v3.dc.html`) estão implementadas.
   escolhidos (juntando vídeo e áudio com o ffmpeg) e salva em `Download/Convertia`.
   Continua com o app fechado, com notificação de progresso, e respeita
   "Somente em Wi-Fi". O yt-dlp pode ser atualizado em Ajustes › Motor › Verificar.
-- **Conversão: ainda simulada**, como no protótipo (progresso falso, nenhum arquivo
-  gerado). É a próxima fase.
+- **Conversão: real.**
+  - Áudio e vídeo com o ffmpeg empacotado (MediaCodec quando a aceleração por hardware
+    está ligada, com volta automática para software).
+  - Imagens com as APIs do Android (HEIC pelo HeifWriter, SVG pela AndroidSVG) e o ffmpeg
+    para AVIF/TIFF/BMP/GIF/ICO; imagem → PDF e PDF → imagens.
+  - Compactados com o Commons Compress; RAR pela libarchive.
+  - Documentos, planilhas, apresentações e e-books com o LibreOffice embutido, num
+    processo à parte (`:office`): DOCX/ODT/RTF/TXT/HTML/MD/PDF/EPUB; FB2 por um gravador
+    próprio; EPUB entra convertido em HTML.
+  - Ainda não: PDF → documento editável (Fase 3c) e OCR (Fase 3d). MOBI/AZW3 ficam fora.
 - Biblioteca, histórico, links recentes e fila ficam salvos no aparelho. Downloads
   interrompidos voltam pausados.
 
@@ -50,9 +65,11 @@ app/src/main/java/com/convertia/app/
 ├── MainActivity.kt          # onboarding ou app
 ├── domain/                  # regras puras: catálogo de formatos, estimativas, modelos
 ├── data/                    # filas, biblioteca, ajustes, estado salvo
-│   ├── engine/              # interfaces de motor, yt-dlp e motores simulados
+│   ├── convert/             # pasta de trabalho e motor composto (escolhe o conversor)
+│   ├── engine/              # yt-dlp, ffmpeg, imagens, compactados, LibreOffice (office/)
 │   ├── download/            # serviço em primeiro plano, notificações, rede
 │   └── storage/             # gravação em Download/Convertia
+app/src/main/java/org/libreoffice/kit/   # ponte LibreOfficeKit (MPL-2.0)
 ├── share/                   # ShareActivity (menu Compartilhar)
 └── ui/
     ├── AppViewModel.kt      # navegação (aba, sheet, voltar) e ações dos toasts
@@ -63,13 +80,15 @@ app/src/main/java/com/convertia/app/
 ```
 
 Os motores ficam atrás das interfaces de `data/engine` (`MediaInspector`,
-`DownloadEngine`, `ConversionEngine`): o de download é o yt-dlp (`data/engine/ytdlp`); o
-de conversão ainda é o simulado.
+`DownloadEngine`, `ConversionEngine`). O de download é o yt-dlp (`data/engine/ytdlp`). O
+de conversão é o `CompositeConversionEngine` (`data/convert`): copia a origem para uma
+pasta de trabalho, escolhe o `FileConverter` pelo par origem → destino e grava a saída
+respeitando o ajuste de conflito. Sem conversor para o par, o item falha com aviso.
 
 ## Publicar no GitHub
 
 O workflow `.github/workflows/release.yml` gera os APKs assinados e cria um release a cada
-tag `v*`. A versão do app vem da tag (`v0.2.0` → 0.2.0).
+tag `v*`. A versão do app vem da tag (`v0.3.0` → 0.3.0).
 
 1. Crie a chave de assinatura (uma vez só, e **guarde-a bem**: sem ela não dá para
    publicar atualizações que instalem por cima):
@@ -87,11 +106,11 @@ tag `v*`. A versão do app vem da tag (`v0.2.0` → 0.2.0).
 3. Publique uma versão:
 
    ```bash
-   git tag v0.2.0
+   git tag v0.3.0
    ```
 
    ```bash
-   git push origin v0.2.0
+   git push origin v0.3.0
    ```
 
 Para assinar um build local, exporte `CONVERTIA_KEYSTORE_FILE`,
@@ -107,4 +126,8 @@ Para assinar um build local, exporte `CONVERTIA_KEYSTORE_FILE`,
 Os valores esperados do domínio (tamanhos, formato sugerido, estimativas) foram obtidos
 rodando a lógica JavaScript do próprio mockup. O leitor de formatos do yt-dlp é testado
 com a saída real de um vídeo do YouTube com licença Creative Commons
-(`app/src/test/resources/ytdlp/`).
+(`app/src/test/resources/ytdlp/`). Quando há `ffmpeg` ou `soffice` no PATH, alguns testes
+rodam os argumentos gerados neles de verdade (e são pulados quando não há).
+
+Os motores rodam de verdade num emulador x86_64 no workflow `instrumented.yml`
+(`app/src/androidTest`), inclusive o LibreOffice.

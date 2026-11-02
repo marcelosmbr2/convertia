@@ -16,6 +16,10 @@ androidsvg = "1.4"
 commonsCompress = "1.28.0"
 xz = "1.12"
 libarchive = "1.1.6"
+androidxTestJunit = "1.3.0"
+pdfboxAndroid = "2.0.27.0"
+pdfbox = "2.0.37"
+androidxTestRunner = "1.7.0"
 
 [libraries]
 # Com o Kotlin embutido do AGP 9, o KGP vem como dependência do próprio AGP.
@@ -58,7 +62,13 @@ commons-compress = { group = "org.apache.commons", name = "commons-compress", ve
 xz = { group = "org.tukaani", name = "xz", version.ref = "xz" }
 libarchive = { group = "me.zhanghai.android.libarchive", name = "library", version.ref = "libarchive" }
 
+# PDF → documento: leitura de texto com posição e desenhos (Android) e o PDFBox de desktop para os testes.
+pdfbox-android = { group = "com.tom-roush", name = "pdfbox-android", version.ref = "pdfboxAndroid" }
+pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version.ref = "pdfbox" }
+
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestJunit" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

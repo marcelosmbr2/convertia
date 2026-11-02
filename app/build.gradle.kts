@@ -16,8 +16,8 @@ plugins {
  */
 val releaseKeystore: String? = System.getenv("CONVERTIA_KEYSTORE_FILE")
 
-/** Versão: no GitHub Actions vem da tag (v0.2.0 → 0.2.0); localmente, o valor padrão. */
-val appVersionName: String = System.getenv("CONVERTIA_VERSION_NAME")?.removePrefix("v") ?: "0.2.0"
+/** Versão: no GitHub Actions vem da tag (v0.3.0 → 0.3.0); localmente, o valor padrão. */
+val appVersionName: String = System.getenv("CONVERTIA_VERSION_NAME")?.removePrefix("v") ?: "0.3.0"
 
 /** 1.2.3 → 10203: cresce a cada versão, como o Android exige para atualizar por cima. */
 val appVersionCode: Int = appVersionName.substringBefore('-').split('.')
@@ -137,6 +137,7 @@ android {
         targetSdk = 37
         versionCode = appVersionCode
         versionName = appVersionName
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Vazio quando o build não embute o LibreOffice.
         buildConfigField("String", "LIBREOFFICE_VERSION", "\"${if (officeEnabled) officeVersion else ""}\"")
     }
@@ -193,7 +194,7 @@ android {
     }
 }
 
-// APKs nomeados como "Convertia-0.2.0-arm64-v8a-release.apk".
+// APKs nomeados como "Convertia-0.3.0-arm64-v8a-release.apk".
 base {
     archivesName = "Convertia-$appVersionName"
 }
@@ -218,6 +219,8 @@ dependencies {
     implementation(libs.xz)
     implementation(libs.libarchive)
 
+    implementation(libs.pdfbox.android)
+
     implementation(platform(libs.kotlinx.coroutines.bom))
     implementation(libs.kotlinx.coroutines.android)
 
@@ -230,4 +233,10 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(platform(libs.kotlinx.coroutines.bom))
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.pdfbox)
+
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(platform(libs.kotlinx.coroutines.bom))
+    androidTestImplementation(libs.kotlinx.coroutines.test)
 }
