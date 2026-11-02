@@ -37,6 +37,7 @@ import com.convertia.app.ui.convert.InspectorActions
 import com.convertia.app.ui.convert.InspectorSheet
 import com.convertia.app.ui.convert.PickerActions
 import com.convertia.app.ui.download.DownloadScreen
+import com.convertia.app.ui.queue.QueueScreen
 import com.convertia.app.ui.components.SheetHost
 import com.convertia.app.ui.components.ToastHost
 import com.convertia.app.ui.theme.Palette
@@ -103,7 +104,7 @@ private fun TabContent(nav: NavState, appViewModel: AppViewModel) {
                 openAddFiles = { appViewModel.openSheet(AppSheet.AddFiles) },
             ),
         )
-        Tab.QUEUE -> PlaceholderScreen(R.string.tab_queue, R.string.queue_subtitle)
+        Tab.QUEUE -> QueueScreen(onConvertDownload = appViewModel::convertDownload)
         Tab.LIBRARY -> PlaceholderScreen(R.string.tab_library, R.string.library_subtitle)
         Tab.SETTINGS -> PlaceholderScreen(R.string.tab_settings, R.string.settings_subtitle)
     }

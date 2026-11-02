@@ -15,7 +15,6 @@
     </plurals>
 
     <string name="download_subtitle">Cole um link, escolha o formato e baixe.</string>
-    <string name="queue_subtitle">Downloads e conversões aparecem aqui enquanto rodam.</string>
     <string name="library_subtitle">Seus arquivos baixados e convertidos.</string>
     <string name="settings_subtitle">As alterações são salvas automaticamente.</string>
 
@@ -182,6 +181,51 @@
     <string name="picker_current">Formato atual</string>
     <string name="picker_empty">Nenhum formato compatível.</string>
 
+    <!-- Fila -->
+    <string name="queue_title">Fila</string>
+    <string name="queue_counts">%1$s · %2$s</string>
+    <plurals name="queue_active">
+        <item quantity="one">%d ativo</item>
+        <item quantity="many">%d ativos</item>
+        <item quantity="other">%d ativos</item>
+    </plurals>
+    <plurals name="queue_done">
+        <item quantity="one">%d concluído</item>
+        <item quantity="many">%d concluídos</item>
+        <item quantity="other">%d concluídos</item>
+    </plurals>
+    <string name="queue_section_active">Em andamento</string>
+    <string name="queue_section_failed">Com falha</string>
+    <string name="queue_section_done">Concluídos</string>
+    <string name="queue_pause_all">Pausar tudo</string>
+    <string name="queue_resume_all">Retomar tudo</string>
+    <string name="queue_clear">Limpar</string>
+    <string name="queue_pause">Pausar</string>
+    <string name="queue_resume">Retomar</string>
+    <string name="queue_retry">Tentar novamente</string>
+    <string name="queue_remove">Remover</string>
+    <string name="queue_download_active">%1$d%% · %2$s MB/s · %3$s restante</string>
+    <string name="queue_download_queued">Na fila · aguardando vaga</string>
+    <string name="queue_download_paused">Pausado · %1$d%% · %2$s de %3$s</string>
+    <string name="queue_download_done">Salvo · %1$s</string>
+    <string name="queue_conversion_active">%1$d%% · no aparelho</string>
+    <string name="queue_conversion_queued">Na fila · aguardando</string>
+    <string name="queue_conversion_paused">Pausado · %1$d%%</string>
+    <string name="queue_conversion_done">%1$s · %2$s</string>
+    <plurals name="queue_downloading">
+        <item quantity="one">%1$d baixando · %2$s MB/s</item>
+        <item quantity="many">%1$d baixando · %2$s MB/s</item>
+        <item quantity="other">%1$d baixando · %2$s MB/s</item>
+    </plurals>
+    <plurals name="queue_converting">
+        <item quantity="one">%d convertendo no aparelho</item>
+        <item quantity="many">%d convertendo no aparelho</item>
+        <item quantity="other">%d convertendo no aparelho</item>
+    </plurals>
+    <string name="queue_idle">Ocioso · salvando em Download/Convertia</string>
+    <string name="queue_empty_title">Nada na fila</string>
+    <string name="queue_empty_body">Downloads e conversões aparecem aqui enquanto rodam.</string>
+
     <!-- Formatos de saída (descrições do seletor) -->
     <string name="format_image_jpg">Com perdas · universal</string>
     <string name="format_image_png">Sem perdas</string>
@@ -243,6 +287,7 @@
 
     <!-- Datas -->
     <string name="time_now">Agora</string>
+    <string name="time_just_now">Agora mesmo</string>
     <string name="time_minutes_ago">há %1$d min</string>
     <string name="time_hours_ago">há %1$d h</string>
     <string name="time_today">Hoje</string>
