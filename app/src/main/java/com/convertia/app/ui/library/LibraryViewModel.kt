@@ -58,10 +58,8 @@ class LibraryViewModel(
         messages.show(ToastEvent.LibraryItemDeleted(item, index))
     }
 
-    /** Sem arquivo real nesta fase: só avisa. */
-    fun openInPlayer() = messages.show(ToastEvent.OpeningPlayer)
-
-    fun share() = messages.show(ToastEvent.ShareMenuOpened)
+    /** Avisa que o arquivo não pôde ser aberto (apagado fora do app ou sem app compatível). */
+    fun fileUnavailable() = messages.show(ToastEvent.FileUnavailable)
 
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {

@@ -106,6 +106,29 @@ class DownloadQueueTest {
     }
 
     @Test
+    fun `capitulos separados viram itens da Biblioteca depois do principal`() = runTest {
+        val queue = queue(FakeDownloadEngine(extraFiles = 2))
+        val id = queue.enqueue(request("aula"))
+        advanceTimeBy(450)
+        runCurrent()
+        val items = library.items.value
+        assertEquals(listOf("aula", "Capítulo 0", "Capítulo 1"), items.map { it.title })
+        assertEquals("content://media/$id", items.first().uri)
+        assertEquals(items.first().id, queue.find(id)?.libraryItemId)
+    }
+
+    @Test
+    fun `remover um download incompleto descarta o que sobrou`() = runTest {
+        val engine = FakeDownloadEngine()
+        val queue = queue(engine)
+        val id = queue.enqueue(request("a"))
+        advanceTimeBy(150)
+        runCurrent()
+        queue.remove(id)
+        assertEquals(listOf(id), engine.discarded)
+    }
+
+    @Test
     fun `aumentar o limite inicia mais downloads`() = runTest {
         val queue = queue()
         val ids = listOf("a", "b", "c").map { queue.enqueue(request(it)) }

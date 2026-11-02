@@ -53,8 +53,7 @@
         <item quantity="many">Ajustes aplicados a %d arquivos</item>
         <item quantity="other">Ajustes aplicados a %d arquivos</item>
     </plurals>
-    <string name="toast_opening_player">Abrindo no player…</string>
-    <string name="toast_share_menu_opened">Menu Compartilhar aberto</string>
+    <string name="toast_file_unavailable">Não foi possível abrir este arquivo</string>
     <string name="toast_engine_up_to_date">%1$s %2$s está atualizado</string>
     <string name="toast_no_link_shared">Nenhum link encontrado no que foi compartilhado</string>
     <string name="toast_no_link_clipboard">Nenhum link na área de transferência</string>

@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.semantics
@@ -35,6 +36,7 @@ import com.convertia.app.ui.convert.InspectorActions
 import com.convertia.app.ui.convert.InspectorSheet
 import com.convertia.app.ui.convert.PickerActions
 import com.convertia.app.ui.download.DownloadScreen
+import com.convertia.app.ui.library.LibraryIntents
 import com.convertia.app.ui.library.LibraryItemActions
 import com.convertia.app.ui.library.LibraryItemSheet
 import com.convertia.app.ui.library.LibraryScreen
@@ -178,6 +180,7 @@ private fun ColumnScope.SheetContent(sheet: AppSheet, appViewModel: AppViewModel
         )
         is AppSheet.LibraryActions -> {
             val library: LibraryViewModel = viewModel(factory = LibraryViewModel.Factory)
+            val context = LocalContext.current
             val libraryUi by library.uiState.collectAsStateWithLifecycle()
             val item = libraryUi.items.firstOrNull { it.id == sheet.itemId } ?: return
             LibraryItemSheet(
@@ -186,11 +189,11 @@ private fun ColumnScope.SheetContent(sheet: AppSheet, appViewModel: AppViewModel
                     onConvert = { appViewModel.convertLibraryItem(item.id) },
                     onPlay = {
                         appViewModel.closeSheet()
-                        library.openInPlayer()
+                        if (!LibraryIntents.open(context, item)) library.fileUnavailable()
                     },
                     onShare = {
                         appViewModel.closeSheet()
-                        library.share()
+                        if (!LibraryIntents.share(context, item)) library.fileUnavailable()
                     },
                     onDelete = { library.delete(item.id) },
                 ),

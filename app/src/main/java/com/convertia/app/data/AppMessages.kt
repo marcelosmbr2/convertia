@@ -37,9 +37,8 @@ sealed interface ToastEvent {
 
     data class OptionsApplied(val count: Int) : ToastEvent
 
-    data object OpeningPlayer : ToastEvent
-
-    data object ShareMenuOpened : ToastEvent
+    /** Arquivo da Biblioteca que não abre (apagado fora do app ou sem app compatível). */
+    data object FileUnavailable : ToastEvent
 
     data class EngineUpToDate(val engine: String, val version: String) : ToastEvent
 

@@ -2,6 +2,8 @@ package com.convertia.app
 
 import android.content.Context
 import com.convertia.app.data.AppMessages
+import com.convertia.app.data.AppSnapshot
+import com.convertia.app.data.AppStateStore
 import com.convertia.app.data.CompletionNotifier
 import com.convertia.app.data.ConversionQueue
 import com.convertia.app.data.DownloadQueue
@@ -24,9 +26,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.Clock
 
@@ -51,12 +57,18 @@ class AppContainer(context: Context) {
         settingsOrNull.map { it ?: AppSettings() }.stateIn(appScope, SharingStarted.Eagerly, AppSettings())
 
     val messages = AppMessages()
-    val library = LibraryRepository()
     val presets: List<Preset> = SampleData.presets
 
     /** yt-dlp + ffmpeg empacotados; inicializa em segundo plano assim que o app abre. */
     val ytDlp = YtDlp(context.applicationContext)
     val mediaSaver = MediaSaver(context.applicationContext)
+
+    val library = LibraryRepository(
+        scope = appScope,
+        deleteFile = { uri -> appScope.launch(Dispatchers.IO) { mediaSaver.delete(uri) } },
+    )
+
+    private val stateStore = AppStateStore(File(context.filesDir, "state.json"))
     val mediaInspector: MediaInspector = YtDlpMediaInspector(ytDlp)
 
     val downloads = DownloadQueue(
@@ -99,9 +111,31 @@ class AppContainer(context: Context) {
             notificationsEnabled = settings.map { it.notifications }.stateIn(appScope, SharingStarted.Eagerly, true),
             messages = messages,
         )
+        restoreState()
         appScope.launch {
             // Erros aqui reaparecem (com mensagem) na primeira inspeção ou download.
             runCatching { ytDlp.prepare() }
         }
+    }
+
+    /** Lê o estado salvo (arquivo pequeno, então é lido na hora) e passa a gravar cada mudança. */
+    private fun restoreState() {
+        stateStore.load()?.withInterruptedJobsPaused()?.let { snapshot ->
+            library.seed(snapshot.library, snapshot.history, snapshot.recents)
+            downloads.seed(snapshot.jobs)
+        }
+        appScope.launch {
+            combine(library.items, library.history, library.recents, downloads.jobs) { items, history, recents, jobs ->
+                AppSnapshot(items, history, recents, jobs)
+            }
+                .drop(1)
+                // Durante um download o progresso muda várias vezes por segundo.
+                .sample(SAVE_INTERVAL_MS)
+                .collect { snapshot -> withContext(Dispatchers.IO) { runCatching { stateStore.save(snapshot) } } }
+        }
+    }
+
+    private companion object {
+        const val SAVE_INTERVAL_MS = 1_000L
     }
 }

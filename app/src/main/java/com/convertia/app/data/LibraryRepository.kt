@@ -3,16 +3,28 @@ package com.convertia.app.data
 import com.convertia.app.domain.HistoryEntry
 import com.convertia.app.domain.LibraryItem
 import com.convertia.app.domain.RecentLink
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /**
- * Biblioteca (arquivos baixados), histórico de conversões e links recentes.
- * Em memória nesta fase; vira Room quando os arquivos forem reais.
+ * Biblioteca (arquivos baixados), histórico de conversões e links recentes. O
+ * [AppContainer][com.convertia.app.AppContainer] grava tudo em disco a cada mudança.
+ *
+ * Excluir tira o item da lista na hora, mas só apaga o arquivo ([deleteFile]) depois de
+ * [deleteDelayMs], para o "Desfazer" do toast funcionar.
  */
-class LibraryRepository {
+class LibraryRepository(
+    private val scope: CoroutineScope? = null,
+    private val deleteFile: (uri: String) -> Unit = {},
+    private val deleteDelayMs: Long = DELETE_DELAY_MS,
+) {
+    private val pendingDeletes = mutableMapOf<String, Job>()
     private val _items = MutableStateFlow<List<LibraryItem>>(emptyList())
     private val _history = MutableStateFlow<List<HistoryEntry>>(emptyList())
     private val _recents = MutableStateFlow<List<RecentLink>>(emptyList())
@@ -26,18 +38,30 @@ class LibraryRepository {
 
     fun find(id: String): LibraryItem? = _items.value.firstOrNull { it.id == id }
 
-    /** Remove e devolve o item com a posição, para o "Desfazer". */
+    /** Remove e devolve o item com a posição, para o "Desfazer"; o arquivo some depois. */
     fun remove(id: String): Pair<LibraryItem, Int>? {
         val list = _items.value
         val index = list.indexOfFirst { it.id == id }
         if (index < 0) return null
         _items.value = list.toMutableList().apply { removeAt(index) }
-        return list[index] to index
+        val item = list[index]
+        item.uri?.let { uri ->
+            pendingDeletes[id] = scope?.launch {
+                delay(deleteDelayMs)
+                pendingDeletes.remove(id)
+                deleteFile(uri)
+            } ?: return@let
+        }
+        return item to index
     }
 
-    fun restore(item: LibraryItem, index: Int) = _items.update { list ->
-        if (list.any { it.id == item.id }) list
-        else list.toMutableList().apply { add(index.coerceIn(0, size), item) }
+    /** "Desfazer": devolve o item à lista e cancela a exclusão do arquivo. */
+    fun restore(item: LibraryItem, index: Int) {
+        pendingDeletes.remove(item.id)?.cancel()
+        _items.update { list ->
+            if (list.any { it.id == item.id }) list
+            else list.toMutableList().apply { add(index.coerceIn(0, size), item) }
+        }
     }
 
     fun addHistory(entry: HistoryEntry) = _history.update { listOf(entry) + it }
@@ -57,7 +81,10 @@ class LibraryRepository {
         _recents.value = recents
     }
 
-    private companion object {
-        const val MAX_RECENTS = 3
+    companion object {
+        private const val MAX_RECENTS = 3
+
+        /** Mais que o toast (3,6 s, ou mais com as opções de acessibilidade). */
+        const val DELETE_DELAY_MS = 10_000L
     }
 }
