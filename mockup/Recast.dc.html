@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>body{margin:0;background:#070708;-webkit-font-smoothing:antialiased}*{box-sizing:border-box}a{color:#f07152;text-decoration:none}a:hover{color:#f5866d}input::placeholder{color:#5c5c66}input:focus{outline:none}button{font-family:inherit}::-webkit-scrollbar{width:0;height:0}@keyframes cvUp{from{transform:translateY(100%)}to{transform:none}}@keyframes cvFade{from{opacity:0}to{opacity:1}}@keyframes cvToast{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}</style>
+</helmet>
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:40px;padding:40px 24px;background:#070708;font-family:Inter,system-ui,sans-serif">
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" dark="{{ true }}" bg="#0f0f11" hint-size="412px,892px">
+<div data-screen-label="Recast" style="height:100%;position:relative;display:flex;flex-direction:column;background:#0f0f11;color:#ededef;font-family:Inter,system-ui,sans-serif;font-size:14px;overflow:hidden;font-feature-settings:'cv11','ss01','tnum'">
+<input type="file" multiple ref="{{ fileRef }}" onChange="{{ onFiles }}" style="display:none">
+
+<sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Onboarding" style="flex:1;min-height:0;display:flex;flex-direction:column;padding:4px 24px 24px">
+<div style="height:48px;flex:none;display:flex;align-items:center;justify-content:space-between">
+<div style="display:flex;gap:6px">
+<sc-for list="{{ obDots }}" as="d" hint-placeholder-count="3"><span style="height:6px;border-radius:3px;width:{{ d.w }};background:{{ d.bg }};transition:all .2s"></span></sc-for>
+</div>
+<button onClick="{{ obSkip }}" style="height:40px;padding:0 12px;border:0;border-radius:20px;background:transparent;color:#a1a1aa;font-size:14px;font-weight:500;cursor:pointer">Pular</button>
+</div>
+
+<sc-if value="{{ ob0 }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px">
+<div style="display:flex;flex-direction:column;gap:18px">
+<div style="width:72px;height:72px;border-radius:22px;background:#f07152;display:flex;align-items:center;justify-content:center;color:#1a0e0a"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"></path></svg></div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-size:32px;font-weight:700;letter-spacing:-0.025em">Recast</div>
+<div style="font-size:16px;line-height:1.5;color:#a1a1aa;text-wrap:pretty">Baixe vídeos por link e converta qualquer arquivo. Tudo em um app, tudo no seu aparelho.</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;gap:14px;padding:16px;background:#141417;border:1px solid #222227;border-radius:16px">
+<div style="width:40px;height:40px;flex:none;border-radius:12px;background:rgba(240,113,82,.12);color:#f5866d;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"></path></svg></div>
+<div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:600">Baixar</span><span style="font-size:13px;line-height:1.45;color:#8b8b95;text-wrap:pretty">Cole ou compartilhe um link e escolha a qualidade antes de salvar.</span></div>
+</div>
+<div style="display:flex;gap:14px;padding:16px;background:#141417;border:1px solid #222227;border-radius:16px">
+<div style="width:40px;height:40px;flex:none;border-radius:12px;background:rgba(240,113,82,.12);color:#f5866d;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"></path></svg></div>
+<div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:600">Converter</span><span style="font-size:13px;line-height:1.45;color:#8b8b95;text-wrap:pretty">Imagens, documentos, áudio, vídeo, compactados e e-books.</span></div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ ob1 }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px">
+<div style="width:72px;height:72px;border-radius:22px;background:rgba(79,191,135,.12);border:1px solid rgba(79,191,135,.3);display:flex;align-items:center;justify-content:center;color:#6fd19f"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-size:28px;font-weight:700;letter-spacing:-0.02em;line-height:1.15">Seus arquivos ficam no aparelho</div>
+<div style="font-size:15px;line-height:1.5;color:#a1a1aa;text-wrap:pretty">As conversões rodam offline. Nada é enviado para servidores, e você não precisa de conta.</div>
+</div>
+<div style="display:flex;flex-direction:column;background:#141417;border:1px solid #222227;border-radius:16px">
+<div style="min-height:52px;display:flex;align-items:center;gap:12px;padding:0 16px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6fd19f" style="stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span style="font-size:14.5px">Conversões 100% offline</span></div>
+<div style="min-height:52px;display:flex;align-items:center;gap:12px;padding:0 16px;border-top:1px solid #1c1c20"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6fd19f" style="stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span style="font-size:14.5px">Sem conta e sem nuvem</span></div>
+<div style="min-height:52px;display:flex;align-items:center;gap:12px;padding:0 16px;border-top:1px solid #1c1c20"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6fd19f" style="stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span style="font-size:14.5px">Downloads vêm direto da fonte</span></div>
+</div>
+<div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#6e6e78">0 bytes enviados · sempre</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ ob2 }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:24px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-size:28px;font-weight:700;letter-spacing:-0.02em;line-height:1.15">Duas permissões</div>
+<div style="font-size:15px;line-height:1.5;color:#a1a1aa;text-wrap:pretty">Você pode mudar isso depois em Ajustes.</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:14px;padding:16px;background:#141417;border:1px solid #222227;border-radius:16px">
+<div style="width:40px;height:40px;flex:none;border-radius:12px;background:#1c1c20;color:#c9c9cf;display:flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"></path></svg></div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:600">Notificações</span><span style="font-size:13px;line-height:1.4;color:#8b8b95">Avisa quando um download ou conversão termina.</span></div>
+<button onClick="{{ permNotify }}" style="flex:none;height:40px;padding:0 14px;border-radius:20px;border:1px solid {{ perm.notify.bd }};background:{{ perm.notify.bg }};color:{{ perm.notify.fg }};font-size:13px;font-weight:600;cursor:pointer">{{ perm.notify.label }}</button>
+</div>
+<div style="display:flex;align-items:center;gap:14px;padding:16px;background:#141417;border:1px solid #222227;border-radius:16px">
+<div style="width:40px;height:40px;flex:none;border-radius:12px;background:#1c1c20;color:#c9c9cf;display:flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg></div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:600">Arquivos</span><span style="font-size:13px;line-height:1.4;color:#8b8b95">Salvar em Download/Recast e abrir arquivos para converter.</span></div>
+<button onClick="{{ permFiles }}" style="flex:none;height:40px;padding:0 14px;border-radius:20px;border:1px solid {{ perm.files.bd }};background:{{ perm.files.bg }};color:{{ perm.files.fg }};font-size:13px;font-weight:600;cursor:pointer">{{ perm.files.label }}</button>
+</div>
+</div>
+<div style="display:flex;gap:12px;align-items:flex-start;padding:0 4px;font-size:13px;line-height:1.5;color:#8b8b95">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f5866d" style="stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none;margin-top:1px"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13"></path></svg>
+<span style="text-wrap:pretty">O Recast também aparece no menu Compartilhar de outros apps. Envie um link e escolha o formato sem sair do vídeo.</span>
+</div>
+</div>
+</sc-if>
+
+<button onClick="{{ obNext }}" style="flex:none;height:52px;border:0;border-radius:26px;background:#f07152;color:#1a0e0a;font-size:15px;font-weight:600;cursor:pointer" style-hover="background:#f4846a">{{ obCta }}</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ isShare }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Compartilhar" style="flex:1;min-height:0;display:flex;flex-direction:column;background:#0a0a0b">
+<div style="height:56px;flex:none;display:flex;align-items:center;gap:8px;padding:0 8px">
+<button onClick="{{ exitShare }}" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;border:0;border-radius:24px;background:transparent;color:#c9c9cf;cursor:pointer"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></button>
+<span style="font-size:15px;color:#a1a1aa">App de vídeo</span>
+<span style="margin-left:auto;margin-right:8px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#55555e;padding:3px 7px;border:1px solid #26262c;border-radius:5px">simulado</span>
+</div>
+<div style="aspect-ratio:16/9;flex:none;position:relative;background:repeating-linear-gradient(135deg,#151518 0 10px,#19191d 10px 20px);display:flex;align-items:center;justify-content:center">
+<div style="width:56px;height:56px;border-radius:28px;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;color:#ededef"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></div>
+<div style="position:absolute;left:0;right:0;bottom:0;height:3px;background:#2a2a30"><div style="width:34%;height:100%;background:#ededef"></div></div>
+</div>
+<div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+<div style="font-size:17px;font-weight:600;line-height:1.35;text-wrap:pretty">Construindo um teclado mecânico do zero — Montagem completa</div>
+<div style="display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;border-radius:16px;background:#26262c"></span><div style="display:flex;flex-direction:column;gap:1px"><span style="font-size:14px;font-weight:500">Hollow Workshop</span><span style="font-size:12px;color:#7c7c86">248 mil visualizações · 12 set. 2026</span></div></div>
+<div style="display:flex;gap:8px;overflow-x:auto">
+<span style="flex:none;height:36px;display:flex;align-items:center;gap:6px;padding:0 14px;border-radius:18px;background:#1c1c20;font-size:13px;color:#c9c9cf">Gostei</span>
+<button onClick="{{ openShareSheet }}" style="flex:none;height:36px;display:flex;align-items:center;gap:7px;padding:0 14px;border-radius:18px;border:1px solid rgba(240,113,82,.55);background:rgba(240,113,82,.12);font-size:13px;font-weight:600;color:#f5866d;cursor:pointer"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13"></path></svg>Compartilhar</button>
+<span style="flex:none;height:36px;display:flex;align-items:center;padding:0 14px;border-radius:18px;background:#1c1c20;font-size:13px;color:#c9c9cf">Salvar</span>
+<span style="flex:none;height:36px;display:flex;align-items:center;padding:0 14px;border-radius:18px;background:#1c1c20;font-size:13px;color:#c9c9cf">Clipe</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px"><div style="height:10px;width:92%;border-radius:4px;background:#17171a"></div><div style="height:10px;width:78%;border-radius:4px;background:#17171a"></div><div style="height:10px;width:60%;border-radius:4px;background:#17171a"></div></div>
+</div>
+</div>
+
+<sc-if value="{{ shareSheet }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ shareCancel }}" style="position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.6);animation:cvFade .18s ease-out"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;z-index:31;display:flex;flex-direction:column;background:#1e1e22;border-radius:28px 28px 0 0;padding:0 0 20px;animation:cvUp .26s cubic-bezier(.2,.8,.2,1)">
+<div style="display:flex;justify-content:center;padding:12px 0 10px"><span style="width:32px;height:4px;border-radius:2px;background:#4a4a52"></span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:4px 20px 16px;border-bottom:1px solid #2a2a30">
+<div style="width:48px;height:48px;flex:none;border-radius:10px;background:repeating-linear-gradient(135deg,#232328 0 6px,#28282d 6px 12px)"></div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Construindo um teclado mecânico do zero</span><span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#8b8b95;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">youtube.com/watch?v=k3yB0ard_fs</span></div>
+<span style="width:40px;height:40px;flex:none;border-radius:20px;background:#2a2a30;display:flex;align-items:center;justify-content:center;color:#c9c9cf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"></path></svg></span>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px 8px;padding:20px 16px 4px">
+<button onClick="{{ pickRecast }}" style="display:flex;flex-direction:column;align-items:center;gap:8px;border:0;background:transparent;cursor:pointer;color:#ededef;padding:0">
+<span style="width:56px;height:56px;border-radius:18px;background:#f07152;display:flex;align-items:center;justify-content:center;color:#1a0e0a;box-shadow:0 0 0 3px rgba(240,113,82,.25)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"></path></svg></span>
+<span style="font-size:12px;font-weight:600">Recast</span>
+</button>
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="width:56px;height:56px;border-radius:28px;background:#2a2a30;display:flex;align-items:center;justify-content:center;font-weight:600;color:#a1a1aa">M</span><span style="font-size:12px;color:#c9c9cf">Mensagens</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="width:56px;height:56px;border-radius:28px;background:#2a2a30;display:flex;align-items:center;justify-content:center;font-weight:600;color:#a1a1aa">E</span><span style="font-size:12px;color:#c9c9cf">E-mail</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="width:56px;height:56px;border-radius:28px;background:#2a2a30;display:flex;align-items:center;justify-content:center;font-weight:600;color:#a1a1aa">D</span><span style="font-size:12px;color:#c9c9cf">Drive</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="width:56px;height:56px;border-radius:28px;background:#2a2a30;display:flex;align-items:center;justify-content:center;font-weight:600;color:#a1a1aa">N</span><span style="font-size:12px;color:#c9c9cf">Notas</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="width:56px;height:56px;border-radius:28px;background:#2a2a30;display:flex;align-items:center;justify-content:center;font-weight:600;color:#a1a1aa">B</span><span style="font-size:12px;color:#c9c9cf">Bluetooth</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="width:56px;height:56px;border-radius:28px;background:#2a2a30;display:flex;align-items:center;justify-content:center;font-weight:600;color:#a1a1aa">C</span><span style="font-size:12px;color:#c9c9cf">Chat</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="width:56px;height:56px;border-radius:28px;background:#2a2a30;display:flex;align-items:center;justify-content:center;color:#a1a1aa"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg></span><span style="font-size:12px;color:#c9c9cf">Mais</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ shareRecast }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ shareCancel }}" style="position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.6);animation:cvFade .18s ease-out"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;z-index:31;display:flex;flex-direction:column;gap:16px;background:#17171a;border-radius:28px 28px 0 0;border-top:1px solid #26262c;padding:0 20px 20px;animation:cvUp .26s cubic-bezier(.2,.8,.2,1)">
+<div style="display:flex;justify-content:center;padding-top:12px"><span style="width:32px;height:4px;border-radius:2px;background:#44444c"></span></div>
+<div style="display:flex;align-items:center;gap:10px">
+<span style="width:28px;height:28px;border-radius:9px;background:#f07152;display:flex;align-items:center;justify-content:center;color:#1a0e0a"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"></path></svg></span>
+<div style="display:flex;flex-direction:column;gap:1px"><span style="font-size:12px;color:#8b8b95">Recast</span><span style="font-size:18px;font-weight:600;letter-spacing:-0.01em">Baixar este vídeo</span></div>
+</div>
+<div style="display:flex;gap:12px;align-items:center">
+<div style="width:96px;height:54px;flex:none;position:relative;border-radius:8px;border:1px solid #24242a;background:repeating-linear-gradient(135deg,#151518 0 6px,#19191d 6px 12px)"><span style="position:absolute;right:4px;bottom:4px;font-family:'JetBrains Mono',monospace;font-size:10px;padding:1px 4px;border-radius:3px;background:rgba(0,0,0,.75)">18:42</span></div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:500;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">Construindo um teclado mecânico do zero — Montagem completa</span><span style="font-size:12px;color:#7c7c86">Hollow Workshop · youtube.com</span></div>
+</div>
+<div style="display:flex;flex-direction:column;background:#141417;border:1px solid #222227;border-radius:16px;overflow:hidden">
+<sc-for list="{{ shareOpts }}" as="o" hint-placeholder-count="3">
+<div onClick="{{ o.on }}" style="min-height:60px;display:flex;align-items:center;gap:14px;padding:8px 16px;cursor:pointer;border-top:{{ o.border }};background:{{ o.bg }}">
+<span style="width:20px;height:20px;flex:none;border-radius:50%;border:2px solid {{ o.ring }};display:flex;align-items:center;justify-content:center"><sc-if value="{{ o.sel }}"><span style="width:10px;height:10px;border-radius:50%;background:#f07152"></span></sc-if></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:500">{{ o.label }}<sc-if value="{{ o.hasBadge }}"><span style="font-size:10.5px;font-weight:600;padding:2px 6px;border-radius:4px;background:rgba(240,113,82,.14);color:#f5866d">{{ o.badge }}</span></sc-if></span><span style="font-size:12.5px;color:#7c7c86">{{ o.sub }}</span></div>
+</div>
+</sc-for>
+</div>
+<div style="font-size:11.5px;line-height:1.45;color:#6e6e78">Salve apenas conteúdo que seja seu ou que você tenha permissão para baixar.</div>
+<div style="display:flex;gap:8px">
+<button onClick="{{ shareMore }}" style="flex:1;height:48px;border-radius:24px;border:1px solid #2a2a30;background:#1c1c20;color:#ededef;font-size:14px;font-weight:600;cursor:pointer">Mais formatos</button>
+<button onClick="{{ shareDownload }}" style="flex:1;height:48px;border:0;border-radius:24px;background:#f07152;color:#1a0e0a;font-size:14px;font-weight:600;cursor:pointer">Baixar</button>
+</div>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ isApp }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;min-height:0;display:flex;flex-direction:column">
+
+<sc-if value="{{ isDownload }}" hint-placeholder-val="{{ true }}">
+<div data-screen-label="Baixar" style="flex:1;min-height:0;display:flex;flex-direction:column">
+<div style="flex:1;min-height:0;overflow:auto;padding:8px 16px 24px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:3px;padding:4px 4px 0">
+<div style="font-size:24px;font-weight:600;letter-spacing:-0.015em">Baixar</div>
+<div style="font-size:13px;color:#7c7c86">Veja os formatos antes de salvar qualquer coisa.</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="height:52px;display:flex;align-items:center;gap:10px;padding:0 4px 0 14px;background:#141417;border:1px solid #2a2a30;border-radius:14px;color:#6e6e78">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg>
+<input value="{{ url }}" onChange="{{ onUrl }}" onKeyDown="{{ onUrlKey }}" placeholder="Cole um link de vídeo" spellcheck="false" style="flex:1;min-width:0;height:100%;background:transparent;border:0;color:#ededef;font-family:inherit;font-size:14.5px;padding:0">
+<sc-if value="{{ hasUrl }}" hint-placeholder-val="{{ false }}">
+<button onClick="{{ clearUrl }}" style="width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;background:transparent;border:0;border-radius:22px;color:#8b8b95;cursor:pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.8;stroke-linecap:round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</sc-if>
+</div>
+<div style="display:flex;gap:8px">
+<button onClick="{{ pasteUrl }}" style="flex:1;height:44px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:22px;border:1px solid #2a2a30;background:#1a1a1e;color:#ededef;font-size:14px;font-weight:600;cursor:pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><rect x="8" y="2" width="8" height="4" rx="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path></svg>Colar</button>
+<button onClick="{{ inspect }}" style="flex:1;height:44px;border:0;border-radius:22px;background:#f07152;color:#1a0e0a;font-size:14px;font-weight:600;cursor:pointer">{{ inspectLabel }}</button>
+</div>
+</div>
+
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ showClip }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:center;gap:12px;padding:12px 8px 12px 14px;background:rgba(240,113,82,.07);border:1px solid rgba(240,113,82,.3);border-radius:16px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f5866d" style="stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none"><rect x="8" y="2" width="8" height="4" rx="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path></svg>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:13.5px;font-weight:500">Link copiado</span><span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#a1a1aa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">youtube.com/watch?v=la4_vectors</span></div>
+<button onClick="{{ inspectClip }}" style="flex:none;height:40px;padding:0 14px;border:0;border-radius:20px;background:transparent;color:#f5866d;font-size:13.5px;font-weight:600;cursor:pointer">Inspecionar</button>
+</div>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-size:12px;font-weight:600;color:#7c7c86;letter-spacing:.06em;text-transform:uppercase;padding:0 4px">Recentes</div>
+<div style="display:flex;flex-direction:column;background:#141417;border:1px solid #222227;border-radius:16px;overflow:hidden">
+<sc-for list="{{ recent }}" as="r" hint-placeholder-count="3">
+<div onClick="{{ r.open }}" style="min-height:64px;display:flex;align-items:center;gap:14px;padding:10px 16px;cursor:pointer;border-top:{{ r.border }}" style-hover="background:#17171b">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" style="stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none"><path d="M12 8v4l3 2"></path><circle cx="12" cy="12" r="9"></circle></svg>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.t }}</span><span style="font-size:12px;color:#7c7c86">{{ r.d }} · {{ r.w }}</span></div>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;gap:14px;padding:16px;border:1px dashed #2c2c33;border-radius:16px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" style="stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13"></path></svg>
+<div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:500">Baixe direto de outros apps</span><span style="font-size:12.5px;line-height:1.45;color:#8b8b95;text-wrap:pretty">No app de vídeo, toque em Compartilhar e escolha Recast.</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="aspect-ratio:16/9;border-radius:14px;background:#17171a"></div>
+<div style="width:80%;height:14px;border-radius:4px;background:#1a1a1e"></div>
+<div style="width:50%;height:11px;border-radius:4px;background:#17171a"></div>
+<div style="height:60px;border-radius:14px;background:#141417"></div>
+<div style="height:60px;border-radius:14px;background:#141417"></div>
+<div style="font-size:13px;color:#7c7c86;display:flex;align-items:center;gap:8px"><span style="width:6px;height:6px;border-radius:50%;background:#f07152"></span>Lendo formatos disponíveis…</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isReady }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="aspect-ratio:16/9;position:relative;border-radius:14px;overflow:hidden;border:1px solid #24242a;background:repeating-linear-gradient(135deg,#151518 0 10px,#19191d 10px 20px);display:flex;align-items:center;justify-content:center">
+<span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#55555e">miniatura</span>
+<span style="position:absolute;right:8px;bottom:8px;font-family:'JetBrains Mono',monospace;font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(0,0,0,.75)">18:42</span>
+</div>
+<div style="font-size:16px;font-weight:600;line-height:1.35;text-wrap:pretty">{{ mediaTitle }}</div>
+<div style="font-size:12.5px;color:#8b8b95">Hollow Workshop · 12 set. 2026 · youtube.com</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px">
+<span style="height:26px;display:flex;align-items:center;gap:5px;padding:0 9px;border:1px solid rgba(79,191,135,.3);border-radius:8px;font-size:12px;color:#6fd19f;background:rgba(79,191,135,.08)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M20 6L9 17l-5-5"></path></svg>CC BY 4.0</span>
+<span style="height:26px;display:flex;align-items:center;padding:0 9px;border:1px solid #2a2a30;border-radius:8px;font-size:12px;color:#a1a1aa">9 capítulos</span>
+<span style="height:26px;display:flex;align-items:center;padding:0 9px;border:1px solid #2a2a30;border-radius:8px;font-size:12px;color:#a1a1aa">Legendas · EN, DE, JA</span>
+</div>
+</div>
+<div style="display:flex;padding:3px;background:#141417;border:1px solid #24242a;border-radius:14px;gap:3px">
+<sc-for list="{{ dtabs }}" as="t" hint-placeholder-count="2">
+<button onClick="{{ t.on }}" style="flex:1;height:40px;border:0;border-radius:11px;font-size:14px;font-weight:500;cursor:pointer;background:{{ t.bg }};color:{{ t.fg }}">{{ t.label }}</button>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;background:#141417;border:1px solid #222227;border-radius:16px;overflow:hidden">
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+<div onClick="{{ r.on }}" style="min-height:60px;display:flex;align-items:center;gap:14px;padding:8px 16px;cursor:pointer;border-top:{{ r.border }};background:{{ r.bg }}">
+<span style="width:20px;height:20px;flex:none;border-radius:50%;border:2px solid {{ r.ring }};display:flex;align-items:center;justify-content:center"><sc-if value="{{ r.sel }}"><span style="width:10px;height:10px;border-radius:50%;background:#f07152"></span></sc-if></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:500">{{ r.q }}<sc-if value="{{ r.hasBadge }}"><span style="font-size:10.5px;font-weight:600;padding:2px 6px;border-radius:4px;background:rgba(240,113,82,.14);color:#f5866d">{{ r.badge }}</span></sc-if></span><span style="font-size:12.5px;color:#7c7c86;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.sub }}</span></div>
+<span style="flex:none;font-size:13px;color:#c9c9cf">{{ r.size }}</span>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-size:12px;font-weight:600;color:#7c7c86;letter-spacing:.06em;text-transform:uppercase;padding:0 4px">Salvar como</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<sc-for list="{{ containers }}" as="c" hint-placeholder-count="3">
+<button onClick="{{ c.on }}" style="height:36px;min-width:64px;padding:0 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }}">{{ c.label }}</button>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;background:#141417;border:1px solid #222227;border-radius:16px;overflow:hidden">
+<div onClick="{{ toggleMore }}" style="min-height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;cursor:pointer"><span style="font-size:14.5px;font-weight:500">Mais opções</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b8b95" style="stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s;transform:{{ moreRot }}"><path d="M6 9l6 6 6-6"></path></svg></div>
+<sc-if value="{{ more }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ tog.thumb }}" style="min-height:52px;display:flex;align-items:center;gap:16px;padding:0 16px;border-top:1px solid #1c1c20;cursor:pointer"><span style="flex:1">Incorporar miniatura</span><span style="flex:none;width:44px;height:26px;border-radius:13px;position:relative;background:{{ tg.thumb.bg }};transition:background .15s"><span style="position:absolute;top:3px;left:{{ tg.thumb.x }};width:20px;height:20px;border-radius:50%;background:{{ tg.thumb.knob }};transition:left .15s"></span></span></div>
+<div onClick="{{ tog.meta }}" style="min-height:52px;display:flex;align-items:center;gap:16px;padding:0 16px;border-top:1px solid #1c1c20;cursor:pointer"><span style="flex:1">Incorporar metadados</span><span style="flex:none;width:44px;height:26px;border-radius:13px;position:relative;background:{{ tg.meta.bg }};transition:background .15s"><span style="position:absolute;top:3px;left:{{ tg.meta.x }};width:20px;height:20px;border-radius:50%;background:{{ tg.meta.knob }};transition:left .15s"></span></span></div>
+<div onClick="{{ tog.subs }}" style="min-height:52px;display:flex;align-items:center;gap:16px;padding:0 16px;border-top:1px solid #1c1c20;cursor:pointer"><span style="flex:1">Legendas (EN)</span><span style="flex:none;width:44px;height:26px;border-radius:13px;position:relative;background:{{ tg.subs.bg }};transition:background .15s"><span style="position:absolute;top:3px;left:{{ tg.subs.x }};width:20px;height:20px;border-radius:50%;background:{{ tg.subs.knob }};transition:left .15s"></span></span></div>
+<div onClick="{{ tog.chapters }}" style="min-height:52px;display:flex;align-items:center;gap:16px;padding:0 16px;border-top:1px solid #1c1c20;cursor:pointer"><span style="flex:1">Dividir por capítulos</span><span style="flex:none;width:44px;height:26px;border-radius:13px;position:relative;background:{{ tg.chapters.bg }};transition:background .15s"><span style="position:absolute;top:3px;left:{{ tg.chapters.x }};width:20px;height:20px;border-radius:50%;background:{{ tg.chapters.knob }};transition:left .15s"></span></span></div>
+<div style="min-height:56px;display:flex;align-items:center;gap:12px;padding:8px 16px;border-top:1px solid #1c1c20"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span>Nome do arquivo</span><span style="font-size:12px;color:#7c7c86;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ filePreview }}</span></div><span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#a1a1aa">%(title)s</span></div>
+</sc-if>
+</div>
+<div style="font-size:12px;line-height:1.5;color:#6e6e78;padding:0 4px">Salve apenas conteúdo que seja seu ou que você tenha permissão para baixar.</div>
+</sc-if>
+</div>
+<sc-if value="{{ isReady }}" hint-placeholder-val="{{ false }}">
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:10px 16px;border-top:1px solid #1e1e22;background:#0c0c0e">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ summary }}</span><span style="font-size:12px;color:#6e6e78">Download/Recast</span></div>
+<button onClick="{{ download }}" style="flex:none;height:48px;display:flex;align-items:center;gap:8px;padding:0 22px;border:0;border-radius:24px;background:#f07152;color:#1a0e0a;font-size:14.5px;font-weight:600;cursor:pointer"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"></path></svg>Baixar</button>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isConvert }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Converter" style="flex:1;min-height:0;display:flex;flex-direction:column">
+<div style="flex:1;min-height:0;overflow:auto;padding:8px 16px 24px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:6px;padding:4px 4px 0">
+<div style="font-size:24px;font-weight:600;letter-spacing:-0.015em">Converter</div>
+<div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#7c7c86"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6fd19f" style="stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ convSummary }}</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-size:12px;font-weight:600;color:#7c7c86;letter-spacing:.06em;text-transform:uppercase;padding:0 4px">Predefinições rápidas</div>
+<div style="display:flex;gap:8px;overflow-x:auto;margin:0 -16px;padding:0 16px">
+<sc-for list="{{ quickPresets }}" as="qp" hint-placeholder-count="4">
+<button onClick="{{ qp.on }}" style="flex:none;height:40px;display:flex;align-items:center;gap:8px;padding:0 14px;border-radius:12px;border:1px solid #2a2a30;background:#141417;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:12.5px" style-hover="border-color:#3a3a42">
+<span style="color:#8b8b95">{{ qp.from }}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#55555e" style="stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg><span style="color:#ededef">{{ qp.to }}</span>
+</button>
+</sc-for>
+</div>
+</div>
+
+<sc-if value="{{ hasFiles }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:center;gap:8px;padding:0 4px">
+<span style="flex:1;font-size:12px;font-weight:600;color:#7c7c86;letter-spacing:.06em;text-transform:uppercase">{{ filesLabel }}</span>
+<sc-if value="{{ hasDone }}" hint-placeholder-val="{{ false }}"><button onClick="{{ clearDone }}" style="height:36px;padding:0 10px;border:0;border-radius:18px;background:transparent;color:#a1a1aa;font-size:13px;font-weight:500;cursor:pointer">Limpar</button></sc-if>
+<sc-if value="{{ hasPickable }}" hint-placeholder-val="{{ true }}"><button onClick="{{ openAllPicker }}" style="height:36px;display:flex;align-items:center;gap:6px;padding:0 10px 0 12px;border:1px solid #2a2a30;border-radius:10px;background:#1a1a1e;color:#a1a1aa;font-size:13px;cursor:pointer">Tudo para <span style="color:#ededef;font-weight:600">{{ allTarget }}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M6 9l6 6 6-6"></path></svg></button></sc-if>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ cfiles }}" as="f" hint-placeholder-count="5">
+<div onClick="{{ f.onOpen }}" style="display:flex;flex-direction:column;gap:10px;padding:12px 12px 12px 14px;background:#141417;border:1px solid #222227;border-radius:16px;cursor:pointer" style-hover="border-color:#2e2e35">
+<div style="display:flex;align-items:center;gap:12px">
+<div style="width:36px;height:44px;flex:none;border-radius:7px;background:{{ f.tileBg }};border:1px solid {{ f.tileBd }};display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px"><span style="font-size:8.5px;font-weight:700;letter-spacing:.02em;color:{{ f.tint }}">{{ f.srcExt }}</span></div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ f.name }}</span><span style="font-size:12px;color:#7c7c86;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ f.meta }}</span></div>
+<sc-if value="{{ f.canPick }}" hint-placeholder-val="{{ true }}"><button onClick="{{ f.onPick }}" style="flex:none;height:36px;display:flex;align-items:center;gap:4px;padding:0 8px 0 10px;border-radius:10px;border:1px solid #2a2a30;background:#1c1c20;color:#ededef;font-size:13px;font-weight:600;cursor:pointer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" style="stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>{{ f.targetExt }}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b8b95" style="stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M6 9l6 6 6-6"></path></svg></button></sc-if>
+<sc-if value="{{ f.noPick }}" hint-placeholder-val="{{ false }}"><span style="flex:none;padding:0 10px;font-size:13px;font-weight:600;color:#a1a1aa">→ {{ f.targetExt }}</span></sc-if>
+</div>
+<sc-if value="{{ f.isActive }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:6px;padding-left:48px"><div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:#c9c9cf">{{ f.activeLabel }}</span><span style="font-family:'JetBrains Mono',monospace;color:#8b8b95">{{ f.pct }}</span></div><div style="height:4px;border-radius:2px;background:#26262a;overflow:hidden"><div style="height:100%;width:{{ f.pct }};background:{{ f.barColor }};border-radius:2px;transition:width .3s linear"></div></div></div>
+</sc-if>
+<sc-if value="{{ f.isDone }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:7px;padding-left:48px;font-size:12.5px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6fd19f" style="stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span style="color:#c9c9cf">{{ f.outLabel }}</span><span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#7c7c86">{{ f.deltaLabel }}</span></div>
+</sc-if>
+<sc-if value="{{ f.isQueued }}" hint-placeholder-val="{{ false }}"><div style="padding-left:48px;font-size:12.5px;color:#7c7c86">Na fila</div></sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ noFiles }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:40px 24px;border:1.5px dashed #2c2c33;border-radius:20px">
+<div style="width:48px;height:48px;border-radius:14px;background:#1a1a1e;border:1px solid #2a2a30;display:flex;align-items:center;justify-content:center;color:#f07152"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M12 15V4M7.5 8.5L12 4l4.5 4.5M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15"></path></svg></div>
+<div style="font-size:17px;font-weight:600">Adicione arquivos para converter</div>
+<div style="font-size:13px;line-height:1.5;color:#8b8b95;text-wrap:pretty">Imagens, documentos, áudio, vídeo, compactados e e-books. Tudo processado neste aparelho.</div>
+<button onClick="{{ openAdd }}" style="margin-top:6px;height:44px;padding:0 20px;border:0;border-radius:22px;background:#f07152;color:#1a0e0a;font-size:14px;font-weight:600;cursor:pointer">Escolher arquivos</button>
+</div>
+</sc-if>
+</div>
+<sc-if value="{{ hasFiles }}" hint-placeholder-val="{{ true }}">
+<div style="flex:none;display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid #1e1e22;background:#0c0c0e">
+<button onClick="{{ openAdd }}" title="Adicionar arquivos" style="width:48px;height:48px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:24px;border:1px solid #2a2a30;background:#1a1a1e;color:#ededef;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.9;stroke-linecap:round"><path d="M12 5v14M5 12h14"></path></svg></button>
+<button onClick="{{ onPrimary }}" style="flex:1;height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:24px;background:#f07152;color:#1a0e0a;font-size:14.5px;font-weight:600;cursor:pointer;opacity:{{ primary.opacity }}">
+<sc-if value="{{ primary.isPause }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect></svg></sc-if>
+<sc-if value="{{ primary.isPlay }}" hint-placeholder-val="{{ true }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12.5-7.5z"></path></svg></sc-if>
+{{ primary.label }}</button>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isQueue }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Fila" style="flex:1;min-height:0;display:flex;flex-direction:column">
+<div style="flex:1;min-height:0;overflow:auto;padding:8px 16px 24px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:flex-start;gap:8px;padding:4px 0 0 4px">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><div style="font-size:24px;font-weight:600;letter-spacing:-0.015em">Fila</div><div style="font-size:13px;color:#7c7c86">{{ queueSub }}</div></div>
+<button onClick="{{ pauseAll }}" style="flex:none;height:40px;margin-top:2px;padding:0 14px;border-radius:20px;border:1px solid #2a2a30;background:#1a1a1e;color:#ededef;font-size:13px;font-weight:600;cursor:pointer">{{ pauseAllLabel }}</button>
+</div>
+<div style="display:flex;gap:8px;overflow-x:auto;margin:0 -16px;padding:0 16px">
+<sc-for list="{{ filters }}" as="f" hint-placeholder-count="4">
+<button onClick="{{ f.on }}" style="flex:none;height:36px;display:flex;align-items:center;gap:6px;padding:0 14px;border-radius:10px;border:1px solid {{ f.bd }};background:{{ f.bg }};color:{{ f.fg }};font-size:13px;font-weight:500;cursor:pointer">{{ f.label }}<span style="font-size:12px;opacity:.7">{{ f.n }}</span></button>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ qitems }}" as="j" hint-placeholder-count="5">
+<div style="display:flex;flex-direction:column;gap:10px;padding:12px 8px 12px 14px;background:#141417;border:1px solid #222227;border-radius:16px">
+<div style="display:flex;align-items:center;gap:12px">
+<sc-if value="{{ j.isDl }}" hint-placeholder-val="{{ true }}"><div style="width:36px;height:36px;flex:none;border-radius:10px;background:#1c1c20;border:1px solid #26262c;display:flex;align-items:center;justify-content:center;color:#a1a1aa">
+<sc-if value="{{ j.isAudio }}" hint-placeholder-val="{{ false }}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg></sc-if>
+<sc-if value="{{ j.isVideo }}" hint-placeholder-val="{{ true }}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M10 9.5v5l4-2.5z"></path></svg></sc-if>
+</div></sc-if>
+<sc-if value="{{ j.isCv }}" hint-placeholder-val="{{ false }}"><div style="width:36px;height:36px;flex:none;border-radius:10px;background:{{ j.tileBg }};border:1px solid {{ j.tileBd }};display:flex;align-items:center;justify-content:center"><span style="font-size:8.5px;font-weight:700;color:{{ j.tint }}">{{ j.ext }}</span></div></sc-if>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ j.title }}</span><span style="font-size:12px;color:#7c7c86;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ j.sub }}</span></div>
+<div style="display:flex;flex:none">
+<sc-if value="{{ j.canPause }}" hint-placeholder-val="{{ false }}"><button title="Pausar" onClick="{{ j.onPause }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:transparent;border:0;border-radius:20px;color:#a1a1aa;cursor:pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:2;stroke-linecap:round"><path d="M9 5v14M15 5v14"></path></svg></button></sc-if>
+<sc-if value="{{ j.canResume }}" hint-placeholder-val="{{ false }}"><button title="Retomar" onClick="{{ j.onResume }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:transparent;border:0;border-radius:20px;color:#a1a1aa;cursor:pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.8;stroke-linejoin:round"><path d="M7 5l12 7-12 7z"></path></svg></button></sc-if>
+<sc-if value="{{ j.canRetry }}" hint-placeholder-val="{{ false }}"><button title="Tentar novamente" onClick="{{ j.onRetry }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:transparent;border:0;border-radius:20px;color:#a1a1aa;cursor:pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"></path></svg></button></sc-if>
+<button title="Remover" onClick="{{ j.onRemove }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:transparent;border:0;border-radius:20px;color:#7c7c86;cursor:pointer"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.8;stroke-linecap:round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:7px;padding:0 6px 0 48px">
+<div style="height:4px;border-radius:2px;background:#26262a;overflow:hidden"><div style="height:100%;border-radius:2px;width:{{ j.w }};background:{{ j.bar }};transition:width .3s linear"></div></div>
+<div style="display:flex;align-items:center;gap:8px"><span style="flex:none;height:22px;display:flex;align-items:center;padding:0 7px;border-radius:6px;font-size:11px;font-weight:600;color:{{ j.sFg }};background:{{ j.sBg }}">{{ j.sLabel }}</span><span style="flex:1;min-width:0;font-size:12px;color:{{ j.lineFg }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ j.line }}</span>
+<sc-if value="{{ j.canConvert }}" hint-placeholder-val="{{ false }}"><button onClick="{{ j.onConvert }}" style="flex:none;height:32px;display:flex;align-items:center;gap:6px;padding:0 10px;border:0;border-radius:16px;background:rgba(240,113,82,.12);color:#f5866d;font-size:12.5px;font-weight:600;cursor:pointer"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"></path></svg>Converter</button></sc-if>
+</div>
+</div>
+</div>
+</sc-for>
+<sc-if value="{{ noQ }}" hint-placeholder-val="{{ false }}"><div style="padding:48px 0;text-align:center;font-size:13px;color:#7c7c86">Nada nesta visualização.</div></sc-if>
+</div>
+<sc-if value="{{ hasQDone }}" hint-placeholder-val="{{ true }}"><button onClick="{{ clearQDone }}" style="align-self:center;height:40px;padding:0 16px;border:0;border-radius:20px;background:transparent;color:#a1a1aa;font-size:13px;font-weight:500;cursor:pointer">Limpar concluídos</button></sc-if>
+</div>
+<div style="flex:none;min-height:40px;display:flex;align-items:center;gap:8px;padding:0 20px;border-top:1px solid #1e1e22;background:#0c0c0e;font-size:12px;color:#7c7c86"><span style="width:6px;height:6px;border-radius:50%;background:{{ engineDot }}"></span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ throughput }}</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isLibrary }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Biblioteca" style="flex:1;min-height:0;overflow:auto;padding:8px 16px 24px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;flex-direction:column;gap:3px;padding:4px 4px 0"><div style="font-size:24px;font-weight:600;letter-spacing:-0.015em">Biblioteca</div><div style="font-size:13px;color:#7c7c86">{{ libSub }}</div></div>
+<div style="display:flex;padding:3px;background:#141417;border:1px solid #24242a;border-radius:14px;gap:3px">
+<sc-for list="{{ libTabs }}" as="t" hint-placeholder-count="2"><button onClick="{{ t.on }}" style="flex:1;height:40px;border:0;border-radius:11px;font-size:14px;font-weight:500;cursor:pointer;background:{{ t.bg }};color:{{ t.fg }}">{{ t.label }}</button></sc-for>
+</div>
+<sc-if value="{{ isLibFiles }}" hint-placeholder-val="{{ true }}">
+<div style="height:48px;display:flex;align-items:center;gap:10px;padding:0 14px;background:#141417;border:1px solid #26262c;border-radius:24px;color:#6e6e78">
+<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.8;stroke-linecap:round;flex:none"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+<input value="{{ lq }}" onChange="{{ onLq }}" placeholder="Buscar arquivos" style="flex:1;min-width:0;background:transparent;border:0;color:#ededef;font-family:inherit;font-size:14px;padding:0">
+</div>
+<div style="display:flex;flex-direction:column;margin:0 -16px">
+<sc-for list="{{ lib }}" as="l" hint-placeholder-count="7">
+<div onClick="{{ l.open }}" style="min-height:68px;display:flex;align-items:center;gap:12px;padding:8px 16px;cursor:pointer" style-hover="background:#141417">
+<div style="width:64px;height:36px;flex:none;border-radius:6px;border:1px solid #24242a;background:repeating-linear-gradient(135deg,#151518 0 5px,#19191d 5px 10px);display:flex;align-items:center;justify-content:center;color:#6e6e78">
+<sc-if value="{{ l.isAudio }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg></sc-if>
+</div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.n }}</span><span style="font-size:12px;color:#7c7c86;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.meta }}</span></div>
+<div style="flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:3px"><span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#a1a1aa">{{ l.d }}</span><span style="font-size:11.5px;color:#6e6e78">{{ l.a }}</span></div>
+</div>
+</sc-for>
+<sc-if value="{{ noLib }}" hint-placeholder-val="{{ false }}"><div style="padding:40px 0;text-align:center;font-size:13px;color:#7c7c86">Nenhum arquivo encontrado.</div></sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ isLibHistory }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:0 4px"><span style="font-size:12.5px;color:#7c7c86">Armazenado só neste aparelho.</span><button onClick="{{ clearHistory }}" style="height:36px;padding:0 10px;border:0;border-radius:18px;background:transparent;color:#a1a1aa;font-size:13px;font-weight:500;cursor:pointer">Limpar</button></div>
+<div style="display:flex;flex-direction:column;margin:0 -16px">
+<sc-for list="{{ historyRows }}" as="h" hint-placeholder-count="6">
+<div style="min-height:64px;display:flex;align-items:center;gap:12px;padding:8px 16px">
+<div style="width:30px;height:38px;flex:none;border-radius:6px;background:{{ h.tileBg }};border:1px solid {{ h.tileBd }};display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px"><span style="font-size:7.5px;font-weight:700;color:{{ h.tint }}">{{ h.from }}</span></div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.name }}</span><span style="display:flex;gap:6px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#8b8b95"><span>{{ h.from }} → {{ h.to }}</span><span style="color:#55555e">·</span><span>{{ h.sizes }}</span></span></div>
+<span style="flex:none;font-size:11.5px;color:#6e6e78">{{ h.when }}</span>
+</div>
+</sc-for>
+<sc-if value="{{ historyEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:40px 0;text-align:center;font-size:13px;color:#7c7c86">Nenhuma conversão ainda.</div></sc-if>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Ajustes" style="flex:1;min-height:0;overflow:auto;padding:8px 16px 28px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:3px;padding:4px 4px 0"><div style="font-size:24px;font-weight:600;letter-spacing:-0.015em">Ajustes</div><div style="font-size:13px;color:#7c7c86">As alterações são salvas automaticamente.</div></div>
+
+<div style="display:flex;gap:14px;align-items:center;padding:16px;background:rgba(79,191,135,.07);border:1px solid rgba(79,191,135,.25);border-radius:16px">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6fd19f" style="stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+<div style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font-size:14.5px;font-weight:600">Conversões no aparelho</span><span style="font-size:12.5px;line-height:1.45;color:#a1a1aa;text-wrap:pretty">Seus arquivos nunca são enviados. Downloads vêm direto da fonte.</span></div>
+<span style="flex:none;font-family:'JetBrains Mono',monospace;font-size:11px;color:#6fd19f">0 B</span>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-size:12px;font-weight:600;color:#7c7c86;letter-spacing:.06em;text-transform:uppercase;padding:0 4px">Geral</div>
+<div style="background:#141417;border:1px solid #222227;border-radius:16px;overflow:hidden">
+<div style="min-height:64px;display:flex;align-items:center;gap:12px;padding:10px 16px"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:500">Pasta de salvamento</span><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b8b95">Download/Recast</span></div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" style="stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9 6l6 6-6 6"></path></svg></div>
+<div onClick="{{ tog.clip }}" style="min-height:64px;display:flex;align-items:center;gap:16px;padding:10px 16px;border-top:1px solid #1c1c20;cursor:pointer"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:500">Detectar links copiados</span><span style="font-size:12.5px;color:#7c7c86;line-height:1.4">Oferece inspecionar um link da área de transferência.</span></div><span style="flex:none;width:44px;height:26px;border-radius:13px;position:relative;background:{{ tg.clip.bg }};transition:background .15s"><span style="position:absolute;top:3px;left:{{ tg.clip.x }};width:20px;height:20px;border-radius:50%;background:{{ tg.clip.knob }};transition:left .15s"></span></span></div>
+<div onClick="{{ tog.notify }}" style="min-height:64px;display:flex;align-items:center;gap:16px;padding:10px 16px;border-top:1px solid #1c1c20;cursor:pointer"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:500">Notificações</span><span style="font-size:12.5px;color:#7c7c86;line-height:1.4">Avisa quando um download ou conversão termina.</span></div><span style="flex:none;width:44px;height:26px;border-radius:13px;position:relative;background:{{ tg.notify.bg }};transition:background .15s"><span style="position:absolute;top:3px;left:{{ tg.notify.x }};width:20px;height:20px;border-radius:50%;background:{{ tg.notify.knob }};transition:left .15s"></span></span></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-size:12px;font-weight:600;color:#7c7c86;letter-spacing:.06em;text-transform:uppercase;padding:0 4px">Downloads</div>
+<div style="background:#141417;border:1px solid #222227;border-radius:16px;overflow:hidden">
+<div style="min-height:64px;display:flex;align-items:center;gap:12px;padding:10px 16px"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:500">Qualidade preferida</span><span style="font-size:12.5px;color:#7c7c86">1080p · MP4</span></div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" style="stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9 6l6 6-6 6"></path></svg></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-top:1px solid #1c1c20"><span style="font-size:14.5px;font-weight:500">Downloads simultâneos</span><div style="display:flex;padding:3px;background:#0f0f11;border:1px solid #24242a;border-radius:12px;gap:3px"><sc-for list="{{ concOpts }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.on }}" style="flex:1;height:36px;border:0;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for></div></div>
+<div onClick="{{ tog.wifi }}" style="min-height:64px;display:flex;align-items:center;gap:16px;padding:10px 16px;border-top:1px solid #1c1c20;cursor:pointer"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:500">Somente em Wi-Fi</span><span style="font-size:12.5px;color:#7c7c86;line-height:1.4">Pausa downloads nos dados móveis.</span></div><span style="flex:none;width:44px;height:26px;border-radius:13px;position:relative;background:{{ tg.wifi.bg }};transition:background .15s"><span style="position:absolute;top:3px;left:{{ tg.wifi.x }};width:20px;height:20px;border-radius:50%;background:{{ tg.wifi.knob }};transition:left .15s"></span></span></div>
+<div style="min-height:64px;display:flex;align-items:center;gap:12px;padding:10px 16px;border-top:1px solid #1c1c20"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:500">Modelo de nome</span><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b8b95">%(title)s.%(ext)s</span></div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" style="stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9 6l6 6-6 6"></path></svg></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-size:12px;font-weight:600;color:#7c7c86;letter-spacing:.06em;text-transform:uppercase;padding:0 4px">Conversão</div>
+<div style="background:#141417;border:1px solid #222227;border-radius:16px;overflow:hidden">
+<div onClick="{{ openPresets }}" style="min-height:64px;display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer" style-hover="background:#17171b"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:500">Predefinições</span><span style="font-size:12.5px;color:#7c7c86">{{ presetCount }}</span></div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" style="stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9 6l6 6-6 6"></path></svg></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-top:1px solid #1c1c20"><span style="font-size:14.5px;font-weight:500">Se o arquivo já existir</span><div style="display:flex;padding:3px;background:#0f0f11;border:1px solid #24242a;border-radius:12px;gap:3px"><sc-for list="{{ conflictOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="flex:1;height:36px;border:0;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for></div></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-top:1px solid #1c1c20"><span style="font-size:14.5px;font-weight:500">Conversões simultâneas</span><div style="display:flex;padding:3px;background:#0f0f11;border:1px solid #24242a;border-radius:12px;gap:3px"><sc-for list="{{ parOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="flex:1;height:36px;border:0;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for></div></div>
+<div onClick="{{ tog.hw }}" style="min-height:64px;display:flex;align-items:center;gap:16px;padding:10px 16px;border-top:1px solid #1c1c20;cursor:pointer"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:500">Aceleração de hardware</span><span style="font-size:12.5px;color:#7c7c86;line-height:1.4">Usa o codificador de mídia do aparelho para vídeo.</span></div><span style="flex:none;width:44px;height:26px;border-radius:13px;position:relative;background:{{ tg.hw.bg }};transition:background .15s"><span style="position:absolute;top:3px;left:{{ tg.hw.x }};width:20px;height:20px;border-radius:50%;background:{{ tg.hw.knob }};transition:left .15s"></span></span></div>
+<div onClick="{{ tog.keep }}" style="min-height:64px;display:flex;align-items:center;gap:16px;padding:10px 16px;border-top:1px solid #1c1c20;cursor:pointer"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:500">Manter originais</span><span style="font-size:12.5px;color:#7c7c86;line-height:1.4">Os originais continuam onde estão.</span></div><span style="flex:none;width:44px;height:26px;border-radius:13px;position:relative;background:{{ tg.keep.bg }};transition:background .15s"><span style="position:absolute;top:3px;left:{{ tg.keep.x }};width:20px;height:20px;border-radius:50%;background:{{ tg.keep.knob }};transition:left .15s"></span></span></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-size:12px;font-weight:600;color:#7c7c86;letter-spacing:.06em;text-transform:uppercase;padding:0 4px">Motor</div>
+<div style="background:#141417;border:1px solid #222227;border-radius:16px;overflow:hidden">
+<div style="min-height:64px;display:flex;align-items:center;gap:12px;padding:10px 16px"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:500">yt-dlp</span><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b8b95">2026.10.10 · atualizado</span></div><button onClick="{{ checkUpdates }}" style="flex:none;height:40px;padding:0 14px;border-radius:20px;border:1px solid #2a2a30;background:#1a1a1e;color:#ededef;font-size:13px;font-weight:600;cursor:pointer">Verificar</button></div>
+<div style="min-height:64px;display:flex;align-items:center;gap:12px;padding:10px 16px;border-top:1px solid #1c1c20"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:500">ffmpeg</span><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b8b95">7.1 · incluído no app</span></div><span style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#6fd19f"><span style="width:6px;height:6px;border-radius:50%;background:#4fbf87"></span>Pronto</span></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-size:12px;font-weight:600;color:#7c7c86;letter-spacing:.06em;text-transform:uppercase;padding:0 4px">Aparência</div>
+<div style="background:#141417;border:1px solid #222227;border-radius:16px;overflow:hidden">
+<div style="display:flex;flex-direction:column;gap:10px;padding:14px 16px"><span style="font-size:14.5px;font-weight:500">Tema</span><div style="display:flex;padding:3px;background:#0f0f11;border:1px solid #24242a;border-radius:12px;gap:3px"><sc-for list="{{ themeOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="flex:1;height:36px;border:0;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for></div></div>
+<div onClick="{{ restartOb }}" style="min-height:56px;display:flex;align-items:center;gap:12px;padding:10px 16px;border-top:1px solid #1c1c20;cursor:pointer" style-hover="background:#17171b"><span style="flex:1;font-size:14.5px;font-weight:500">Rever introdução</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" style="stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9 6l6 6-6 6"></path></svg></div>
+</div>
+</div>
+<div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#55555e">Recast 1.0.0</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPresets }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Predefinições" style="flex:1;min-height:0;display:flex;flex-direction:column">
+<div style="height:56px;flex:none;display:flex;align-items:center;gap:4px;padding:0 8px">
+<button onClick="{{ closePresets }}" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;border:0;border-radius:24px;background:transparent;color:#ededef;cursor:pointer"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></button>
+<span style="font-size:20px;font-weight:600">Predefinições</span>
+</div>
+<div style="flex:1;min-height:0;overflow:auto;padding:4px 16px 24px;display:flex;flex-direction:column;gap:8px">
+<div style="font-size:13px;line-height:1.5;color:#7c7c86;padding:0 4px 6px;text-wrap:pretty">Regras salvas de formato e qualidade. Aplique a todos os arquivos correspondentes na lista de conversão.</div>
+<sc-for list="{{ presetRows }}" as="p" hint-placeholder-count="5">
+<div style="display:flex;align-items:center;gap:12px;padding:14px 12px 14px 16px;background:#141417;border:1px solid #222227;border-radius:16px">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font-size:14.5px;font-weight:500">{{ p.name }}</span><span style="font-size:12.5px;color:#7c7c86">{{ p.detail }}</span><span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#a1a1aa">{{ p.rule }}</span></div>
+<button onClick="{{ p.onApply }}" style="flex:none;height:40px;padding:0 14px;border-radius:20px;border:1px solid #2a2a30;background:#1a1a1e;color:#ededef;font-size:13px;font-weight:600;cursor:pointer">Aplicar</button>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+</div>
+
+<div style="height:80px;flex:none;display:flex;background:#141417;border-top:1px solid #1e1e22">
+<button onClick="{{ go.download }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:0;background:transparent;cursor:pointer;padding:0">
+<span style="width:56px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:{{ nav.download.ind }};color:{{ nav.download.ic }};transition:background .2s"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"></path></svg></span>
+<span style="font-size:12px;font-weight:{{ nav.download.fw }};color:{{ nav.download.fg }}">Baixar</span>
+</button>
+<button onClick="{{ go.convert }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:0;background:transparent;cursor:pointer;padding:0">
+<span style="width:56px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:{{ nav.convert.ind }};color:{{ nav.convert.ic }};transition:background .2s"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"></path></svg></span>
+<span style="font-size:12px;font-weight:{{ nav.convert.fw }};color:{{ nav.convert.fg }}">Converter</span>
+</button>
+<button onClick="{{ go.queue }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:0;background:transparent;cursor:pointer;padding:0">
+<span style="position:relative;width:56px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:{{ nav.queue.ind }};color:{{ nav.queue.ic }};transition:background .2s"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"></path></svg>
+<sc-if value="{{ hasActive }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:0;left:32px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#f07152;color:#1a0e0a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #141417">{{ activeCount }}</span></sc-if></span>
+<span style="font-size:12px;font-weight:{{ nav.queue.fw }};color:{{ nav.queue.fg }}">Fila</span>
+</button>
+<button onClick="{{ go.library }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:0;background:transparent;cursor:pointer;padding:0">
+<span style="width:56px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:{{ nav.library.ind }};color:{{ nav.library.ic }};transition:background .2s"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg></span>
+<span style="font-size:12px;font-weight:{{ nav.library.fw }};color:{{ nav.library.fg }}">Biblioteca</span>
+</button>
+<button onClick="{{ go.settings }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:0;background:transparent;cursor:pointer;padding:0">
+<span style="width:56px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:{{ nav.settings.ind }};color:{{ nav.settings.ic }};transition:background .2s"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M4 20v-6M4 10V4M12 20v-8M12 8V4M20 20v-4M20 12V4M2 14h4M10 8h4M18 16h4"></path></svg></span>
+<span style="font-size:12px;font-weight:{{ nav.settings.fw }};color:{{ nav.settings.fg }}">Ajustes</span>
+</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ hasSheet }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeSheet }}" style="position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.6);animation:cvFade .18s ease-out"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;z-index:31;max-height:90%;display:flex;flex-direction:column;background:#17171a;border-radius:28px 28px 0 0;border-top:1px solid #26262c;animation:cvUp .26s cubic-bezier(.2,.8,.2,1)">
+<div style="flex:none;display:flex;justify-content:center;padding:12px 0 8px"><span style="width:32px;height:4px;border-radius:2px;background:#44444c"></span></div>
+
+<sc-if value="{{ sheetPicker }}" hint-placeholder-val="{{ false }}">
+<div style="flex:none;padding:4px 20px 12px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:8px">
+<sc-if value="{{ picker.canBack }}" hint-placeholder-val="{{ false }}"><button onClick="{{ pickerBack }}" style="width:40px;height:40px;margin-left:-10px;display:flex;align-items:center;justify-content:center;border:0;border-radius:20px;background:transparent;color:#ededef;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></button></sc-if>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:18px;font-weight:600">Converter para</span><span style="font-size:12.5px;color:#7c7c86">{{ picker.title }}</span></div>
+</div>
+<div style="height:44px;display:flex;align-items:center;gap:10px;padding:0 14px;background:#1c1c20;border-radius:22px;color:#6e6e78">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.8;stroke-linecap:round;flex:none"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+<input value="{{ picker.q }}" onChange="{{ onPickerQ }}" placeholder="Buscar formatos" style="flex:1;min-width:0;background:transparent;border:0;color:#ededef;font-family:inherit;font-size:14px;padding:0">
+</div>
+<div style="display:flex;gap:8px;overflow-x:auto;margin:0 -20px;padding:0 20px">
+<sc-for list="{{ picker.cats }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.on }}" style="flex:none;height:34px;padding:0 12px;border-radius:10px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-size:13px;font-weight:500;cursor:pointer">{{ c.label }}</button></sc-for>
+</div>
+</div>
+<div style="flex:1;min-height:0;overflow:auto;padding:4px 20px 24px">
+<div style="margin:0 2px 8px;font-size:12px;font-weight:600;color:#7c7c86;letter-spacing:.06em;text-transform:uppercase">{{ picker.heading }}</div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+<sc-for list="{{ picker.items }}" as="it" hint-placeholder-count="6">
+<button onClick="{{ it.on }}" style="height:64px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;padding:0 12px;border-radius:12px;border:1px solid {{ it.bd }};background:{{ it.bg }};opacity:{{ it.op }};cursor:pointer;text-align:left;min-width:0">
+<span style="font-size:14.5px;font-weight:600;color:{{ it.fg }}">{{ it.ext }}</span>
+<span style="max-width:100%;font-size:11px;color:#7c7c86;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ it.desc }}</span>
+</button>
+</sc-for>
+</div>
+<sc-if value="{{ picker.empty }}" hint-placeholder-val="{{ false }}"><div style="padding:32px 0;text-align:center;font-size:13px;color:#7c7c86">Nenhum formato compatível.</div></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheetFile }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:0;overflow:auto;padding:4px 20px 16px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;gap:12px;align-items:center">
+<div style="width:40px;height:50px;flex:none;border-radius:8px;background:{{ sel.tileBg }};border:1px solid {{ sel.tileBd }};display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px"><span style="font-size:9px;font-weight:700;color:{{ sel.tint }}">{{ sel.srcExt }}</span></div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:600;line-height:1.35;word-break:break-word">{{ sel.name }}</span><span style="font-size:12.5px;color:#7c7c86">{{ sel.meta }}</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span style="font-size:12.5px;font-weight:500;color:#8b8b95">Formato de saída</span>
+<button onClick="{{ sel.onPick }}" style="height:52px;display:flex;align-items:center;gap:12px;padding:0 14px;border:1px solid #2a2a30;border-radius:14px;background:#1c1c20;cursor:pointer;opacity:{{ sel.pickOp }}">
+<span style="font-size:16px;font-weight:600;color:#ededef">{{ sel.targetExt }}</span>
+<span style="flex:1;font-size:13px;color:#7c7c86;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sel.targetDesc }}</span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b8b95" style="stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+</div>
+<sc-if value="{{ sel.hasQuality }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:500;color:#8b8b95"><span>Qualidade</span><span style="font-family:'JetBrains Mono',monospace;color:#c9c9cf">{{ sel.qualityLabel }}</span></div>
+<div style="display:flex;padding:3px;background:#0f0f11;border:1px solid #24242a;border-radius:12px;gap:3px"><sc-for list="{{ sel.presetOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="flex:1;height:36px;border:0;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for></div>
+<input type="range" min="10" max="100" value="{{ sel.quality }}" onChange="{{ sel.onQuality }}" style="width:100%;margin:4px 0 0;accent-color:#f07152">
+</div>
+</sc-if>
+<sc-for list="{{ sel.fields }}" as="fld" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-if value="{{ fld.isSeg }}" hint-placeholder-val="{{ true }}">
+<span style="font-size:12.5px;font-weight:500;color:#8b8b95">{{ fld.label }}</span>
+<div style="display:flex;padding:3px;background:#0f0f11;border:1px solid #24242a;border-radius:12px;gap:3px"><sc-for list="{{ fld.opts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="flex:1;height:36px;border:0;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for></div>
+</sc-if>
+<sc-if value="{{ fld.isToggle }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ fld.onToggle }}" style="display:flex;align-items:center;gap:16px;cursor:pointer"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:500">{{ fld.label }}</span><span style="font-size:12.5px;color:#7c7c86;line-height:1.4">{{ fld.desc }}</span></div><span style="flex:none;width:44px;height:26px;border-radius:13px;position:relative;background:{{ fld.bg }};transition:background .15s"><span style="position:absolute;top:3px;left:{{ fld.x }};width:20px;height:20px;border-radius:50%;background:{{ fld.knob }};transition:left .15s"></span></span></div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+<div style="flex:none;display:flex;flex-direction:column;gap:10px;padding:14px 20px 20px;border-top:1px solid #222227">
+<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#8b8b95">{{ sel.estLabel }}</span><span style="font-weight:600">{{ sel.est }}</span></div>
+<button onClick="{{ sel.onApply }}" style="height:44px;border-radius:22px;border:1px solid #2a2a30;background:#1c1c20;color:#ededef;font-size:13.5px;font-weight:600;cursor:pointer">{{ sel.applyLabel }}</button>
+<div style="display:flex;gap:8px">
+<button onClick="{{ sel.onRemove }}" style="flex:none;height:48px;padding:0 18px;border:0;border-radius:24px;background:transparent;color:#f0777a;font-size:14px;font-weight:600;cursor:pointer">Remover</button>
+<button onClick="{{ closeSheet }}" style="flex:1;height:48px;border:0;border-radius:24px;background:#f07152;color:#1a0e0a;font-size:14.5px;font-weight:600;cursor:pointer">Concluir</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheetAdd }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:0;overflow:auto;padding:4px 20px 24px;display:flex;flex-direction:column;gap:14px">
+<span style="font-size:18px;font-weight:600">Adicionar arquivos</span>
+<div style="display:flex;flex-direction:column;background:#141417;border:1px solid #222227;border-radius:16px;overflow:hidden">
+<div onClick="{{ addGallery }}" style="min-height:64px;display:flex;align-items:center;gap:14px;padding:10px 16px;cursor:pointer" style-hover="background:#1a1a1e"><span style="width:40px;height:40px;flex:none;border-radius:12px;background:rgba(143,176,245,.1);color:#8fb0f5;display:flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-9 9"></path></svg></span><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:500">Galeria</span><span style="font-size:12.5px;color:#7c7c86">Fotos e vídeos do aparelho</span></div></div>
+<div onClick="{{ browse }}" style="min-height:64px;display:flex;align-items:center;gap:14px;padding:10px 16px;border-top:1px solid #1c1c20;cursor:pointer" style-hover="background:#1a1a1e"><span style="width:40px;height:40px;flex:none;border-radius:12px;background:rgba(201,204,211,.08);color:#c9ccd3;display:flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg></span><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:500">Arquivos</span><span style="font-size:12.5px;color:#7c7c86">Documentos, áudio, compactados, e-books</span></div></div>
+</div>
+<span style="font-size:12px;font-weight:600;color:#7c7c86;letter-spacing:.06em;text-transform:uppercase;padding:4px 4px 0">Dos seus downloads</span>
+<div style="display:flex;flex-direction:column;background:#141417;border:1px solid #222227;border-radius:16px;overflow:hidden">
+<sc-for list="{{ addLib }}" as="l" hint-placeholder-count="4">
+<div onClick="{{ l.on }}" style="min-height:60px;display:flex;align-items:center;gap:12px;padding:8px 12px 8px 16px;cursor:pointer;border-top:{{ l.border }}" style-hover="background:#1a1a1e">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.n }}</span><span style="font-size:12px;color:#7c7c86">{{ l.meta }}</span></div>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b8b95" style="stroke-width:1.9;stroke-linecap:round;flex:none"><path d="M12 5v14M5 12h14"></path></svg>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheetLib }}" hint-placeholder-val="{{ false }}">
+<div style="padding:4px 20px 20px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;gap:12px;align-items:center">
+<div style="width:72px;height:40px;flex:none;border-radius:7px;border:1px solid #24242a;background:repeating-linear-gradient(135deg,#151518 0 5px,#19191d 5px 10px)"></div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:600;line-height:1.35">{{ libSel.n }}</span><span style="font-size:12.5px;color:#7c7c86">{{ libSel.meta }}</span></div>
+</div>
+<div style="display:flex;flex-direction:column;background:#141417;border:1px solid #222227;border-radius:16px;overflow:hidden">
+<div onClick="{{ libSel.onConvert }}" style="min-height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;cursor:pointer" style-hover="background:#1a1a1e"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#f5866d" style="stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"></path></svg><span style="font-size:14.5px;font-weight:500;color:#f5866d">Converter</span></div>
+<div onClick="{{ libSel.onPlay }}" style="min-height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;border-top:1px solid #1c1c20;cursor:pointer" style-hover="background:#1a1a1e"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#c9c9cf" style="stroke-width:1.7;stroke-linejoin:round"><path d="M7 5l12 7-12 7z"></path></svg><span style="font-size:14.5px">Abrir no player</span></div>
+<div onClick="{{ libSel.onShare }}" style="min-height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;border-top:1px solid #1c1c20;cursor:pointer" style-hover="background:#1a1a1e"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#c9c9cf" style="stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13"></path></svg><span style="font-size:14.5px">Compartilhar</span></div>
+<div onClick="{{ libSel.onDelete }}" style="min-height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;border-top:1px solid #1c1c20;cursor:pointer" style-hover="background:#1a1a1e"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#f0777a" style="stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"></path></svg><span style="font-size:14.5px;color:#f0777a">Excluir</span></div>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:12px;right:12px;bottom:{{ toastBottom }};z-index:40;min-height:48px;display:flex;align-items:center;gap:8px;padding:4px 6px 4px 16px;background:#e6e6ea;color:#17171a;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:cvToast .2s ease-out">
+<span style="flex:1;min-width:0;font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ toastText }}</span>
+<sc-if value="{{ toastHasAction }}" hint-placeholder-val="{{ false }}"><button onClick="{{ onToastAction }}" style="flex:none;height:40px;padding:0 12px;border:0;border-radius:20px;background:transparent;color:#b3441f;font-size:13.5px;font-weight:700;cursor:pointer">{{ toastAction }}</button></sc-if>
+</div>
+</sc-if>
+</div>
+</x-import>
+
+<div style="width:260px;display:flex;flex-direction:column;gap:20px;color:#ededef">
+<div style="display:flex;align-items:center;gap:12px">
+<span style="width:40px;height:40px;border-radius:12px;background:#f07152;display:flex;align-items:center;justify-content:center;color:#1a0e0a"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"></path></svg></span>
+<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:16px;font-weight:600">Recast</span><span style="font-size:12.5px;color:#7c7c86">Protótipo Android</span></div>
+</div>
+<div style="font-size:13px;line-height:1.55;color:#a1a1aa;text-wrap:pretty">Downloads do LocalTube e conversões do Recast em um só app. Toque nas abas para navegar; progresso, arquivos e permissões são simulados.</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span style="font-size:11.5px;font-weight:600;color:#6e6e78;letter-spacing:.06em;text-transform:uppercase">Cenários</span>
+<button onClick="{{ demoOnboarding }}" style="height:40px;display:flex;align-items:center;padding:0 14px;border-radius:10px;border:1px solid #2a2a30;background:#141417;color:#ededef;font-size:13px;font-weight:500;cursor:pointer;text-align:left" style-hover="border-color:#3a3a42">Abrir onboarding</button>
+<button onClick="{{ demoShare }}" style="height:40px;display:flex;align-items:center;padding:0 14px;border-radius:10px;border:1px solid #2a2a30;background:#141417;color:#ededef;font-size:13px;font-weight:500;cursor:pointer;text-align:left" style-hover="border-color:#3a3a42">Receber link via Compartilhar</button>
+<button onClick="{{ demoReset }}" style="height:40px;display:flex;align-items:center;padding:0 14px;border-radius:10px;border:1px solid #2a2a30;background:#141417;color:#ededef;font-size:13px;font-weight:500;cursor:pointer;text-align:left" style-hover="border-color:#3a3a42">Reiniciar dados</button>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;initialScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;onboarding&quot;,&quot;download&quot;,&quot;convert&quot;,&quot;queue&quot;,&quot;library&quot;,&quot;settings&quot;,&quot;share&quot;],&quot;default&quot;:&quot;onboarding&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;simulateProgress&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const CATS = {
+  image: { label: 'Imagens', one: 'Imagem', plural: 'todas as imagens', tint: '#8fb0f5' },
+  document: { label: 'Documentos', one: 'Documento', plural: 'todos os documentos', tint: '#c9ccd3' },
+  audio: { label: 'Áudio', one: 'Áudio', plural: 'todos os áudios', tint: '#b89cf3' },
+  video: { label: 'Vídeo', one: 'Vídeo', plural: 'todos os vídeos', tint: '#f08a9c' },
+  archive: { label: 'Compactados', one: 'Compactado', plural: 'todos os compactados', tint: '#e2b46e' },
+  ebook: { label: 'E-books', one: 'E-book', plural: 'todos os e-books', tint: '#7fd3c4' }
+};
+const FORMATS = {
+  image: [['JPG','Com perdas · universal'],['PNG','Sem perdas'],['WEBP','Leve · web'],['AVIF','Mínimo · moderno'],['HEIC','Fotos Apple'],['GIF','Animado'],['TIFF','Impressão'],['BMP','Sem compressão'],['ICO','Ícone']],
+  document: [['PDF','Documento portátil'],['DOCX','Microsoft Word'],['ODT','OpenDocument'],['RTF','Texto formatado'],['TXT','Texto simples'],['HTML','Página web'],['MD','Markdown']],
+  audio: [['MP3','Universal'],['AAC','Eficiente'],['M4A','AAC em MP4'],['OPUS','Voz · mínimo'],['OGG','Vorbis'],['FLAC','Sem perdas'],['WAV','Sem compressão'],['AIFF','Sem compressão']],
+  video: [['MP4','H.264 · HEVC'],['MOV','QuickTime'],['WEBM','VP9 · AV1'],['MKV','Matroska'],['AVI','Legado'],['GIF','Loop animado']],
+  archive: [['ZIP','Universal'],['7Z','Melhor compressão'],['TAR.GZ','Unix · compactado'],['TAR','Unix']],
+  ebook: [['EPUB','Padrão aberto'],['MOBI','Kindle legado'],['AZW3','Kindle'],['FB2','FictionBook']]
+};
+const COMPAT = { image: ['image','document'], document: ['document','image','ebook'], audio: ['audio'], video: ['video','audio','image'], archive: ['archive'], ebook: ['ebook','document'] };
+const SRC_CAT = {};
+[['image','jpg jpeg png webp avif heic heif gif tiff tif bmp ico svg dng'],['document','pdf doc docx odt rtf txt html htm md pptx ppt xlsx xls csv'],['audio','mp3 wav flac aac ogg m4a opus aiff aif wma'],['video','mp4 mov mkv webm avi wmv m4v 3gp'],['archive','zip 7z rar tar gz tgz bz2'],['ebook','epub mobi azw3 fb2']].forEach(([c, l]) => l.split(' ').forEach(e => SRC_CAT[e] = c));
+const DEFAULT_TARGET = { heic: 'JPG', heif: 'JPG', png: 'WEBP', jpg: 'WEBP', jpeg: 'WEBP', webp: 'PNG', pdf: 'DOCX', mp3: 'WAV', mp4: 'WEBM', zip: '7Z', epub: 'MOBI', mov: 'MP4', wav: 'MP3', tiff: 'PDF', '7z': 'ZIP' };
+const CAT_DEFAULT = { image: 'PNG', document: 'PDF', audio: 'MP3', video: 'MP4', archive: 'ZIP', ebook: 'EPUB' };
+const FACTOR = { JPG:.55, PNG:1.3, WEBP:.32, AVIF:.24, HEIC:.4, GIF:.9, TIFF:2, BMP:3, ICO:.05, PDF:.42, DOCX:.6, ODT:.6, RTF:.8, TXT:.05, HTML:.3, MD:.04, MP3:.12, AAC:.1, M4A:.11, OPUS:.07, OGG:.1, FLAC:.55, WAV:4, AIFF:4, MP4:.38, MOV:1.1, WEBM:.3, MKV:.9, AVI:1.2, ZIP:1.05, '7Z':.85, 'TAR.GZ':.95, TAR:1.1, EPUB:.6, MOBI:.9, AZW3:.9, FB2:.5 };
+const LOSSLESS = ['PNG','TIFF','BMP','ICO','GIF','FLAC','WAV','AIFF'];
+const PRESETS = [
+  { name: 'Fotos HEIC para JPG', from: ['heic','heif'], target: 'JPG', tcat: 'image', q: 85, detail: 'Qualidade 85 · Remove localização' },
+  { name: 'Imagens para web', from: ['png','jpg','jpeg','tiff','bmp'], target: 'WEBP', tcat: 'image', q: 80, detail: 'Qualidade 80 · Até 2560 px' },
+  { name: 'Áudio para MP3', from: ['wav','aiff','flac','m4a'], target: 'MP3', tcat: 'audio', q: 95, detail: '320 kbps · Estéreo' },
+  { name: 'Vídeo para compartilhar', from: ['mov','mkv','avi','webm','m4v'], target: 'MP4', tcat: 'video', q: 80, detail: 'H.264 · 1080p · Equilibrado' },
+  { name: 'Digitalizações para PDF', from: ['tiff','tif'], target: 'PDF', tcat: 'document', q: 80, detail: 'Reconhecimento de texto · Imagens comprimidas' }
+];
+const HISTORY = [
+  { name: 'Relatório trimestral.pptx', from: 'PPTX', to: 'PDF', inS: 18.4e6, outS: 6.1e6, when: 'Hoje, 10:31' },
+  { name: 'IMG_4021.HEIC', from: 'HEIC', to: 'JPG', inS: 3.2e6, outS: 4.1e6, when: 'Hoje, 10:30' },
+  { name: 'ferias-0418.mov', from: 'MOV', to: 'MP4', inS: 2.86e9, outS: 912e6, when: 'Hoje, 08:15' },
+  { name: 'logo-final.png', from: 'PNG', to: 'WEBP', inS: 1.8e6, outS: 240e3, when: 'Ontem' },
+  { name: 'capitulo-01.docx', from: 'DOCX', to: 'EPUB', inS: 640e3, outS: 410e3, when: 'Ontem' },
+  { name: 'notas-de-campo.m4a', from: 'M4A', to: 'MP3', inS: 54.2e6, outS: 38.9e6, when: '23 out.' }
+];
+const SAMPLES = [
+  ['IMG_4021.HEIC', 3.2e6, 'DCIM/Camera', { target: 'JPG', status: 'done', progress: 100, outSize: 4.1e6 }],
+  ['entrevista-bruta.wav', 412.6e6, 'Recordings', { target: 'FLAC', status: 'converting', progress: 38 }],
+  ['contrato_assinado.pdf', 2.1e6, 'Download', { target: 'DOCX' }],
+  ['demo-produto.mov', 1.24e9, 'Movies', { target: 'MP4' }],
+  ['scan_0142.tiff', 48.1e6, 'Documents', { target: 'PDF', ocr: true }]
+];
+const V = [
+  { id: 'v2160', q: '2160p', codec: 'VP9 + Opus', d: '60', c: 'webm', mb: 2410, r: '3840×2160' },
+  { id: 'v1440', q: '1440p', codec: 'VP9 + Opus', d: '60', c: 'webm', mb: 1180, r: '2560×1440' },
+  { id: 'v1080', q: '1080p', badge: 'Recomendado', codec: 'H.264 + AAC', d: '60', c: 'mp4', mb: 412, r: '1920×1080' },
+  { id: 'v1080a', q: '1080p', codec: 'AV1 + Opus', d: '30', c: 'mp4', mb: 298, r: '1920×1080' },
+  { id: 'v720', q: '720p', codec: 'H.264 + AAC', d: '30', c: 'mp4', mb: 186, r: '1280×720' },
+  { id: 'v480', q: '480p', codec: 'H.264 + AAC', d: '30', c: 'mp4', mb: 94, r: '854×480' }
+];
+const A = [
+  { id: 'a1', q: '160 kbps', badge: 'Melhor', codec: 'Opus', d: '48 kHz', c: 'webm', mb: 21.4, r: '160 kbps' },
+  { id: 'a2', q: '128 kbps', codec: 'AAC', d: '44,1 kHz', c: 'm4a', mb: 17.1, r: '128 kbps' },
+  { id: 'a3', q: '320 kbps', codec: 'MP3 · recodificado', d: '44,1 kHz', c: 'mp3', mb: 42.8, r: '320 kbps' },
+  { id: 'a4', q: '192 kbps', codec: 'MP3 · recodificado', d: '44,1 kHz', c: 'mp3', mb: 25.7, r: '192 kbps' }
+];
+const SHARE_OPTS = [
+  { id: 'v1080', label: 'Vídeo · 1080p', badge: 'Recomendado', sub: 'MP4 · H.264 · ≈ 412 MB', k: 'v', fmt: '1080p · MP4', ext: 'mp4', mb: 412, r: '1920×1080' },
+  { id: 'v720', label: 'Vídeo · 720p', sub: 'MP4 · H.264 · ≈ 186 MB', k: 'v', fmt: '720p · MP4', ext: 'mp4', mb: 186, r: '1280×720' },
+  { id: 'a320', label: 'Somente áudio', sub: 'MP3 · 320 kbps · ≈ 42,8 MB', k: 'a', fmt: 'MP3 · 320 kbps', ext: 'mp3', mb: 42.8, r: '320 kbps' }
+];
+const DEFAULT_TITLE = 'Construindo um teclado mecânico do zero — Montagem completa';
+const DEFAULT_URL = 'https://www.youtube.com/watch?v=k3yB0ard_fs';
+const CLIP = { u: 'https://www.youtube.com/watch?v=la4_vectors', t: 'Introdução à Álgebra Linear — Aula 4' };
+const RECENT = [
+  { t: 'Introdução à Álgebra Linear — Aula 4', d: 'youtube.com', w: 'há 2 h', u: CLIP.u },
+  { t: 'Gravação de campo: chuva no telhado de zinco', d: 'vimeo.com', w: 'Ontem', u: 'https://vimeo.com/884213301' },
+  { t: 'Palestra: Renderizando texto na GPU', d: 'youtube.com', w: '24 out.', u: 'https://www.youtube.com/watch?v=gpu_text_22' }
+];
+const LIB0 = [
+  { id: 'l1', n: 'Palestra: Renderizando texto na GPU', f: 'MP4', r: '1920×1080', s: 538e6, d: '42:17', a: 'Hoje', k: 'v' },
+  { id: 'l2', n: 'Podcast ep. 112 — Criando software local-first', f: 'M4A', r: '256 kbps', s: 64.2e6, d: '1:08:33', a: 'Hoje', k: 'a' },
+  { id: 'l3', n: 'Gravação de campo — Floresta ao amanhecer', f: 'MP3', r: '320 kbps', s: 48.1e6, d: '20:04', a: '23 out.', k: 'a' },
+  { id: 'l4', n: 'Como funcionam os relógios mecânicos', f: 'MKV', r: '3840×2160', s: 1.92e9, d: '24:51', a: '21 out.', k: 'v' },
+  { id: 'l5', n: 'Aula 3 — Espaços vetoriais', f: 'MP4', r: '1280×720', s: 201e6, d: '51:12', a: '20 out.', k: 'v' },
+  { id: 'l6', n: 'Synth Jam 04', f: 'FLAC', r: '48 kHz', s: 212e6, d: '18:40', a: '18 out.', k: 'a' },
+  { id: 'l7', n: 'Timelapse — Porto à noite', f: 'WEBM', r: '1920×1080', s: 96.4e6, d: '2:30', a: '14 out.', k: 'v' }
+];
+const JOBS0 = [
+  { id: 1, title: 'Gravação de campo: chuva no telhado de zinco', k: 'a', fmt: 'MP3 · 320 kbps', ext: 'mp3', r: '320 kbps', src: 'vimeo.com', mb: 288, p: 64, speed: 5.1, status: 'downloading', dur: '2:00:12' },
+  { id: 2, title: 'Introdução à Álgebra Linear — Aula 3', k: 'v', fmt: '720p · MP4', ext: 'mp4', r: '1280×720', src: 'youtube.com', mb: 186, p: 0, speed: 0, status: 'queued', dur: '48:10' },
+  { id: 3, title: 'Timelapse: aurora boreal sobre Tromsø', k: 'v', fmt: '2160p · WEBM', ext: 'webm', r: '3840×2160', src: 'vimeo.com', mb: 2410, p: 18, speed: 0, status: 'paused', dur: '6:02' },
+  { id: 4, title: 'Live set — Sessão no galpão', k: 'v', fmt: '1080p · MP4', ext: 'mp4', r: '1920×1080', src: 'twitch.tv', mb: 1640, p: 3, speed: 0, status: 'failed', err: 'HTTP 403 · formato indisponível' },
+  { id: 5, title: 'Palestra: Renderizando texto na GPU', k: 'v', fmt: '1080p · MP4', ext: 'mp4', r: '1920×1080', src: 'youtube.com', mb: 538, p: 100, speed: 0, status: 'done', when: 'Hoje, 10:42', dur: '42:17' }
+];
+const ST = {
+  downloading: ['Baixando', '#f5866d', 'rgba(240,113,82,.12)', '#f07152'],
+  converting: ['Convertendo', '#f5866d', 'rgba(240,113,82,.12)', '#f07152'],
+  queued: ['Na fila', '#a1a1aa', '#1f1f24', '#3a3a42'],
+  paused: ['Pausado', '#e0a84a', 'rgba(224,168,74,.12)', '#6b6b74'],
+  done: ['Concluído', '#6fd19f', 'rgba(79,191,135,.12)', '#4fbf87'],
+  failed: ['Falhou', '#f0777a', 'rgba(229,72,77,.12)', '#e5484d']
+};
+const hexA = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
+const dec = (x, d) => x.toFixed(d).replace('.', ',');
+const fmtSize = b => b >= 1e9 ? dec(b / 1e9, 2) + ' GB' : b >= 1e6 ? (b >= 1e8 ? Math.round(b / 1e6) : dec(b / 1e6, 1)) + ' MB' : b >= 1e3 ? Math.round(b / 1e3) + ' KB' : Math.round(b) + ' B';
+const fmtT = s => { s = Math.max(0, Math.round(s)); const m = Math.floor(s / 60); return m + ':' + String(s % 60).padStart(2, '0'); };
+const findCat = (cat, t) => COMPAT[cat].find(c => FORMATS[c].some(x => x[0] === t)) || cat;
+const noop = () => {};
+let UID = 1;
+function makeFile(name, size, path, extra = {}) {
+  const ext = name.includes('.') ? name.split('.').pop().toLowerCase() : '';
+  const cat = SRC_CAT[ext] || 'document';
+  let target = DEFAULT_TARGET[ext] || CAT_DEFAULT[cat];
+  if (target.toLowerCase() === ext) target = FORMATS[cat].find(f => f[0].toLowerCase() !== ext)[0];
+  const { ocr, ...rest } = extra;
+  const f = { id: 'f' + (UID++), name, ext, cat, size, path, target, status: 'ready', progress: 0, outSize: 0,
+    opts: { preset: 'Equilibrado', quality: 80, codec: 'H.264', res: 'Original', bitrate: '320 kbps', channels: 'Estéreo', resize: 'Original', strip: true, compress: true, ocr: !!ocr, level: 'Normal' }, ...rest };
+  f.targetCat = findCat(cat, f.target);
+  return f;
+}
+const seg = (options, cur, set) => options.map(o => ({ label: String(o), bg: o === cur ? '#2a2a30' : 'transparent', fg: o === cur ? '#ededef' : '#8b8b95', on: () => set(o) }));
+const tgl = on => on ? { bg: '#f07152', x: '21px', knob: '#1a0e0a' } : { bg: '#2a2a30', x: '3px', knob: '#8b8b95' };
+
+class Component extends DCLogic {
+  fileRef = React.createRef();
+  state = this.init((this.props && this.props.initialScreen) || 'onboarding');
+
+  init(sc) {
+    UID = 1;
+    return {
+      ...this.sceneState(sc),
+      obStep: 0, perm: { notify: false, files: false },
+      phase: 'empty', url: '', mediaTitle: DEFAULT_TITLE, dtab: 'video', fmt: 'v1080', container: 'mp4', more: false,
+      jobs: JOBS0.map(j => ({ ...j })), files: SAMPLES.map(s => makeFile(...s)), running: true,
+      lib: LIB0.slice(), history: HISTORY.slice(),
+      qf: 'all', libView: 'files', lq: '',
+      tg: { thumb: true, meta: true, subs: false, chapters: false, clip: true, notify: true, wifi: true, hw: true, keep: true },
+      conc: 2, parallel: '2', conflict: 'Renomear', theme: 'Escuro',
+      toast: null, sharePick: 'v1080'
+    };
+  }
+  sceneState(sc) {
+    const tabs = ['download', 'convert', 'queue', 'library', 'settings'];
+    return { mode: sc === 'onboarding' ? 'onboarding' : sc === 'share' ? 'share' : 'app', tab: tabs.includes(sc) ? sc : 'download', shareStep: 'player', sheet: null, sub: null, obStep: 0 };
+  }
+  componentDidMount() { this.timer = setInterval(this.tick, 300); }
+  componentWillUnmount() { clearInterval(this.timer); clearTimeout(this.tt); clearTimeout(this.lt); }
+  componentDidUpdate(prev) { if (prev.initialScreen !== this.props.initialScreen && this.props.initialScreen) this.setState(this.sceneState(this.props.initialScreen)); }
+
+  inc(f) { return Math.max(0.5, 30 / Math.sqrt(Math.max(f.size / 1e6, 1))) * (this.state.tg.hw && f.cat === 'video' ? 1.6 : 1) * 3; }
+  factor(f) {
+    const o = f.opts, lossless = LOSSLESS.includes(f.target);
+    let k = FACTOR[f.target] ?? .8;
+    if (['image','video','audio'].includes(f.targetCat) && !lossless) k *= 0.45 + o.quality / 145;
+    if (f.targetCat === 'video') k *= ({ 'H.264': 1, HEVC: .65, AV1: .5 }[o.codec] || 1) * ({ Original: 1, '1080p': .7, '720p': .42 }[o.res] || 1);
+    if (f.targetCat === 'audio' && !lossless) k *= { '128 kbps': .4, '192 kbps': .6, '320 kbps': 1 }[o.bitrate] || 1;
+    if (f.targetCat === 'image') k *= { Original: 1, '50%': .3, '2560 px': .7 }[o.resize] || 1;
+    if (f.targetCat === 'document' && o.compress) k *= .7;
+    if (f.targetCat === 'archive') k *= { 'Rápida': 1.08, Normal: 1, 'Máxima': .92 }[o.level] || 1;
+    return k;
+  }
+  libFromJob(j) { return { id: 'l' + j.id + '_' + Date.now(), n: j.title, f: j.ext.toUpperCase(), r: j.r, s: j.mb * 1e6, d: j.dur || '18:42', a: 'Agora', k: j.k }; }
+
+  tick = () => {
+    if (this.props.simulateProgress === false) return;
+    const s = this.state, patch = {};
+    let doneJob = null, convDone = false;
+    if (s.jobs.some(j => j.status === 'downloading' || j.status === 'queued')) {
+      const fin = [];
+      let jobs = s.jobs.map(j => {
+        if (j.status !== 'downloading') return j;
+        const speed = Math.max(1.5, Math.min(14, j.speed + (Math.random() - 0.5) * 1.6));
+        const p = Math.min(100, j.p + speed * 0.75 / j.mb * 100);
+        if (p >= 100) { const d = { ...j, p: 100, speed: 0, status: 'done', when: 'Agora mesmo' }; fin.push(d); return d; }
+        return { ...j, p, speed };
+      });
+      let active = jobs.filter(j => j.status === 'downloading').length;
+      jobs = jobs.map(j => { if (j.status === 'queued' && active < s.conc) { active++; return { ...j, status: 'downloading', speed: 5 + Math.random() * 5 }; } return j; });
+      patch.jobs = jobs;
+      if (fin.length) { patch.lib = [...fin.map(j => this.libFromJob(j)), ...s.lib]; doneJob = fin[0]; }
+    }
+    if (s.running) {
+      const conc = parseInt(s.parallel, 10);
+      const files = s.files.map(f => ({ ...f }));
+      const active = files.filter(f => f.status === 'converting');
+      for (const f of files) { if (active.length >= conc) break; if (f.status === 'ready') { f.status = 'converting'; f.progress = 0; active.push(f); } }
+      const finished = [];
+      for (const f of active) { f.progress = Math.min(100, f.progress + this.inc(f)); if (f.progress >= 100) { f.status = 'done'; f.outSize = Math.round(f.size * this.factor(f)); finished.push(f); } }
+      patch.files = files;
+      if (finished.length) patch.history = [...finished.map(f => ({ name: f.name, from: f.ext.toUpperCase(), to: f.target, inS: f.size, outS: f.outSize, when: 'Agora' })), ...s.history];
+      if (!files.some(f => f.status === 'ready' || f.status === 'converting')) { patch.running = false; convDone = true; }
+    }
+    if (Object.keys(patch).length) this.setState(patch);
+    if (!s.tg.notify) return;
+    if (doneJob) this.showToast('Download concluído', 'Converter', () => this.convertMedia(doneJob.title + '.' + doneJob.ext, doneJob.mb * 1e6, doneJob.k));
+    else if (convDone) this.showToast('Conversões concluídas', 'Histórico', () => this.go('library', { libView: 'history' }));
+  };
+
+  showToast(text, action, fn) {
+    clearTimeout(this.tt);
+    this.setState({ toast: { text, action, fn } });
+    this.tt = setTimeout(() => this.setState({ toast: null }), 3600);
+  }
+  go(tab, extra = {}) { this.setState({ tab, sub: null, sheet: null, mode: 'app', ...extra }); }
+  inspect(u, title) {
+    u = (u ?? this.state.url).trim();
+    if (!u) return;
+    clearTimeout(this.lt);
+    const rec = RECENT.find(r => r.u === u);
+    this.setState({ url: u, phase: 'loading', mediaTitle: title || (rec ? rec.t : DEFAULT_TITLE), mode: 'app', tab: 'download', sheet: null });
+    this.lt = setTimeout(() => this.setState({ phase: 'ready' }), 1100);
+  }
+  addJob(job) {
+    this.setState(st => {
+      const active = st.jobs.filter(j => j.status === 'downloading').length;
+      return { jobs: [{ ...job, id: Date.now(), p: 0, speed: 6, status: active < st.conc ? 'downloading' : 'queued' }, ...st.jobs] };
+    });
+  }
+  selRow() { const rows = this.state.dtab === 'video' ? V : A; return rows.find(r => r.id === this.state.fmt) || rows[0]; }
+  download() {
+    const r = this.selRow(), s = this.state, isV = s.dtab === 'video';
+    const fmt = isV ? `${r.q} · ${s.container.toUpperCase()}` : `${s.container.toUpperCase()} · ${r.q}`;
+    this.addJob({ title: s.mediaTitle.split(' — ')[0], k: isV ? 'v' : 'a', fmt, ext: s.container, r: r.r, src: (s.url.match(/\/\/(?:www\.)?([^/]+)/) || [])[1] || 'youtube.com', mb: r.mb, dur: '18:42' });
+    this.showToast(`Na fila · ${fmt}`, 'Ver fila', () => this.go('queue'));
+  }
+  convertMedia(name, size, k) {
+    const f = makeFile(name, size, 'Download/Recast', k === 'v' ? { target: 'MP3' } : {});
+    this.setState(st => ({ files: [...st.files, f], mode: 'app', tab: 'convert', sub: null, sheet: { type: 'file', fileId: f.id }, toast: null }));
+  }
+  convertLib(l) { this.convertMedia(/\.\w{2,4}$/.test(l.n) ? l.n : l.n + '.' + l.f.toLowerCase(), l.s, l.k); }
+  setOpts(id, patch) { this.setState(st => ({ files: st.files.map(f => f.id === id ? { ...f, opts: { ...f.opts, ...patch } } : f) })); }
+  removeFile(id) { this.setState(st => { const files = st.files.filter(f => f.id !== id); return { files, sheet: null, running: st.running && files.some(f => f.status !== 'done') }; }); }
+  addFiles(arr, path) {
+    if (!arr.length) return;
+    const added = arr.map(([n, sz]) => makeFile(n, sz, path));
+    this.setState(st => ({ files: [...st.files, ...added], sheet: null, tab: 'convert' }));
+    this.showToast(`${added.length} ${added.length === 1 ? 'arquivo adicionado' : 'arquivos adicionados'}`);
+  }
+  openPicker(mode, fileId, back) {
+    let cat;
+    if (mode === 'file') { const f = this.state.files.find(x => x.id === fileId); if (!f || f.status === 'converting') return; cat = f.targetCat; }
+    else { const c = {}; this.state.files.filter(f => f.status !== 'converting').forEach(f => c[f.cat] = (c[f.cat] || 0) + 1); cat = Object.keys(c).sort((a, b) => c[b] - c[a])[0] || 'image'; }
+    this.setState({ sheet: { type: 'picker', mode, fileId, cat, q: '', back: !!back } });
+  }
+  choose(ext, cat) {
+    const p = this.state.sheet;
+    let n = 0;
+    const files = this.state.files.map(f => {
+      const hit = p.mode === 'file' ? f.id === p.fileId : (f.status !== 'converting' && COMPAT[f.cat].includes(cat) && f.ext !== ext.toLowerCase());
+      if (!hit) return f;
+      n++;
+      const reset = f.status === 'done';
+      return { ...f, target: ext, targetCat: cat, status: reset ? 'ready' : f.status, progress: reset ? 0 : f.progress, outSize: reset ? 0 : f.outSize };
+    });
+    this.setState({ files, sheet: p.back ? { type: 'file', fileId: p.fileId } : null });
+    if (p.mode === 'all') this.showToast(n ? `${n} ${n === 1 ? 'arquivo definido' : 'arquivos definidos'} como ${ext}` : 'Nenhum arquivo compatível');
+  }
+  applyPreset(p) {
+    let n = 0;
+    const files = this.state.files.map(f => {
+      if (f.status === 'converting' || !p.from.includes(f.ext)) return f;
+      n++;
+      return { ...f, target: p.target, targetCat: p.tcat, status: 'ready', progress: 0, outSize: 0, opts: { ...f.opts, quality: p.q, preset: { 55: 'Menor', 80: 'Equilibrado', 95: 'Melhor' }[p.q] || 'Personalizado' } };
+    });
+    this.setState({ files, mode: 'app', tab: 'convert', sub: null });
+    this.showToast(n ? `“${p.name}” aplicada a ${n} ${n === 1 ? 'arquivo' : 'arquivos'}` : `Nenhum arquivo ${p.from.map(x => x.toUpperCase()).join('/')} na lista`);
+  }
+  applyAll(sel) {
+    let n = 0;
+    const files = this.state.files.map(f => {
+      if (f.cat !== sel.cat || f.status === 'converting') return f;
+      n++;
+      const reset = f.status === 'done' && f.id !== sel.id;
+      return { ...f, target: sel.target, targetCat: sel.targetCat, opts: { ...sel.opts }, status: reset ? 'ready' : f.status, progress: reset ? 0 : f.progress, outSize: reset ? 0 : f.outSize };
+    });
+    this.setState({ files, sheet: null });
+    this.showToast(`Ajustes aplicados a ${n} ${n === 1 ? 'arquivo' : 'arquivos'}`);
+  }
+  updJob(id, patch) { this.setState(st => ({ jobs: st.jobs.map(j => j.id === id ? { ...j, ...patch } : j) })); }
+
+  inspector(sel) {
+    if (!sel) return {};
+    const tc = sel.targetCat, o = sel.opts, tint = CATS[sel.cat].tint, lossless = LOSSLESS.includes(sel.target);
+    const upd = (k, v) => this.setOpts(sel.id, { [k]: v });
+    const segF = (label, opts, cur, k) => ({ label, isSeg: true, isToggle: false, opts: seg(opts, cur, v => upd(k, v)) });
+    const tgF = (label, desc, k) => ({ label, desc, isSeg: false, isToggle: true, ...tgl(o[k]), onToggle: () => upd(k, !o[k]) });
+    const fields = [];
+    if (tc === 'video') { fields.push(segF('Codec', ['H.264','HEVC','AV1'], o.codec, 'codec')); fields.push(segF('Resolução', ['Original','1080p','720p'], o.res, 'res')); }
+    if (tc === 'audio') { if (!lossless) fields.push(segF('Taxa de bits', ['128 kbps','192 kbps','320 kbps'], o.bitrate, 'bitrate')); fields.push(segF('Canais', ['Estéreo','Mono'], o.channels, 'channels')); }
+    if (tc === 'image') { fields.push(segF('Redimensionar', ['Original','50%','2560 px'], o.resize, 'resize')); fields.push(tgF('Remover metadados', 'Remove localização e dados da câmera', 'strip')); }
+    if (tc === 'document') { fields.push(tgF('Comprimir imagens', 'Reduz imagens incorporadas para 150 dpi', 'compress')); fields.push(tgF('Reconhecer texto', 'Torna páginas digitalizadas pesquisáveis', 'ocr')); }
+    if (tc === 'archive') fields.push(segF('Compressão', ['Rápida','Normal','Máxima'], o.level, 'level'));
+    const QP = { 'Menor': 55, 'Equilibrado': 80, 'Melhor': 95 };
+    return {
+      name: sel.name, meta: fmtSize(sel.size) + ' · ' + CATS[sel.cat].one + ' ' + sel.ext.toUpperCase(), srcExt: sel.ext.toUpperCase(),
+      tint, tileBg: hexA(tint, .08), tileBd: hexA(tint, .3),
+      targetExt: sel.target, targetDesc: (FORMATS[tc].find(x => x[0] === sel.target) || ['', ''])[1],
+      onPick: () => this.openPicker('file', sel.id, true), pickOp: sel.status === 'converting' ? '.5' : '1',
+      hasQuality: ['image','video','audio'].includes(tc) && !lossless,
+      quality: o.quality, qualityLabel: o.quality + '%',
+      presetOpts: seg(['Menor','Equilibrado','Melhor'], o.preset, v => this.setOpts(sel.id, { preset: v, quality: QP[v] })),
+      onQuality: e => { const q = +e.target.value; this.setOpts(sel.id, { quality: q, preset: Object.keys(QP).find(k => QP[k] === q) || 'Personalizado' }); },
+      fields,
+      estLabel: sel.status === 'done' ? 'Tamanho final' : 'Tamanho estimado',
+      est: sel.status === 'done' ? fmtSize(sel.outSize) : '≈ ' + fmtSize(Math.round(sel.size * this.factor(sel))),
+      applyLabel: 'Aplicar a ' + CATS[sel.cat].plural, onApply: () => this.applyAll(sel),
+      onRemove: () => this.removeFile(sel.id)
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const isApp = s.mode === 'app';
+    const navItem = id => { const on = s.tab === id; return { ind: on ? 'rgba(240,113,82,.16)' : 'transparent', ic: on ? '#f5866d' : '#a1a1aa', fg: on ? '#ededef' : '#a1a1aa', fw: on ? 600 : 500 }; };
+    const go = {}; ['download', 'convert', 'queue', 'library', 'settings'].forEach(id => go[id] = () => this.go(id));
+    const tg = {}; Object.keys(s.tg).forEach(k => tg[k] = tgl(s.tg[k]));
+    const tog = {}; Object.keys(s.tg).forEach(k => tog[k] = () => this.setState(st => ({ tg: { ...st.tg, [k]: !st.tg[k] } })));
+
+    // onboarding
+    const permBtn = on => on ? { label: 'Permitido', bd: 'rgba(79,191,135,.35)', bg: 'rgba(79,191,135,.1)', fg: '#6fd19f' } : { label: 'Permitir', bd: '#f07152', bg: '#f07152', fg: '#1a0e0a' };
+    const finishOb = () => this.setState({ mode: 'app', tab: 'download', obStep: 0 });
+
+    // download
+    const isV = s.dtab === 'video';
+    const r = this.selRow();
+    const rows = (isV ? V : A).map((x, i) => ({
+      q: x.q, badge: x.badge, hasBadge: !!x.badge, sel: x.id === s.fmt, size: fmtSize(x.mb * 1e6),
+      sub: isV ? `${x.codec} · ${x.d} fps · ${x.c.toUpperCase()}` : `${x.codec} · ${x.d}`,
+      border: i ? '1px solid #1c1c20' : '0', bg: x.id === s.fmt ? 'rgba(240,113,82,.06)' : 'transparent', ring: x.id === s.fmt ? '#f07152' : '#44444c',
+      on: () => this.setState({ fmt: x.id })
+    }));
+    const dtabs = [['video', 'Vídeo'], ['audio', 'Somente áudio']].map(([id, label]) => ({
+      label, bg: s.dtab === id ? '#2a2a30' : 'transparent', fg: s.dtab === id ? '#ededef' : '#8b8b95',
+      on: () => this.setState({ dtab: id, fmt: id === 'video' ? 'v1080' : 'a1', container: id === 'video' ? 'mp4' : 'mp3' })
+    }));
+    const containers = (isV ? ['mp4', 'mkv', 'webm'] : ['mp3', 'm4a', 'opus', 'wav']).map(c => {
+      const on = s.container === c;
+      return { label: c.toUpperCase(), bd: on ? 'rgba(240,113,82,.5)' : '#2a2a30', bg: on ? 'rgba(240,113,82,.1)' : '#141417', fg: on ? '#f5866d' : '#c9c9cf', on: () => this.setState({ container: c }) };
+    });
+
+    // converter
+    const sheet = s.sheet || {};
+    const pending = s.files.filter(f => f.status === 'ready' || f.status === 'converting');
+    const activeF = s.files.filter(f => f.status === 'converting');
+    const doneF = s.files.filter(f => f.status === 'done');
+    const pickable = s.files.filter(f => f.status !== 'converting');
+    const targets = [...new Set(pickable.map(f => f.target))];
+    const total = s.files.reduce((a, f) => a + f.size, 0);
+    const cfiles = s.files.map(f => {
+      const tint = CATS[f.cat].tint, delta = f.outSize ? Math.round((f.outSize - f.size) / f.size * 100) : 0;
+      return {
+        name: f.name, meta: fmtSize(f.size) + ' · ' + f.path, srcExt: f.ext.toUpperCase(), targetExt: f.target,
+        tint, tileBg: hexA(tint, .08), tileBd: hexA(tint, .28),
+        isQueued: f.status === 'ready' && s.running, isActive: f.status === 'converting', isDone: f.status === 'done',
+        activeLabel: s.running ? 'Convertendo · ' + Math.max(1, Math.round((100 - f.progress) / this.inc(f) * 0.3)) + 's restantes' : 'Pausado',
+        barColor: s.running ? '#f07152' : '#5a5a62', pct: Math.floor(f.progress) + '%',
+        canPick: f.status !== 'converting', noPick: f.status === 'converting',
+        outLabel: fmtSize(f.outSize), deltaLabel: (delta <= 0 ? '−' : '+') + Math.abs(delta) + '%',
+        onOpen: () => this.setState({ sheet: { type: 'file', fileId: f.id } }),
+        onPick: e => { e.stopPropagation(); this.openPicker('file', f.id); }
+      };
+    });
+    const primary = s.running ? { label: 'Pausar', isPause: true, isPlay: false, opacity: '1' }
+      : activeF.length ? { label: 'Retomar', isPause: false, isPlay: true, opacity: '1' }
+      : pending.length ? { label: `Converter ${pending.length} ${pending.length === 1 ? 'arquivo' : 'arquivos'}`, isPause: false, isPlay: true, opacity: '1' }
+      : { label: 'Converter', isPause: false, isPlay: true, opacity: '.45' };
+
+    let picker = {};
+    if (sheet.type === 'picker') {
+      const f = sheet.mode === 'file' ? s.files.find(x => x.id === sheet.fileId) : null;
+      const cats = f ? COMPAT[f.cat] : [...new Set(pickable.flatMap(x => COMPAT[x.cat]))];
+      const q = sheet.q.trim().toLowerCase();
+      const list = q
+        ? cats.flatMap(c => FORMATS[c].map(x => ({ ext: x[0], desc: x[1], cat: c }))).filter(x => x.ext.toLowerCase().includes(q) || x.desc.toLowerCase().includes(q))
+        : FORMATS[sheet.cat].map(x => ({ ext: x[0], desc: x[1], cat: sheet.cat }));
+      const items = list.map(x => {
+        const cur = f && x.ext === f.target && x.cat === f.targetCat;
+        const dis = f && (x.ext.toLowerCase() === f.ext || (x.ext === 'JPG' && f.ext === 'jpeg') || (x.ext === 'TIFF' && f.ext === 'tif'));
+        return { ext: x.ext, desc: dis ? 'Formato atual' : (q ? CATS[x.cat].label + ' · ' + x.desc : x.desc),
+          bg: cur ? 'rgba(240,113,82,.12)' : '#1c1c20', bd: cur ? 'rgba(240,113,82,.55)' : '#2a2a30', fg: cur ? '#f5866d' : '#ededef', op: dis ? '.4' : '1',
+          on: dis ? noop : () => this.choose(x.ext, x.cat) };
+      });
+      picker = {
+        q: sheet.q, canBack: sheet.back, title: f ? f.name : 'Todos os arquivos compatíveis',
+        heading: q ? 'Resultados' : CATS[sheet.cat].label, items, empty: items.length === 0,
+        cats: cats.map(c => { const on = !q && c === sheet.cat; return { label: CATS[c].label, bd: on ? 'rgba(240,113,82,.5)' : '#2a2a30', bg: on ? 'rgba(240,113,82,.1)' : 'transparent', fg: on ? '#f5866d' : '#a1a1aa', on: () => this.setState(st => ({ sheet: { ...st.sheet, cat: c, q: '' } })) }; })
+      };
+    }
+    const selFile = sheet.type === 'file' ? s.files.find(f => f.id === sheet.fileId) : null;
+
+    // queue
+    const order = { downloading: 0, converting: 0, queued: 1, paused: 2, failed: 3, done: 4 };
+    const dlItems = s.jobs.map(j => {
+      const p = Math.floor(j.p);
+      let line;
+      if (j.status === 'downloading') line = `${p}% · ${dec(j.speed, 1)} MB/s · ${fmtT((j.mb * (100 - j.p) / 100) / j.speed)} restante`;
+      else if (j.status === 'queued') line = 'Aguardando vaga';
+      else if (j.status === 'paused') line = `${p}% · ${fmtSize(j.mb * j.p / 100 * 1e6)} de ${fmtSize(j.mb * 1e6)}`;
+      else if (j.status === 'done') line = `Salvo · ${j.when}`;
+      else line = j.err;
+      return { key: 'd' + j.id, st: j.status, isDl: true, isCv: false, isVideo: j.k === 'v', isAudio: j.k === 'a', title: j.title,
+        sub: `Download · ${j.fmt} · ${fmtSize(j.mb * 1e6)} · ${j.src}`, p: j.status === 'failed' ? Math.max(j.p, 3) : j.p, line,
+        canPause: j.status === 'downloading' || j.status === 'queued', canResume: j.status === 'paused', canRetry: j.status === 'failed', canConvert: j.status === 'done',
+        onPause: () => this.updJob(j.id, { status: 'paused', speed: 0 }), onResume: () => this.updJob(j.id, { status: 'queued' }),
+        onRetry: () => this.updJob(j.id, { status: 'queued', p: 0, err: null }),
+        onConvert: () => this.convertMedia(j.title + '.' + j.ext, j.mb * 1e6, j.k),
+        onRemove: () => this.setState(st => ({ jobs: st.jobs.filter(x => x.id !== j.id) })) };
+    });
+    const cvItems = s.files.filter(f => f.status !== 'ready' || s.running).map(f => {
+      const tint = CATS[f.cat].tint;
+      const stt = f.status === 'converting' ? (s.running ? 'converting' : 'paused') : f.status === 'ready' ? 'queued' : 'done';
+      const line = stt === 'converting' ? `${Math.floor(f.progress)}% · no aparelho` : stt === 'paused' ? `${Math.floor(f.progress)}% · pausado` : stt === 'queued' ? 'Aguardando' : `${fmtSize(f.outSize)} · ${f.name.replace(/\.[^.]+$/, '')}.${f.target.toLowerCase()}`;
+      return { key: f.id, st: stt, isDl: false, isCv: true, ext: f.ext.toUpperCase(), tint, tileBg: hexA(tint, .08), tileBd: hexA(tint, .28), title: f.name,
+        sub: `Conversão · ${f.ext.toUpperCase()} → ${f.target} · ${fmtSize(f.size)}`, p: f.progress, line,
+        canPause: stt === 'converting', canResume: stt === 'paused', canRetry: false, canConvert: false,
+        onPause: () => this.setState({ running: false }), onResume: () => this.setState({ running: true }),
+        onRemove: () => this.removeFile(f.id) };
+    });
+    const isActiveSt = x => ['downloading', 'converting', 'queued', 'paused'].includes(x.st);
+    const all = [...cvItems, ...dlItems].sort((a, b) => order[a.st] - order[b.st]);
+    const fl = { all: () => true, active: isActiveSt, done: x => x.st === 'done', failed: x => x.st === 'failed' };
+    const counts = {}; Object.keys(fl).forEach(k => counts[k] = all.filter(fl[k]).length);
+    const qitems = all.filter(fl[s.qf]).map(x => {
+      const c = ST[x.st];
+      return { ...x, w: x.p + '%', bar: c[3], sLabel: c[0], sFg: c[1], sBg: c[2], lineFg: x.st === 'failed' ? '#f0777a' : '#7c7c86' };
+    });
+    const dlActive = s.jobs.filter(j => j.status === 'downloading');
+    const anyRunning = s.jobs.some(j => j.status === 'downloading' || j.status === 'queued') || s.running;
+    const activeCount = s.jobs.filter(j => j.status === 'downloading' || j.status === 'queued').length + (s.running ? pending.length : 0);
+    const tp = [];
+    if (dlActive.length) tp.push(`${dlActive.length} baixando · ${dec(dlActive.reduce((a, j) => a + j.speed, 0), 1)} MB/s`);
+    if (s.running && activeF.length) tp.push(`${activeF.length} convertendo no aparelho`);
+
+    // library
+    const q = s.lq.trim().toLowerCase();
+    const libMeta = l => `${l.f} · ${l.r} · ${fmtSize(l.s)}`;
+    const lib = s.lib.filter(l => !q || l.n.toLowerCase().includes(q) || l.f.toLowerCase().includes(q)).map(l => ({
+      n: l.n, meta: libMeta(l), d: l.d, a: l.a, isAudio: l.k === 'a', open: () => this.setState({ sheet: { type: 'lib', id: l.id } })
+    }));
+    const libItem = sheet.type === 'lib' ? s.lib.find(l => l.id === sheet.id) : null;
+    const libSel = libItem ? {
+      n: libItem.n, meta: libMeta(libItem) + ' · ' + libItem.d,
+      onConvert: () => this.convertLib(libItem),
+      onPlay: () => { this.setState({ sheet: null }); this.showToast('Abrindo no player…'); },
+      onShare: () => { this.setState({ sheet: null }); this.showToast('Menu Compartilhar aberto'); },
+      onDelete: () => { const prev = s.lib; this.setState(st => ({ lib: st.lib.filter(x => x.id !== libItem.id), sheet: null })); this.showToast('Arquivo excluído', 'Desfazer', () => this.setState({ lib: prev, toast: null })); }
+    } : {};
+
+    const isEmptyQ = qitems.length === 0;
+    const tabsLib = [['files', 'Arquivos'], ['history', 'Histórico']].map(([id, label]) => ({ label, bg: s.libView === id ? '#2a2a30' : 'transparent', fg: s.libView === id ? '#ededef' : '#8b8b95', on: () => this.setState({ libView: id }) }));
+    const sumBytes = s.lib.reduce((a, l) => a + l.s, 0);
+
+    return {
+      fileRef: this.fileRef,
+      onFiles: e => { this.addFiles(Array.from(e.target.files || []).map(f => [f.name, f.size]), 'Download'); e.target.value = ''; },
+      isOnboarding: s.mode === 'onboarding', isShare: s.mode === 'share', isApp,
+
+      obDots: [0, 1, 2].map(i => ({ w: i === s.obStep ? '22px' : '6px', bg: i === s.obStep ? '#f07152' : '#33333a' })),
+      ob0: s.obStep === 0, ob1: s.obStep === 1, ob2: s.obStep === 2,
+      obCta: s.obStep === 2 ? 'Começar' : 'Continuar',
+      obNext: () => s.obStep === 2 ? finishOb() : this.setState({ obStep: s.obStep + 1 }),
+      obSkip: finishOb,
+      perm: { notify: permBtn(s.perm.notify), files: permBtn(s.perm.files) },
+      permNotify: () => this.setState(st => ({ perm: { ...st.perm, notify: true } })),
+      permFiles: () => this.setState(st => ({ perm: { ...st.perm, files: true } })),
+
+      shareSheet: s.mode === 'share' && s.shareStep === 'sheet', shareRecast: s.mode === 'share' && s.shareStep === 'recast',
+      openShareSheet: () => this.setState({ shareStep: 'sheet' }),
+      pickRecast: () => this.setState({ shareStep: 'recast' }),
+      shareCancel: () => this.setState({ shareStep: 'player' }),
+      exitShare: () => this.go('download'),
+      shareOpts: SHARE_OPTS.map((o, i) => ({ label: o.label, sub: o.sub, badge: o.badge, hasBadge: !!o.badge, sel: s.sharePick === o.id,
+        border: i ? '1px solid #1c1c20' : '0', bg: s.sharePick === o.id ? 'rgba(240,113,82,.06)' : 'transparent', ring: s.sharePick === o.id ? '#f07152' : '#44444c',
+        on: () => this.setState({ sharePick: o.id }) })),
+      shareDownload: () => {
+        const o = SHARE_OPTS.find(x => x.id === s.sharePick);
+        this.addJob({ title: 'Construindo um teclado mecânico do zero', k: o.k, fmt: o.fmt, ext: o.ext, r: o.r, src: 'youtube.com', mb: o.mb, dur: '18:42' });
+        this.setState({ shareStep: 'player' });
+        this.showToast(`Baixando no Recast · ${o.fmt}`, 'Abrir', () => this.go('queue', { toast: null }));
+      },
+      shareMore: () => { this.setState({ shareStep: 'player' }); this.inspect(DEFAULT_URL, DEFAULT_TITLE); },
+
+      nav: { download: navItem('download'), convert: navItem('convert'), queue: navItem('queue'), library: navItem('library'), settings: navItem('settings') },
+      go, hasActive: activeCount > 0, activeCount,
+      isDownload: isApp && s.tab === 'download', isConvert: isApp && s.tab === 'convert', isQueue: isApp && s.tab === 'queue',
+      isLibrary: isApp && s.tab === 'library', isSettings: isApp && s.tab === 'settings' && !s.sub, isPresets: isApp && s.tab === 'settings' && s.sub === 'presets',
+
+      url: s.url, hasUrl: !!s.url,
+      onUrl: e => this.setState({ url: e.target.value }),
+      onUrlKey: e => { if (e.key === 'Enter') this.inspect(); },
+      clearUrl: () => this.setState({ url: '', phase: 'empty' }),
+      pasteUrl: async () => {
+        let t = '';
+        try { t = navigator.clipboard && navigator.clipboard.readText ? await navigator.clipboard.readText() : ''; } catch (e) {}
+        if (!/^https?:\/\//i.test(t)) t = DEFAULT_URL;
+        this.inspect(t);
+      },
+      inspect: () => this.inspect(s.url || DEFAULT_URL), inspectLabel: s.phase === 'loading' ? 'Inspecionando…' : 'Inspecionar',
+      isEmpty: s.phase === 'empty', isLoading: s.phase === 'loading', isReady: s.phase === 'ready',
+      showClip: s.tg.clip, inspectClip: () => this.inspect(CLIP.u, CLIP.t),
+      recent: RECENT.map((x, i) => ({ ...x, border: i ? '1px solid #1c1c20' : '0', open: () => this.inspect(x.u, x.t) })),
+      mediaTitle: s.mediaTitle, dtabs, rows, containers, tg, tog,
+      more: s.more, moreRot: s.more ? 'rotate(180deg)' : 'none', toggleMore: () => this.setState({ more: !s.more }),
+      filePreview: s.mediaTitle + '.' + s.container,
+      summary: isV ? `${r.q} · ${s.container.toUpperCase()} · ≈ ${fmtSize(r.mb * 1e6)}` : `Áudio · ${s.container.toUpperCase()} · ${r.q} · ≈ ${fmtSize(r.mb * 1e6)}`,
+      download: () => this.download(),
+
+      convSummary: s.files.length ? `${s.files.length} ${s.files.length === 1 ? 'arquivo' : 'arquivos'} · ${fmtSize(total)} · processado neste aparelho` : 'Processado neste aparelho · 0 bytes enviados',
+      quickPresets: PRESETS.slice(0, 4).map(p => ({ from: p.from[0].toUpperCase(), to: p.target, on: () => this.applyPreset(p) })),
+      hasFiles: s.files.length > 0, noFiles: s.files.length === 0, hasDone: doneF.length > 0, hasPickable: pickable.length > 0,
+      filesLabel: `Arquivos · ${s.files.length}`, allTarget: targets.length === 1 ? targets[0] : 'Vários',
+      clearDone: () => this.setState(st => ({ files: st.files.filter(f => f.status !== 'done') })),
+      openAllPicker: () => this.openPicker('all'),
+      cfiles, primary,
+      onPrimary: () => { if (s.running) this.setState({ running: false }); else if (pending.length) this.setState({ running: true }); },
+      openAdd: () => this.setState({ sheet: { type: 'add' } }),
+
+      queueSub: `${counts.active} ativos · ${counts.done} concluídos`,
+      filters: [['all', 'Todos'], ['active', 'Ativos'], ['done', 'Concluídos'], ['failed', 'Falhas']].map(([id, label]) => {
+        const on = s.qf === id;
+        return { label, n: counts[id], bd: on ? 'rgba(240,113,82,.5)' : '#2a2a30', bg: on ? 'rgba(240,113,82,.1)' : 'transparent', fg: on ? '#f5866d' : '#c9c9cf', on: () => this.setState({ qf: id }) };
+      }),
+      qitems, noQ: isEmptyQ, hasQDone: counts.done > 0,
+      pauseAllLabel: anyRunning ? 'Pausar tudo' : 'Retomar tudo',
+      pauseAll: () => this.setState(st => anyRunning
+        ? { running: false, jobs: st.jobs.map(j => (j.status === 'downloading' || j.status === 'queued') ? { ...j, status: 'paused', speed: 0 } : j) }
+        : { running: st.files.some(f => f.status === 'converting'), jobs: st.jobs.map(j => j.status === 'paused' ? { ...j, status: 'queued' } : j) }),
+      clearQDone: () => this.setState(st => ({ jobs: st.jobs.filter(j => j.status !== 'done'), files: st.files.filter(f => f.status !== 'done') })),
+      throughput: tp.length ? tp.join(' · ') : 'Ocioso · salvando em Download/Recast',
+      engineDot: tp.length ? '#f07152' : '#4fbf87',
+
+      libSub: `${s.lib.length} arquivos · ${fmtSize(sumBytes)}`, libTabs: tabsLib,
+      isLibFiles: s.libView === 'files', isLibHistory: s.libView === 'history',
+      lib, noLib: lib.length === 0, lq: s.lq, onLq: e => this.setState({ lq: e.target.value }),
+      historyRows: s.history.map(h => { const t = CATS[SRC_CAT[h.from.toLowerCase()] || 'document'].tint; return { ...h, tint: t, tileBg: hexA(t, .08), tileBd: hexA(t, .3), sizes: fmtSize(h.inS) + ' → ' + fmtSize(h.outS) }; }),
+      historyEmpty: s.history.length === 0, clearHistory: () => this.setState({ history: [] }),
+
+      concOpts: seg([1, 2, 3, 4], s.conc, v => this.setState({ conc: v })),
+      parOpts: seg(['1', '2', '4'], s.parallel, v => this.setState({ parallel: v })),
+      conflictOpts: seg(['Renomear', 'Substituir', 'Ignorar'], s.conflict, v => this.setState({ conflict: v })),
+      themeOpts: seg(['Escuro', 'Claro', 'Sistema'], s.theme, v => this.setState({ theme: v })),
+      checkUpdates: () => this.showToast('yt-dlp 2026.10.10 está atualizado'),
+      openPresets: () => this.setState({ sub: 'presets' }), closePresets: () => this.setState({ sub: null }),
+      presetCount: `${PRESETS.length} regras salvas`,
+      presetRows: PRESETS.map(p => ({ name: p.name, detail: p.detail, rule: p.from.map(x => x.toUpperCase()).join(', ') + ' → ' + p.target, onApply: () => this.applyPreset(p) })),
+      restartOb: () => this.setState({ mode: 'onboarding', obStep: 0 }),
+
+      hasSheet: isApp && !!s.sheet, closeSheet: () => this.setState({ sheet: null }),
+      sheetPicker: sheet.type === 'picker', sheetFile: sheet.type === 'file' && !!selFile, sheetAdd: sheet.type === 'add', sheetLib: sheet.type === 'lib' && !!libItem,
+      picker, pickerBack: () => this.setState({ sheet: { type: 'file', fileId: sheet.fileId } }),
+      onPickerQ: e => { const v = e.target.value; this.setState(st => ({ sheet: { ...st.sheet, q: v } })); },
+      sel: this.inspector(selFile), libSel,
+      addGallery: () => this.addFiles([['IMG_5120.HEIC', 2.9e6], ['IMG_5121.HEIC', 3.4e6]], 'DCIM/Camera'),
+      browse: () => { if (this.fileRef.current) this.fileRef.current.click(); },
+      addLib: s.lib.slice(0, 4).map((l, i) => ({ n: l.n, meta: libMeta(l), border: i ? '1px solid #1c1c20' : '0', on: () => this.convertLib(l) })),
+
+      hasToast: !!s.toast, toastText: s.toast ? s.toast.text : '', toastHasAction: !!(s.toast && s.toast.action), toastAction: s.toast ? s.toast.action : '',
+      onToastAction: () => { const t = s.toast; this.setState({ toast: null }); if (t && t.fn) t.fn(); },
+      toastBottom: isApp ? (s.sheet ? '16px' : '92px') : '20px',
+
+      demoOnboarding: () => this.setState({ ...this.sceneState('onboarding') }),
+      demoShare: () => this.setState({ ...this.sceneState('share'), toast: null }),
+      demoReset: () => { clearTimeout(this.lt); this.setState(this.init('download')); }
+    };
+  }
+}
+</script>
+</body>
+</html>

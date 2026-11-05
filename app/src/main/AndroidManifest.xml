@@ -12,7 +12,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROCESSING" />
     <!-- Avisar quando um download ou conversão termina (Android 13+). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <!-- Salvar em Download/Convertia até o Android 9; depois disso não é preciso permissão. -->
+    <!-- Salvar em Download/Recast até o Android 9; depois disso não é preciso permissão. -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
@@ -21,13 +21,13 @@
     <uses-sdk tools:overrideLibrary="androidx.heifwriter" />
 
     <application
-        android:name=".ConvertiaApplication"
+        android:name=".RecastApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Convertia">
+        android:theme="@style/Theme.Recast">
 
         <activity
             android:name=".MainActivity"
@@ -50,7 +50,7 @@
             android:exported="false"
             android:process=":office" />
 
-        <!-- Até o Android 9, os arquivos em Download/Convertia são compartilhados por aqui. -->
+        <!-- Até o Android 9, os arquivos em Download/Recast são compartilhados por aqui. -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.files"
@@ -67,7 +67,7 @@
             android:excludeFromRecents="true"
             android:exported="true"
             android:taskAffinity=""
-            android:theme="@style/Theme.Convertia.Share"
+            android:theme="@style/Theme.Recast.Share"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />

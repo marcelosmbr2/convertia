@@ -14,10 +14,10 @@ plugins {
  * Assinatura do release vinda de variáveis de ambiente (no GitHub Actions, das secrets do
  * repositório). Sem elas, o release sai sem assinatura — útil para testar o build local.
  */
-val releaseKeystore: String? = System.getenv("CONVERTIA_KEYSTORE_FILE")
+val releaseKeystore: String? = System.getenv("RECAST_KEYSTORE_FILE")
 
 /** Versão: no GitHub Actions vem da tag (v0.3.0 → 0.3.0); localmente, o valor padrão. */
-val appVersionName: String = System.getenv("CONVERTIA_VERSION_NAME")?.removePrefix("v") ?: "0.3.0"
+val appVersionName: String = System.getenv("RECAST_VERSION_NAME")?.removePrefix("v") ?: "0.3.0"
 
 /** 1.2.3 → 10203: cresce a cada versão, como o Android exige para atualizar por cima. */
 val appVersionCode: Int = appVersionName.substringBefore('-').split('.')
@@ -28,10 +28,10 @@ val appVersionCode: Int = appVersionName.substringBefore('-').split('.')
 /**
  * LibreOffice embutido: o build baixa os APKs do LibreOffice Viewer publicados pelo F-Droid
  * (versão e SHA-256 em gradle/libreoffice.properties), confere e extrai as bibliotecas
- * nativas e os assets. `-Pconvertia.office=false` desliga (para compilar sem acesso ao
+ * nativas e os assets. `-Precast.office=false` desliga (para compilar sem acesso ao
  * f-droid.org); o app então não oferece conversões de documentos.
  */
-val officeEnabled: Boolean = providers.gradleProperty("convertia.office").map { it.toBoolean() }.getOrElse(true)
+val officeEnabled: Boolean = providers.gradleProperty("recast.office").map { it.toBoolean() }.getOrElse(true)
 val officeProperties = Properties().apply { rootProject.file("gradle/libreoffice.properties").inputStream().use(::load) }
 val officeVersion: String = officeProperties.getProperty("libreoffice.version")
 val officeAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64")
@@ -117,7 +117,7 @@ if (officeEnabled) {
         version.set(officeVersion)
         urls.set(officeAbis.associateWith { officeProperties.getProperty("libreoffice.$it.url") })
         checksums.set(officeAbis.associateWith { officeProperties.getProperty("libreoffice.$it.sha256") })
-        downloadCache.set(File(gradle.gradleUserHomeDir, "caches/convertia-libreoffice"))
+        downloadCache.set(File(gradle.gradleUserHomeDir, "caches/recast-libreoffice"))
     }
     androidComponents {
         onVariants { variant ->
@@ -128,11 +128,11 @@ if (officeEnabled) {
 }
 
 android {
-    namespace = "com.convertia.app"
+    namespace = "com.recast.app"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.convertia.app"
+        applicationId = "com.recast.app"
         minSdk = 26
         targetSdk = 37
         versionCode = appVersionCode
@@ -161,9 +161,9 @@ android {
         if (releaseKeystore != null) {
             create("release") {
                 storeFile = file(releaseKeystore)
-                storePassword = System.getenv("CONVERTIA_KEYSTORE_PASSWORD")
-                keyAlias = System.getenv("CONVERTIA_KEY_ALIAS")
-                keyPassword = System.getenv("CONVERTIA_KEY_PASSWORD")
+                storePassword = System.getenv("RECAST_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("RECAST_KEY_ALIAS")
+                keyPassword = System.getenv("RECAST_KEY_PASSWORD")
             }
         }
     }
@@ -209,9 +209,9 @@ android {
     }
 }
 
-// APKs nomeados como "Convertia-0.3.0-arm64-v8a-release.apk".
+// APKs nomeados como "Recast-0.3.0-arm64-v8a-release.apk".
 base {
-    archivesName = "Convertia-$appVersionName"
+    archivesName = "Recast-$appVersionName"
 }
 
 dependencies {

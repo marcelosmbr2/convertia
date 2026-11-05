@@ -1,12 +1,12 @@
 <resources>
     <!-- Tema da janela: só cobre o que aparece antes do Compose desenhar (splash, fundo). -->
-    <style name="Theme.Convertia" parent="android:Theme.Material.NoActionBar">
-        <item name="android:windowBackground">@color/convertia_background</item>
+    <style name="Theme.Recast" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/recast_background</item>
     </style>
 
     <!-- Menu Compartilhar: janela transparente; o véu e o sheet são desenhados pelo app,
          que também anima a entrada e a saída. -->
-    <style name="Theme.Convertia.Share" parent="android:Theme.Material.NoActionBar">
+    <style name="Theme.Recast.Share" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">false</item>

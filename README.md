@@ -1,6 +1,7 @@
-# Convertia
+# Recast para Android
 
-App Android para baixar e converter mídia, feito em Kotlin com Jetpack Compose.
+Versão mobile do [Recast](https://github.com/marcelosmbr2/recast), o conversor de arquivos
+para desktop: baixa e converte mídia no próprio aparelho, feito em Kotlin com Jetpack Compose.
 Os protótipos de interface ficam em [`mockup/`](mockup/).
 
 ## Stack
@@ -36,7 +37,7 @@ porque as bibliotecas nativas são extraídas. A maioria dos celulares usa `arm6
 
 O LibreOffice vem do APK oficial do LibreOffice Viewer publicado pelo F-Droid: o build
 baixa, confere o SHA-256 (`gradle/libreoffice.properties`) e extrai as bibliotecas e os
-assets. Sem acesso ao f-droid.org, compile com `-Pconvertia.office=false`; o app então
+assets. Sem acesso ao f-droid.org, compile com `-Precast.office=false`; o app então
 não oferece conversões de documentos. O workflow `libreoffice-inspect.yml` lista as
 versões disponíveis e regenera o `.properties`.
 
@@ -47,10 +48,10 @@ x86_64, e nesses aparelhos o app troca as cópias extraídas por ela (`WebpLibra
 
 ## Estado atual
 
-Todas as telas do mockup (`mockup/Convertia v3.dc.html`) estão implementadas.
+Todas as telas do mockup (`mockup/Recast v3.dc.html`) estão implementadas.
 
 - **Download: real**, com o yt-dlp. Lê os formatos do link, baixa no formato e contêiner
-  escolhidos (juntando vídeo e áudio com o ffmpeg) e salva em `Download/Convertia`.
+  escolhidos (juntando vídeo e áudio com o ffmpeg) e salva em `Download/Recast`.
   Continua com o app fechado, com notificação de progresso, e respeita
   "Somente em Wi-Fi". O yt-dlp se atualiza sozinho uma vez por dia, ao abrir o app (o que vem na biblioteca
   envelhece e o YouTube passa a responder 403), e também em Ajustes › Motor › Verificar.
@@ -81,7 +82,7 @@ Todas as telas do mockup (`mockup/Convertia v3.dc.html`) estão implementadas.
 ## Estrutura
 
 ```
-app/src/main/java/com/convertia/app/
+app/src/main/java/com/recast/app/
 ├── AppContainer.kt          # dependências (DI manual)
 ├── MainActivity.kt          # onboarding ou app
 ├── domain/                  # regras puras: catálogo de formatos, estimativas, modelos
@@ -89,12 +90,12 @@ app/src/main/java/com/convertia/app/
 │   ├── convert/             # pasta de trabalho e motor composto (escolhe o conversor)
 │   ├── engine/              # yt-dlp, ffmpeg, imagens, compactados, LibreOffice (office/)
 │   ├── download/            # serviço em primeiro plano, notificações, rede
-│   └── storage/             # gravação em Download/Convertia
+│   └── storage/             # gravação em Download/Recast
 app/src/main/java/org/libreoffice/kit/   # ponte LibreOfficeKit (MPL-2.0)
 ├── share/                   # ShareActivity (menu Compartilhar)
 └── ui/
     ├── AppViewModel.kt      # navegação (aba, sheet, voltar) e ações dos toasts
-    ├── ConvertiaApp.kt      # barra inferior, sheets e toasts
+    ├── RecastApp.kt      # barra inferior, sheets e toasts
     ├── components/          # design system do mockup
     ├── theme/               # cores, fontes (Inter, JetBrains Mono) e ícones
     └── download/ convert/ queue/ library/ settings/ onboarding/
@@ -115,13 +116,13 @@ tag `v*`. A versão do app vem da tag (`v0.3.0` → 0.3.0).
    publicar atualizações que instalem por cima):
 
    ```bash
-   keytool -genkeypair -keystore convertia-release.jks -alias convertia -keyalg RSA -keysize 4096 -validity 10000
+   keytool -genkeypair -keystore recast-release.jks -alias recast -keyalg RSA -keysize 4096 -validity 10000
    ```
 
 2. Em **Settings › Secrets and variables › Actions** do repositório, crie as secrets:
-   - `KEYSTORE_BASE64`: o conteúdo de `base64 -w0 convertia-release.jks`
+   - `KEYSTORE_BASE64`: o conteúdo de `base64 -w0 recast-release.jks`
    - `KEYSTORE_PASSWORD`: a senha do keystore
-   - `KEY_ALIAS`: `convertia` (ou o alias que você usou)
+   - `KEY_ALIAS`: `recast` (ou o alias que você usou)
    - `KEY_PASSWORD`: a senha da chave
 
 3. Publique uma versão:
@@ -134,8 +135,8 @@ tag `v*`. A versão do app vem da tag (`v0.3.0` → 0.3.0).
    git push origin v0.3.0
    ```
 
-Para assinar um build local, exporte `CONVERTIA_KEYSTORE_FILE`,
-`CONVERTIA_KEYSTORE_PASSWORD`, `CONVERTIA_KEY_ALIAS` e `CONVERTIA_KEY_PASSWORD` antes de
+Para assinar um build local, exporte `RECAST_KEYSTORE_FILE`,
+`RECAST_KEYSTORE_PASSWORD`, `RECAST_KEY_ALIAS` e `RECAST_KEY_PASSWORD` antes de
 `./gradlew :app:assembleRelease`. O workflow `ci.yml` roda testes, lint e build a cada push.
 
 ## Testes

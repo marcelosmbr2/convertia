@@ -49,7 +49,7 @@ public final class LibreOfficeKit
 
     // This init() method should be called from the upper Java level of
     // LO-based apps.
-    // Convertia: recebe um Context (o serviço), não uma Activity.
+    // Recast: recebe um Context (o serviço), não uma Activity.
     public static synchronized void init(Context context)
     {
         if (initializeDone) {

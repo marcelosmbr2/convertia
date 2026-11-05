@@ -1,7 +1,7 @@
 name: Inspecionar LibreOffice (F-Droid)
 
 # Baixa os APKs do LibreOffice Viewer publicados pelo F-Droid e imprime o que o build do
-# Convertia precisa saber para empacotá-los: versão, códigos por arquitetura, SHA-256,
+# Recast precisa saber para empacotá-los: versão, códigos por arquitetura, SHA-256,
 # bibliotecas nativas (e alinhamento de 16 KB), assets (guardados × comprimidos), classes
 # Java que o código nativo usa e se os filtros prometidos existem. O resultado vai para
 # o resumo do job e para gradle/libreoffice.properties (como artefato).
@@ -56,7 +56,7 @@ jobs:
           mkdir -p apks out
           PKG=org.documentfoundation.libreoffice
           {
-            echo "# LibreOffice Viewer do F-Droid empacotado no Convertia (gerado por libreoffice-inspect.yml)."
+            echo "# LibreOffice Viewer do F-Droid empacotado no Recast (gerado por libreoffice-inspect.yml)."
             echo "libreoffice.version=$VERSION"
           } > out/libreoffice.properties
           echo "## APKs ($VERSION)" >> "$GITHUB_STEP_SUMMARY"

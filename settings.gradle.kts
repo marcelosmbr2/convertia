@@ -20,5 +20,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Convertia"
+rootProject.name = "Recast"
 include(":app")

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pt-BR">
-    <string name="app_name">Convertia</string>
+    <string name="app_name">Recast</string>
 
     <!-- Abas -->
     <string name="tab_download">Baixar</string>
@@ -29,7 +29,7 @@
     <string name="toast_download_finished">Download concluído</string>
     <string name="toast_conversions_finished">Conversões concluídas</string>
     <string name="toast_download_queued">Na fila · %1$s</string>
-    <string name="toast_shared_download_queued">Baixando no Convertia · %1$s</string>
+    <string name="toast_shared_download_queued">Baixando no Recast · %1$s</string>
     <string name="toast_file_deleted">Arquivo excluído</string>
     <plurals name="toast_files_unsupported">
         <item quantity="one">%d arquivo não suportado</item>
@@ -76,7 +76,7 @@
     <string name="download_inspect">Inspecionar</string>
     <string name="download_recent">Recentes</string>
     <string name="download_tip_title">Baixe direto de outros apps</string>
-    <string name="download_tip_body">No app de vídeo, toque em Compartilhar e escolha Convertia.</string>
+    <string name="download_tip_body">No app de vídeo, toque em Compartilhar e escolha Recast.</string>
     <string name="download_loading">Lendo formatos disponíveis…</string>
     <string name="download_tab_video">Vídeo</string>
     <string name="download_tab_audio">Somente áudio</string>
@@ -105,7 +105,7 @@
     <string name="download_summary_audio">Áudio · %1$s · %2$s · ≈ %3$s</string>
     <string name="download_summary_video_unknown">%1$s · %2$s</string>
     <string name="download_summary_audio_unknown">Áudio · %1$s · %2$s</string>
-    <string name="download_folder">Download/Convertia</string>
+    <string name="download_folder">Download/Recast</string>
     <string name="download_action">Baixar</string>
     <string name="badge_recommended">Recomendado</string>
     <string name="badge_best">Melhor</string>
@@ -233,7 +233,7 @@
         <item quantity="many">%d convertendo no aparelho</item>
         <item quantity="other">%d convertendo no aparelho</item>
     </plurals>
-    <string name="queue_idle">Ocioso · salvando em Download/Convertia</string>
+    <string name="queue_idle">Ocioso · salvando em Download/Recast</string>
     <string name="queue_empty_title">Nada na fila</string>
     <string name="queue_empty_body">Downloads e conversões aparecem aqui enquanto rodam.</string>
 
@@ -303,7 +303,7 @@
     <string name="settings_ready">Pronto</string>
     <string name="settings_section_other">Outros</string>
     <string name="settings_review_intro">Rever introdução</string>
-    <string name="settings_version">Convertia %1$s</string>
+    <string name="settings_version">Recast %1$s</string>
 
     <!-- Predefinições -->
     <string name="presets_title">Predefinições</string>
@@ -405,7 +405,7 @@
     <string name="onboarding_continue">Continuar</string>
     <string name="onboarding_skip">Pular</string>
     <string name="onboarding_step">Passo %1$d de %2$d</string>
-    <string name="onboarding_welcome_eyebrow">Bem-vindo ao Convertia</string>
+    <string name="onboarding_welcome_eyebrow">Bem-vindo ao Recast</string>
     <string name="onboarding_welcome_title">Qualquer vídeo.\nQualquer formato.</string>
     <string name="onboarding_welcome_body">Baixe por link e converta imagens, documentos, áudio e vídeo sem enviar nada para a nuvem.</string>
     <string name="onboarding_privacy_eyebrow">Privacidade</string>
@@ -415,7 +415,7 @@
     <string name="onboarding_permissions_title">Duas permissões\ne pronto.</string>
     <string name="onboarding_permissions_body">Para avisar quando algo termina e salvar seus arquivos no aparelho.</string>
     <string name="onboarding_zero_bytes">0 bytes enviados</string>
-    <string name="onboarding_notification_app">Convertia · agora</string>
+    <string name="onboarding_notification_app">Recast · agora</string>
     <string name="onboarding_notification_file">Teclado mecânico do zero.mp4</string>
     <string name="onboarding_share_with">Compartilhar com</string>
     <string name="onboarding_perm_notifications">Notificações</string>

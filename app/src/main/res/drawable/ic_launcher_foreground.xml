@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Setas de conversão do logo do mockup, centralizadas na área segura do ícone adaptável. -->
+<!-- Logo do Recast (o mesmo do desktop): setas laranja sobre a placa escura do fundo,
+     centralizadas na área segura do ícone adaptável. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
@@ -12,8 +13,8 @@
         android:translateY="30">
         <path
             android:pathData="M4,8h14l-3.5,-3.5M20,16H6l3.5,3.5"
-            android:strokeWidth="2.2"
-            android:strokeColor="#FF1A0E0A"
+            android:strokeWidth="1.6"
+            android:strokeColor="#FFEE7A3A"
             android:strokeLineCap="round"
             android:strokeLineJoin="round" />
     </group>

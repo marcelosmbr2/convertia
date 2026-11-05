@@ -8,8 +8,8 @@ on:
     paths:
       - ".github/workflows/instrumented.yml"
       - "app/src/androidTest/**"
-      - "app/src/main/java/com/convertia/app/data/engine/**"
-      - "app/src/main/java/com/convertia/app/data/convert/**"
+      - "app/src/main/java/com/recast/app/data/engine/**"
+      - "app/src/main/java/com/recast/app/data/convert/**"
       - "gradle/libreoffice.properties"
 
 jobs:
@@ -35,7 +35,7 @@ jobs:
       - name: Cache dos APKs do LibreOffice
         uses: actions/cache@v4
         with:
-          path: ~/.gradle/caches/convertia-libreoffice
+          path: ~/.gradle/caches/recast-libreoffice
           key: libreoffice-${{ hashFiles('gradle/libreoffice.properties') }}
 
       - name: Android SDK (API 37)

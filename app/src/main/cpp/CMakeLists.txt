@@ -2,7 +2,7 @@
 # alinhada a 4 KB, que o Android não carrega em aparelhos com páginas de 16 KB; sem ela o
 # ffmpeg nem abre. O app troca aquelas cópias por estas (ver WebpLibraries.kt).
 cmake_minimum_required(VERSION 3.22.1)
-project(convertia_webp C)
+project(recast_webp C)
 
 include(FetchContent)
 FetchContent_Declare(libwebp
